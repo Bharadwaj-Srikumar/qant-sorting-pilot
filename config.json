@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "precision_cases": [
+    {"key_bits": 4, "input_bits": 4, "output_bits": 4, "sizes": [2, 4, 8, 16]},
+    {"key_bits": 8, "input_bits": 8, "output_bits": 8, "sizes": [2, 4, 8, 16, 32, 64, 128, 256]}
+  ],
+  "families": ["distinct", "duplicates_allowed"],
+  "modes": ["ideal", "quantized", "quantized_noise"],
+  "noise_output_lsb": 0.25,
+  "trials": 1000,
+  "master_seed": 20260930,
+  "batch_size": 64,
+  "rounding": "nearest_even",
+  "normalization": "fixed_declared_range_to_unsigned_grid",
+  "output_saturation": true,
+  "tie_rule": "original_index",
+  "rank_repair": false
+}
