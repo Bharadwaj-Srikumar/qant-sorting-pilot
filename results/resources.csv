@@ -1,0 +1,37 @@
+architecture,key_bits,n,pair_differences,comparison_rounds,source_shuffle_steps,source_bypass_steps,dependency_note
+Beyette,4,2,1,1,1,0,Electronic decisions and exchanges after every active layer
+Desmulliez,4,2,1,1,1,0,Electronic decisions and exchanges after every active layer
+Louri,4,2,1,1,,,Electronic rank counting and placement follow comparisons
+Beyette,4,4,6,3,3,0,Electronic decisions and exchanges after every active layer
+Desmulliez,4,4,6,3,3,0,Electronic decisions and exchanges after every active layer
+Louri,4,4,6,1,,,Electronic rank counting and placement follow comparisons
+Beyette,4,8,24,6,7,1,Electronic decisions and exchanges after every active layer
+Desmulliez,4,8,24,6,7,1,Electronic decisions and exchanges after every active layer
+Louri,4,8,28,1,,,Electronic rank counting and placement follow comparisons
+Beyette,4,16,80,10,13,3,Electronic decisions and exchanges after every active layer
+Desmulliez,4,16,80,10,13,3,Electronic decisions and exchanges after every active layer
+Louri,4,16,120,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,2,1,1,1,0,Electronic decisions and exchanges after every active layer
+Desmulliez,8,2,1,1,1,0,Electronic decisions and exchanges after every active layer
+Louri,8,2,1,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,4,6,3,3,0,Electronic decisions and exchanges after every active layer
+Desmulliez,8,4,6,3,3,0,Electronic decisions and exchanges after every active layer
+Louri,8,4,6,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,8,24,6,7,1,Electronic decisions and exchanges after every active layer
+Desmulliez,8,8,24,6,7,1,Electronic decisions and exchanges after every active layer
+Louri,8,8,28,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,16,80,10,13,3,Electronic decisions and exchanges after every active layer
+Desmulliez,8,16,80,10,13,3,Electronic decisions and exchanges after every active layer
+Louri,8,16,120,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,32,240,15,21,6,Electronic decisions and exchanges after every active layer
+Desmulliez,8,32,240,15,21,6,Electronic decisions and exchanges after every active layer
+Louri,8,32,496,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,64,672,21,31,10,Electronic decisions and exchanges after every active layer
+Desmulliez,8,64,672,21,31,10,Electronic decisions and exchanges after every active layer
+Louri,8,64,2016,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,128,1792,28,43,15,Electronic decisions and exchanges after every active layer
+Desmulliez,8,128,1792,28,43,15,Electronic decisions and exchanges after every active layer
+Louri,8,128,8128,1,,,Electronic rank counting and placement follow comparisons
+Beyette,8,256,4608,36,57,21,Electronic decisions and exchanges after every active layer
+Desmulliez,8,256,4608,36,57,21,Electronic decisions and exchanges after every active layer
+Louri,8,256,32640,1,,,Electronic rank counting and placement follow comparisons

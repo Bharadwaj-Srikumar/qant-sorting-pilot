@@ -1,0 +1,171 @@
+{
+  "Beyette": {
+    "source": "Eq.1 and section3.C: P=m^2-m+1; page-oriented completion P+w-1 cycles",
+    "N8_w3_P": 7,
+    "N8_w3_completion_cycles": 9,
+    "status": "Equation reproduced; no hardware timing measurement"
+  },
+  "Desmulliez": {
+    "figure3_trace": [
+      {
+        "step": 1,
+        "operation": "compare",
+        "output_first_example": [
+          4,
+          8,
+          3,
+          1,
+          2,
+          7,
+          6,
+          5
+        ]
+      },
+      {
+        "step": 2,
+        "operation": "bypass",
+        "output_first_example": [
+          4,
+          2,
+          8,
+          7,
+          3,
+          6,
+          1,
+          5
+        ]
+      },
+      {
+        "step": 3,
+        "operation": "compare",
+        "output_first_example": [
+          3,
+          4,
+          6,
+          2,
+          1,
+          8,
+          7,
+          5
+        ]
+      },
+      {
+        "step": 4,
+        "operation": "compare",
+        "output_first_example": [
+          1,
+          3,
+          4,
+          8,
+          7,
+          6,
+          5,
+          2
+        ]
+      },
+      {
+        "step": 5,
+        "operation": "compare",
+        "output_first_example": [
+          1,
+          7,
+          3,
+          6,
+          4,
+          5,
+          2,
+          8
+        ]
+      },
+      {
+        "step": 6,
+        "operation": "compare",
+        "output_first_example": [
+          1,
+          4,
+          5,
+          7,
+          2,
+          3,
+          6,
+          8
+        ]
+      },
+      {
+        "step": 7,
+        "operation": "compare",
+        "output_first_example": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      }
+    ],
+    "projected_N1024_w8_F100MHz_us": 9.1,
+    "projected_Mbit_s": 900.2197802197803,
+    "projected_million_keys_s": 112.52747252747254,
+    "status": "Figure and design-point arithmetic reproduced; whole-system 100MHz not measured"
+  },
+  "Louri": {
+    "paper_one_based_ranks": [
+      3,
+      4,
+      1,
+      5,
+      2
+    ],
+    "hybrid_zero_based_ranks": [
+      2,
+      3,
+      0,
+      4,
+      1
+    ],
+    "reported_component_full_cycle_ns": 60.2,
+    "reported_component_pipeline_period_ns": 36.8,
+    "detector_ns_from_stated_10pJ_1point5mW": 6.666666666666666,
+    "detector_ns_reported": 13.33,
+    "status": "Original matrix example reproduced. Pairwise noisy adaptation differs physically. Detector factor-of-two discrepancy remains unresolved."
+  },
+  "ideal_checks": "PASS: binary exhaustive N2/4/8; endpoints, duplicates, reverse and all-equal arrays at every sweep size",
+  "relu_identity": "PASS on all 256 pairs from 0..15; no optical nonlinearity is simulated",
+  "quantizer_controls": {
+    "4": {
+      "ordered_distinct_pairs": 240,
+      "wrong_N2_comparisons": 15,
+      "exact_N2_distinct_success": 0.9375,
+      "input_step": 0.0625,
+      "output_step": 0.125,
+      "false_ties_all_ordered_pairs": 30,
+      "output_saturation_events_all_ordered_pairs": 1
+    },
+    "8": {
+      "ordered_distinct_pairs": 65280,
+      "wrong_N2_comparisons": 255,
+      "exact_N2_distinct_success": 0.99609375,
+      "input_step": 0.00390625,
+      "output_step": 0.0078125,
+      "false_ties_all_ordered_pairs": 510,
+      "output_saturation_events_all_ordered_pairs": 1
+    }
+  },
+  "input_errors": [
+    "input index 1: key 16 must be a finite whole number in range [0, 15]",
+    "input index 1: key -1 must be a finite whole number in range [0, 15]",
+    "input index 1: key 1.5 must be a finite whole number in range [0, 15]",
+    "input index 1: key nan must be a finite whole number in range [0, 15]",
+    "input index 1: key inf must be a finite whole number in range [0, 15]",
+    "input index 1: key True must be a finite whole number in range [0, 15]",
+    "input index 1: key '3' must be a finite whole number in range [0, 15]",
+    "input index 1: key 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 must be a finite whole number in range [0, 15]",
+    "array index 1, key index 1: key 256 must be a finite whole number in range [0, 255]"
+  ],
+  "noise_batch_invariance": "PASS",
+  "sweep_all_ideal_correct_and_stable": true,
+  "sweep_paired_bitonic_outputs_equal": true
+}

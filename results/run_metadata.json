@@ -1,0 +1,26 @@
+{
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "configurations": 216,
+  "executions": 216000,
+  "input_arrays": 24000,
+  "elapsed_runner_seconds": 27.93084608999925,
+  "timing_note": "Runner wall time only; NOT predicted or measured hardware sorting latency.",
+  "source_code_sha256": {
+    "build_reports.py": "d5863d90e5c80a683c3cebd2e600c163db611756f172adc9449adb0130b61aa8",
+    "evaluate.py": "179ae48a81c50c02327b51fb7c29c7dc892d4049717de9c50fae1393ac68cc46",
+    "model.py": "41ea339bc303d49b90eb22737f6b786096bb5f0fcf29928dfc91a40ae281658f",
+    "sorting.py": "f8b432d00c79b5a6ee2650b37a10afdda54b0efd5152a5dec0754dd6b5e4a05e",
+    "validate.py": "9824b3d7f82c7f21ccb4376be0d4f694e970745c372306cf24c677a58a8db33f"
+  },
+  "full_rerun_csv_byte_identical": true,
+  "precision_csv_sha256": "a1ac9d5ac18c1eb91323b7f865e2a4a7808bd256cc53eef0e66248d9e8cb2fea",
+  "packaged_code_sha256": {
+    "sorting.py": "f8b432d00c79b5a6ee2650b37a10afdda54b0efd5152a5dec0754dd6b5e4a05e",
+    "build_reports.py": "9242a93483c54d9e0e058ac9cefd150eef2203b2097a986369368f7a0eabb18b",
+    "evaluate.py": "179ae48a81c50c02327b51fb7c29c7dc892d4049717de9c50fae1393ac68cc46",
+    "model.py": "41ea339bc303d49b90eb22737f6b786096bb5f0fcf29928dfc91a40ae281658f",
+    "validate.py": "9824b3d7f82c7f21ccb4376be0d4f694e970745c372306cf24c677a58a8db33f"
+  }
+}

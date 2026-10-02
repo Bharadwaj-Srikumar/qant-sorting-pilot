@@ -1,0 +1,11 @@
+{
+  "checkedRows": 216,
+  "zeroScriptErrors": true,
+  "noExternalRequests": true,
+  "csvDownloadExact": true,
+  "workedExamples": true,
+  "mobile": {
+    "viewport": 390,
+    "doc": 390
+  }
+}
