@@ -1,0 +1,97 @@
+mode,mapping,key_bits,input_bits,output_bits,n,family,trials,valid_outputs,correct_sorts,stable_sorts,added_noise,delta_in,delta_out,pair_differences,saturations,api_calls,api_payload_bytes
+equal_step,Pipelined bitonic adaptation,4,4,4,2,distinct,1000,1000,1000,1000,False,0.0625,0.0625,1000,292,,
+equal_step,Rank adaptation,4,4,4,2,distinct,1000,1000,1000,1000,False,0.0625,0.0625,1000,292,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,2,distinct,1000,1000,1000,1000,False,,,1000,,16,6064
+sdk_cpu,Rank adaptation,4,BF16,BF16,2,distinct,1000,1000,1000,1000,False,,,1000,,16,6064
+equal_step,Pipelined bitonic adaptation,4,4,4,2,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,1000,263,,
+equal_step,Rank adaptation,4,4,4,2,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,1000,263,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,2,duplicates_allowed,1000,1000,1000,1000,False,,,1000,,16,6064
+sdk_cpu,Rank adaptation,4,BF16,BF16,2,duplicates_allowed,1000,1000,1000,1000,False,,,1000,,16,6064
+equal_step,Pipelined bitonic adaptation,4,4,4,4,distinct,1000,1000,1000,1000,False,0.0625,0.0625,6000,1397,,
+equal_step,Rank adaptation,4,4,4,4,distinct,1000,1000,1000,1000,False,0.0625,0.0625,6000,1592,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,4,distinct,1000,1000,1000,1000,False,,,6000,,48,36192
+sdk_cpu,Rank adaptation,4,BF16,BF16,4,distinct,1000,1000,1000,1000,False,,,6000,,16,36064
+equal_step,Pipelined bitonic adaptation,4,4,4,4,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,6000,1303,,
+equal_step,Rank adaptation,4,4,4,4,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,6000,1450,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,4,duplicates_allowed,1000,1000,1000,1000,False,,,6000,,48,36192
+sdk_cpu,Rank adaptation,4,BF16,BF16,4,duplicates_allowed,1000,1000,1000,1000,False,,,6000,,16,36064
+equal_step,Pipelined bitonic adaptation,4,4,4,8,distinct,1000,1000,1000,1000,False,0.0625,0.0625,24000,4790,,
+equal_step,Rank adaptation,4,4,4,8,distinct,1000,1000,1000,1000,False,0.0625,0.0625,28000,7356,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,8,distinct,1000,1000,1000,1000,False,,,24000,,96,144384
+sdk_cpu,Rank adaptation,4,BF16,BF16,8,distinct,1000,1000,1000,1000,False,,,28000,,16,168064
+equal_step,Pipelined bitonic adaptation,4,4,4,8,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,24000,4476,,
+equal_step,Rank adaptation,4,4,4,8,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,28000,6839,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,8,duplicates_allowed,1000,1000,1000,1000,False,,,24000,,96,144384
+sdk_cpu,Rank adaptation,4,BF16,BF16,8,duplicates_allowed,1000,1000,1000,1000,False,,,28000,,16,168064
+equal_step,Pipelined bitonic adaptation,4,4,4,16,distinct,1000,1000,1000,1000,False,0.0625,0.0625,80000,13612,,
+equal_step,Rank adaptation,4,4,4,16,distinct,1000,1000,1000,1000,False,0.0625,0.0625,120000,31992,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,16,distinct,1000,1000,1000,1000,False,,,80000,,160,480640
+sdk_cpu,Rank adaptation,4,BF16,BF16,16,distinct,1000,1000,1000,1000,False,,,120000,,16,720064
+equal_step,Pipelined bitonic adaptation,4,4,4,16,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,80000,13329,,
+equal_step,Rank adaptation,4,4,4,16,duplicates_allowed,1000,1000,1000,1000,False,0.0625,0.0625,120000,29641,,
+sdk_cpu,Pipelined bitonic adaptation,4,BF16,BF16,16,duplicates_allowed,1000,1000,1000,1000,False,,,80000,,160,480640
+sdk_cpu,Rank adaptation,4,BF16,BF16,16,duplicates_allowed,1000,1000,1000,1000,False,,,120000,,16,720064
+equal_step,Pipelined bitonic adaptation,8,8,8,2,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,1000,270,,
+equal_step,Rank adaptation,8,8,8,2,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,1000,270,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,2,distinct,1000,1000,1000,1000,False,,,1000,,16,6064
+sdk_cpu,Rank adaptation,8,BF16,BF16,2,distinct,1000,1000,1000,1000,False,,,1000,,16,6064
+equal_step,Pipelined bitonic adaptation,8,8,8,2,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,1000,234,,
+equal_step,Rank adaptation,8,8,8,2,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,1000,234,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,2,duplicates_allowed,1000,1000,1000,1000,False,,,1000,,16,6064
+sdk_cpu,Rank adaptation,8,BF16,BF16,2,duplicates_allowed,1000,1000,1000,1000,False,,,1000,,16,6064
+equal_step,Pipelined bitonic adaptation,8,8,8,4,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,6000,1358,,
+equal_step,Rank adaptation,8,8,8,4,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,6000,1528,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,4,distinct,1000,1000,1000,1000,False,,,6000,,48,36192
+sdk_cpu,Rank adaptation,8,BF16,BF16,4,distinct,1000,1000,1000,1000,False,,,6000,,16,36064
+equal_step,Pipelined bitonic adaptation,8,8,8,4,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,6000,1330,,
+equal_step,Rank adaptation,8,8,8,4,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,6000,1486,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,4,duplicates_allowed,1000,1000,1000,1000,False,,,6000,,48,36192
+sdk_cpu,Rank adaptation,8,BF16,BF16,4,duplicates_allowed,1000,1000,1000,1000,False,,,6000,,16,36064
+equal_step,Pipelined bitonic adaptation,8,8,8,8,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,24000,4666,,
+equal_step,Rank adaptation,8,8,8,8,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,28000,7045,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,8,distinct,1000,1000,1000,1000,False,,,24000,,96,144384
+sdk_cpu,Rank adaptation,8,BF16,BF16,8,distinct,1000,1000,1000,1000,False,,,28000,,16,168064
+equal_step,Pipelined bitonic adaptation,8,8,8,8,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,24000,4651,,
+equal_step,Rank adaptation,8,8,8,8,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,28000,7065,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,8,duplicates_allowed,1000,1000,1000,1000,False,,,24000,,96,144384
+sdk_cpu,Rank adaptation,8,BF16,BF16,8,duplicates_allowed,1000,1000,1000,1000,False,,,28000,,16,168064
+equal_step,Pipelined bitonic adaptation,8,8,8,16,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,80000,13424,,
+equal_step,Rank adaptation,8,8,8,16,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,120000,30130,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,16,distinct,1000,1000,1000,1000,False,,,80000,,160,480640
+sdk_cpu,Rank adaptation,8,BF16,BF16,16,distinct,1000,1000,1000,1000,False,,,120000,,16,720064
+equal_step,Pipelined bitonic adaptation,8,8,8,16,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,80000,13452,,
+equal_step,Rank adaptation,8,8,8,16,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,120000,30315,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,16,duplicates_allowed,1000,1000,1000,1000,False,,,80000,,160,480640
+sdk_cpu,Rank adaptation,8,BF16,BF16,16,duplicates_allowed,1000,1000,1000,1000,False,,,120000,,16,720064
+equal_step,Pipelined bitonic adaptation,8,8,8,32,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,240000,35270,,
+equal_step,Rank adaptation,8,8,8,32,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,496000,124362,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,32,distinct,1000,1000,1000,1000,False,,,240000,,240,1440960
+sdk_cpu,Rank adaptation,8,BF16,BF16,32,distinct,1000,1000,1000,1000,False,,,496000,,16,2976064
+equal_step,Pipelined bitonic adaptation,8,8,8,32,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,240000,35112,,
+equal_step,Rank adaptation,8,8,8,32,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,496000,123584,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,32,duplicates_allowed,1000,1000,1000,1000,False,,,240000,,240,1440960
+sdk_cpu,Rank adaptation,8,BF16,BF16,32,duplicates_allowed,1000,1000,1000,1000,False,,,496000,,16,2976064
+equal_step,Pipelined bitonic adaptation,8,8,8,64,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,672000,86915,,
+equal_step,Rank adaptation,8,8,8,64,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,2016000,505820,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,64,distinct,1000,1000,1000,1000,False,,,672000,,336,4033344
+sdk_cpu,Rank adaptation,8,BF16,BF16,64,distinct,1000,1000,1000,1000,False,,,2016000,,16,12096064
+equal_step,Pipelined bitonic adaptation,8,8,8,64,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,672000,86843,,
+equal_step,Rank adaptation,8,8,8,64,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,2016000,504306,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,64,duplicates_allowed,1000,1000,1000,1000,False,,,672000,,336,4033344
+sdk_cpu,Rank adaptation,8,BF16,BF16,64,duplicates_allowed,1000,1000,1000,1000,False,,,2016000,,16,12096064
+equal_step,Pipelined bitonic adaptation,8,8,8,128,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,1792000,206018,,
+equal_step,Rank adaptation,8,8,8,128,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,8128000,2037182,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,128,distinct,1000,1000,1000,1000,False,,,1792000,,448,10753792
+sdk_cpu,Rank adaptation,8,BF16,BF16,128,distinct,1000,1000,1000,1000,False,,,8128000,,16,48768064
+equal_step,Pipelined bitonic adaptation,8,8,8,128,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,1792000,206840,,
+equal_step,Rank adaptation,8,8,8,128,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,8128000,2031865,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,128,duplicates_allowed,1000,1000,1000,1000,False,,,1792000,,448,10753792
+sdk_cpu,Rank adaptation,8,BF16,BF16,128,duplicates_allowed,1000,1000,1000,1000,False,,,8128000,,16,48768064
+equal_step,Pipelined bitonic adaptation,8,8,8,256,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,4608000,476805,,
+equal_step,Rank adaptation,8,8,8,256,distinct,1000,1000,1000,1000,False,0.00390625,0.00390625,32640000,8192168,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,256,distinct,1000,1000,1000,1000,False,,,4608000,,576,27650304
+sdk_cpu,Rank adaptation,8,BF16,BF16,256,distinct,1000,1000,1000,1000,False,,,32640000,,16,195840064
+equal_step,Pipelined bitonic adaptation,8,8,8,256,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,4608000,479415,,
+equal_step,Rank adaptation,8,8,8,256,duplicates_allowed,1000,1000,1000,1000,False,0.00390625,0.00390625,32640000,8150305,,
+sdk_cpu,Pipelined bitonic adaptation,8,BF16,BF16,256,duplicates_allowed,1000,1000,1000,1000,False,,,4608000,,576,27650304
+sdk_cpu,Rank adaptation,8,BF16,BF16,256,duplicates_allowed,1000,1000,1000,1000,False,,,32640000,,16,195840064

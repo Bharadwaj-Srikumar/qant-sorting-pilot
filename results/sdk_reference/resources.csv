@@ -1,0 +1,17 @@
+n,mapping,active_bitonic_layers,pairs,api_calls_single_sort,max_pair_rows,api_payload_bytes
+2,Pipelined bitonic adaptation,1,1,1,1,10
+2,Rank adaptation,,1,1,1,10
+4,Pipelined bitonic adaptation,3,6,3,2,48
+4,Rank adaptation,,6,1,6,40
+8,Pipelined bitonic adaptation,6,24,6,4,168
+8,Rank adaptation,,28,1,28,172
+16,Pipelined bitonic adaptation,10,80,10,8,520
+16,Rank adaptation,,120,1,120,724
+32,Pipelined bitonic adaptation,15,240,15,16,1500
+32,Rank adaptation,,496,1,496,2980
+64,Pipelined bitonic adaptation,21,672,21,32,4116
+64,Rank adaptation,,2016,1,2016,12100
+128,Pipelined bitonic adaptation,28,1792,28,64,10864
+128,Rank adaptation,,8128,1,8128,48772
+256,Pipelined bitonic adaptation,36,4608,36,128,27792
+256,Rank adaptation,,32640,1,32640,195844

@@ -1,0 +1,244 @@
+{
+  "pair_checks": [
+    {
+      "mode": "equal_step",
+      "bits": 4,
+      "ordered_pairs": 256,
+      "sign_errors": 0,
+      "false_ties": 0,
+      "saturations": 64
+    },
+    {
+      "mode": "sdk_cpu",
+      "bits": 4,
+      "ordered_pairs": 256,
+      "sign_errors": 0,
+      "false_ties": 0,
+      "exact_magnitude": true
+    },
+    {
+      "mode": "equal_step",
+      "bits": 8,
+      "ordered_pairs": 65536,
+      "sign_errors": 0,
+      "false_ties": 0,
+      "saturations": 16384
+    },
+    {
+      "mode": "sdk_cpu",
+      "bits": 8,
+      "ordered_pairs": 65536,
+      "sign_errors": 0,
+      "false_ties": 0,
+      "exact_magnitude": true
+    }
+  ],
+  "binary_sorts": [
+    {
+      "mode": "equal_step",
+      "mapping": "Pipelined bitonic adaptation",
+      "n": 2,
+      "arrays": 4,
+      "all_pass": true
+    },
+    {
+      "mode": "equal_step",
+      "mapping": "Rank adaptation",
+      "n": 2,
+      "arrays": 4,
+      "all_pass": true
+    },
+    {
+      "mode": "sdk_cpu",
+      "mapping": "Pipelined bitonic adaptation",
+      "n": 2,
+      "arrays": 4,
+      "all_pass": true
+    },
+    {
+      "mode": "sdk_cpu",
+      "mapping": "Rank adaptation",
+      "n": 2,
+      "arrays": 4,
+      "all_pass": true
+    },
+    {
+      "mode": "equal_step",
+      "mapping": "Pipelined bitonic adaptation",
+      "n": 4,
+      "arrays": 16,
+      "all_pass": true
+    },
+    {
+      "mode": "equal_step",
+      "mapping": "Rank adaptation",
+      "n": 4,
+      "arrays": 16,
+      "all_pass": true
+    },
+    {
+      "mode": "sdk_cpu",
+      "mapping": "Pipelined bitonic adaptation",
+      "n": 4,
+      "arrays": 16,
+      "all_pass": true
+    },
+    {
+      "mode": "sdk_cpu",
+      "mapping": "Rank adaptation",
+      "n": 4,
+      "arrays": 16,
+      "all_pass": true
+    },
+    {
+      "mode": "equal_step",
+      "mapping": "Pipelined bitonic adaptation",
+      "n": 8,
+      "arrays": 256,
+      "all_pass": true
+    },
+    {
+      "mode": "equal_step",
+      "mapping": "Rank adaptation",
+      "n": 8,
+      "arrays": 256,
+      "all_pass": true
+    },
+    {
+      "mode": "sdk_cpu",
+      "mapping": "Pipelined bitonic adaptation",
+      "n": 8,
+      "arrays": 256,
+      "all_pass": true
+    },
+    {
+      "mode": "sdk_cpu",
+      "mapping": "Rank adaptation",
+      "n": 8,
+      "arrays": 256,
+      "all_pass": true
+    }
+  ],
+  "network_counts": [
+    {
+      "n": 2,
+      "layers": 1,
+      "comparisons": 1
+    },
+    {
+      "n": 4,
+      "layers": 3,
+      "comparisons": 6
+    },
+    {
+      "n": 8,
+      "layers": 6,
+      "comparisons": 24
+    },
+    {
+      "n": 16,
+      "layers": 10,
+      "comparisons": 80
+    },
+    {
+      "n": 32,
+      "layers": 15,
+      "comparisons": 240
+    },
+    {
+      "n": 64,
+      "layers": 21,
+      "comparisons": 672
+    },
+    {
+      "n": 128,
+      "layers": 28,
+      "comparisons": 1792
+    },
+    {
+      "n": 256,
+      "layers": 36,
+      "comparisons": 4608
+    }
+  ],
+  "four_key_trace": [
+    {
+      "pairs": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "ascending": [
+        true,
+        false
+      ],
+      "difference": [
+        0.02734375,
+        0.03125
+      ],
+      "output": [
+        3,
+        10,
+        9,
+        1
+      ]
+    },
+    {
+      "pairs": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          3
+        ]
+      ],
+      "ascending": [
+        true,
+        true
+      ],
+      "difference": [
+        -0.0234375,
+        0.03515625
+      ],
+      "output": [
+        3,
+        1,
+        9,
+        10
+      ]
+    },
+    {
+      "pairs": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "ascending": [
+        true,
+        true
+      ],
+      "difference": [
+        0.0078125,
+        -0.00390625
+      ],
+      "output": [
+        1,
+        3,
+        9,
+        10
+      ]
+    }
+  ]
+}
