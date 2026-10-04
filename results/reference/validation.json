@@ -1,0 +1,33 @@
+{
+  "zero_pair_checks": [
+    {
+      "bits": 4,
+      "pairs": 256,
+      "all_signs_correct": true
+    },
+    {
+      "bits": 8,
+      "pairs": 65536,
+      "all_signs_correct": true
+    }
+  ],
+  "batch_invariance": [
+    {
+      "mapping": "Pipelined bitonic adaptation",
+      "trials": 23,
+      "passed": true
+    },
+    {
+      "mapping": "Rank adaptation",
+      "trials": 23,
+      "passed": true
+    }
+  ],
+  "adjacent_pair_noise_control": {
+    "trials": 200000,
+    "eta": 0.25,
+    "false_tie_fraction": 0.0231,
+    "theoretical_false_tie_fraction": 0.022750130961591574,
+    "purpose": "Independent units/rounding check; not a hardware noise measurement."
+  }
+}

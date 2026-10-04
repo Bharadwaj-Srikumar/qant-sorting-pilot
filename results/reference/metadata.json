@@ -1,0 +1,38 @@
+{
+  "revision": "noise_sweep_20261004",
+  "input_arrays": 24000,
+  "rows": 288,
+  "executions": 288000,
+  "noise_executions": 240000,
+  "zero_executions": 48000,
+  "input_master_seed": 20260930,
+  "eta_values": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25
+  ],
+  "inputs_sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+  "noise": "Independent Gaussian sample per comparison; independent streams between mappings; per-trial seeds. Common seed streams across positive eta values; prior eta=.25 realization retained.",
+  "timing": "Run duration only, not a sorting benchmark or photonic latency.",
+  "elapsed_seconds": 71.9773865970019,
+  "python": "3.12.14",
+  "numpy": "2.5.3",
+  "hardware_executed": false,
+  "sdk_noise_model": false,
+  "source_sha256": {
+    "run_noise_evaluation.py": "58f3ce77ee0c7448d76a25974ff687da379539ea080c20262556ba7b82bb9429",
+    "run_pipeline_evaluation.py": "66031027c263722ab14c386a44cd759dc25a2e0879be16c4f7f36c66f6106c83",
+    "run_noise_sweep.py": "950abc2912023265aef05217daee4efe1882618ee61cbbb51f11c01135dcc134",
+    "input_validation.py": "8ef5d3f6e4fd863f1617e562e5169ee1e7c7579c1722ef855c318bcd39f4b778",
+    "hardware_conditions.py": "cc6b1bc90837879692736b67db082fea4a631097dc416b7a3ceb71ec9c78b19b",
+    "equal_step_control.py": "e7ac1e4554763cd9c4e7df84e1a760add31533600c315603979745b71f923024",
+    "install_sdk.py": "140200e844e0c809777ac9a23529193e46c4beb70d8e3b8752cc138ec163270f",
+    "sdk_mapping.py": "561879c11a9d0f2a5a2052baaa411fe92ea106dd1f9c95b9e3aeba18db8e3a12",
+    "sorting_schedules.py": "f8b432d00c79b5a6ee2650b37a10afdda54b0efd5152a5dec0754dd6b5e4a05e"
+  },
+  "original_endpoint_arrays_matched": 192,
+  "original_endpoint_rows_matched": 96
+}
