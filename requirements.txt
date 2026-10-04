@@ -1,4 +1,3 @@
-numpy==2.3.5
-matplotlib==3.10.8
-reportlab==4.4.9
-PyMuPDF==1.26.6
+# Only dependency for the agreed numerical sweep and its mathematical tests.
+# Pinned to the version used for the saved reference experiment.
+numpy==2.5.3

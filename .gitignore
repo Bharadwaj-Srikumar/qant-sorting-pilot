@@ -4,3 +4,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 results_trial/
+*.py[cod]
+.pytest_cache/
+results/reproduced/
+results/sdk_reproduced/
+results/hardware/
