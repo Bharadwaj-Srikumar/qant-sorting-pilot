@@ -1,0 +1,34 @@
+{
+  "revision": "documented_noise_sweep_20261004",
+  "rows": 288,
+  "executions": 288000,
+  "input_master_seed": 20260930,
+  "eta_values": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25
+  ],
+  "batch_size": 64,
+  "inputs_sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+  "python": "3.12.14",
+  "numpy": "2.5.3",
+  "elapsed_seconds": 66.02015803199902,
+  "hardware_executed": false,
+  "sdk_noise_model": false,
+  "noise": "Independent Gaussian draws per comparison and between mappings; paired streams across positive eta levels.",
+  "timing": "Run duration only; not a hardware latency or sorting performance benchmark.",
+  "source_sha256": {
+    "run_noise_sweep.py": "870d2c7ec58a21fe89e6044a89081d02a291e0eafc18101f812adfa843166e23",
+    "metrics.py": "e6a3cda1bb2e5129ff78fe38ad2c82e8918fc6bebd1d75cd846424b5a8ffe23a",
+    "comparison.py": "891e4630ba9d3a5c8e6cde0f961576ce45e3f5a757e05afc516c4eefcc35252b",
+    "verify_results.py": "59c62c95e885a72dc7cf13ae29f8f9b1be12abccd8ba9b195c9a98ea6b5363c8",
+    "input_validation.py": "8ef5d3f6e4fd863f1617e562e5169ee1e7c7579c1722ef855c318bcd39f4b778",
+    "sdk_mapping.py": "5d8ce56f372028f08d24424c5c0ea8ccda722876354783940f3cfffff5747e1c",
+    "sorting_schedules.py": "f8bc983fb70de16fedc9c41a4318a1f561f689384008f8aae01db32c3cd45415"
+  },
+  "matched_configurations": 288,
+  "matched_arrays": 576
+}

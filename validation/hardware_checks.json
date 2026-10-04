@@ -1,0 +1,139 @@
+{
+  "hardware_executed": false,
+  "peak_link_bytes_per_second": 15753846153.846155,
+  "cap_domain": "Every integer 1 through N(N-1)/2; application submissions, not device tiles.",
+  "bandwidth_domain": "0 < B_eff <= B_peak. No measured link utilization assumed.",
+  "model": "t_A = q_A*ell + C_A*t_arithmetic + U_A/B_up + V_A/B_down + h_A",
+  "threshold": "a=ell+4/B_up; tau=t_arithmetic+4/B_up+2/B_down. Rank wins if (q_B-q_R)*a > (C_R-C_B)*tau + h_R-h_B.",
+  "limitations": "Logical payload only; no measured latency, throughput or energy verdict.",
+  "checks": [
+    {
+      "n": 16,
+      "mapping": "Bitonic",
+      "cap": 1,
+      "pairs": 80,
+      "calls": 80,
+      "correct": true
+    },
+    {
+      "n": 16,
+      "mapping": "Rank",
+      "cap": 1,
+      "pairs": 120,
+      "calls": 120,
+      "correct": true
+    },
+    {
+      "n": 16,
+      "mapping": "Bitonic",
+      "cap": 8,
+      "pairs": 80,
+      "calls": 10,
+      "correct": true
+    },
+    {
+      "n": 16,
+      "mapping": "Rank",
+      "cap": 8,
+      "pairs": 120,
+      "calls": 15,
+      "correct": true
+    },
+    {
+      "n": 16,
+      "mapping": "Bitonic",
+      "cap": 120,
+      "pairs": 80,
+      "calls": 10,
+      "correct": true
+    },
+    {
+      "n": 16,
+      "mapping": "Rank",
+      "cap": 120,
+      "pairs": 120,
+      "calls": 1,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Bitonic",
+      "cap": 1,
+      "pairs": 4608,
+      "calls": 4608,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Rank",
+      "cap": 1,
+      "pairs": 32640,
+      "calls": 32640,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Bitonic",
+      "cap": 8,
+      "pairs": 4608,
+      "calls": 576,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Rank",
+      "cap": 8,
+      "pairs": 32640,
+      "calls": 4080,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Bitonic",
+      "cap": 128,
+      "pairs": 4608,
+      "calls": 36,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Rank",
+      "cap": 128,
+      "pairs": 32640,
+      "calls": 255,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Bitonic",
+      "cap": 1024,
+      "pairs": 4608,
+      "calls": 36,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Rank",
+      "cap": 1024,
+      "pairs": 32640,
+      "calls": 32,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Bitonic",
+      "cap": 32640,
+      "pairs": 4608,
+      "calls": 36,
+      "correct": true
+    },
+    {
+      "n": 256,
+      "mapping": "Rank",
+      "cap": 32640,
+      "pairs": 32640,
+      "calls": 1,
+      "correct": true
+    }
+  ]
+}

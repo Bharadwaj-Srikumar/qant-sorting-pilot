@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-04",
+  "scope": "Code cleanup with unchanged quantizer, seeds, saved inputs and sorting decisions.",
+  "unit_tests": {
+    "command": "python -m unittest discover -s tests -v",
+    "tests_run": 11,
+    "passed": 11
+  },
+  "noise_sweep": {
+    "executions": 288000,
+    "matched_configurations": 288,
+    "matched_trial_arrays": 576,
+    "first_failure_examples_match": true,
+    "elapsed_seconds": 66.02015803199902
+  },
+  "sdk_cpu_control": {
+    "executions": 48000,
+    "matched_trial_arrays": 96,
+    "sdk_version": "2.3.1",
+    "driver_info": "cpu-backend;commit:none;"
+  },
+  "hardware_accounting": {
+    "sdk_chunk_checks": 16,
+    "sensitivity_rows": 43435,
+    "hardware_executed": false
+  },
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.5.3"
+  },
+  "input_sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+  "source_sha256": {
+    "comparison.py": "891e4630ba9d3a5c8e6cde0f961576ce45e3f5a757e05afc516c4eefcc35252b",
+    "hardware_conditions.py": "4a0c59dac23f16fc5785a06f609142be03ff9e312339783164b6e3950363de0c",
+    "input_validation.py": "31ce7fa6afc3fbb11589ec224dcdd87ef412247c8a5623831c12e5e2b9a3dc38",
+    "install_sdk.py": "de99098abf50a87f986723f6f8e1a5b08f33f408d81251eff0470b1e21dd2432",
+    "metrics.py": "e6a3cda1bb2e5129ff78fe38ad2c82e8918fc6bebd1d75cd846424b5a8ffe23a",
+    "run_noise_sweep.py": "870d2c7ec58a21fe89e6044a89081d02a291e0eafc18101f812adfa843166e23",
+    "run_sdk_control.py": "2946bf31775ef7530dd8dc76d68bd5d00f0c06e7f06865df8fdd599c3d3ec5af",
+    "sdk_mapping.py": "5d8ce56f372028f08d24424c5c0ea8ccda722876354783940f3cfffff5747e1c",
+    "sorting_schedules.py": "f8bc983fb70de16fedc9c41a4318a1f561f689384008f8aae01db32c3cd45415",
+    "tests/test_model.py": "1ead7c9f4906291a16618580e9f320cd1447d569cd60eb4899086fcabb461f75",
+    "verify_results.py": "59c62c95e885a72dc7cf13ae29f8f9b1be12abccd8ba9b195c9a98ea6b5363c8"
+  }
+}
