@@ -20,3 +20,14 @@ At larger N, more opportunities for a noisy decision can reduce whole-array succ
 The documented cleanup reproduces every reference CSV row, all 576 saved flags/index arrays, and all first-failure examples exactly. Independent seeds between mappings and common streams across positive noise levels are unchanged.
 
 Read [METHOD.md](METHOD.md) for the equations and [HARDWARE.md](HARDWARE.md) for the remaining hardware questions.
+
+## Interpretation after the SDK source audit
+
+These numerical results remain unchanged. They describe the difference/sign
+comparison model, not a native periodic or ReLU optical sorter. The noiseless
+SDK full-sort control uses only the linear API plus electronic decisions.
+
+A separate CPU arithmetic check now verifies `r=ReLU(a-b)`, `min=a-r`, `max=b+r`:
+256 ordered 4-bit pairs and 65,536 ordered 8-bit pairs pass, including equality.
+There is no additional quantizer, noise, full-sort run or physical NPU here.
+See `validation/nonlinearity_check.json` and `docs/QANT_NONLINEARITY.md`.

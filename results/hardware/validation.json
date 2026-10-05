@@ -1,0 +1,10 @@
+{
+  "hardware_executed": false,
+  "peak_link_bytes_per_second": 15753846153.846155,
+  "cap_domain": "Every integer 1 through N(N-1)/2; application submissions, not device tiles.",
+  "bandwidth_domain": "0 < B_eff <= B_peak. No measured link utilization assumed.",
+  "model": "t_A = q_A*ell + C_A*t_arithmetic + U_A/B_up + V_A/B_down + h_A",
+  "threshold": "a=ell+4/B_up; tau=t_arithmetic+4/B_up+2/B_down. Rank wins if (q_B-q_R)*a > (C_R-C_B)*tau + h_R-h_B.",
+  "limitations": "Logical payload only; no measured latency, throughput or energy verdict.",
+  "checks": []
+}

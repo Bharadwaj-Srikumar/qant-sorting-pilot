@@ -1,0 +1,28 @@
+{
+  "baseline_files_unchanged": {
+    "comparison.py": true,
+    "sorting_schedules.py": true,
+    "run_noise_sweep.py": true,
+    "metrics.py": true,
+    "input_validation.py": true,
+    "run_sdk_control.py": true,
+    "hardware_conditions.py": true,
+    "data/inputs.npz": true,
+    "results/sdk_reference/validation.json": true,
+    "results/sdk_reference/resources.csv": true,
+    "results/sdk_reference/metadata.json": true,
+    "results/sdk_reference/trial_outcomes.npz": true,
+    "results/sdk_reference/results.csv": true,
+    "results/reference/validation.json": true,
+    "results/reference/failures.json": true,
+    "results/reference/metadata.json": true,
+    "results/reference/accuracy.csv": true,
+    "results/reference/trial_outcomes.npz": true
+  },
+  "sdk_mapping_executable_ast_unchanged": true,
+  "unit_tests_passed": 11,
+  "new_pair_check": "validation/nonlinearity_check.json",
+  "physical_hardware_executed": false,
+  "baseline_rerun_in_this_revision": false,
+  "explanation": "Numerical implementation and saved evidence are unchanged; prior full reproduction remains in current_checks.json. New arithmetic test was executed separately."
+}

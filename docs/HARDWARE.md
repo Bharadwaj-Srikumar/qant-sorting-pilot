@@ -19,6 +19,15 @@ line-rate ceiling is approximately 15.754 GB/s after line coding. This is not
 measured application bandwidth. Published GOPS figures are not pair-comparison
 throughput. Reported conversion resolution is not effective optical precision.
 
+## Native nonlinearity: now source-verified
+
+`native.calc_scaled_periodic_nl_fprop` has a native NPU-driver path for
+`v*tcos(u)`. In contrast, `ai.relu_fprop` executes a host CPU max loop in the
+pinned source. An exposed AI operation does not imply optical execution.
+A complete optical C&E and unregenerated stage cascade remain unverified.
+See [QANT_NONLINEARITY.md](QANT_NONLINEARITY.md) for exact source locators,
+mathematics, the executed CPU check and the limits of the public driver boundary.
+
 ## Logical counts for one sort
 
 With pair-submission cap `c`, the number of calls is
@@ -80,8 +89,12 @@ latency, throughput or energy per sort.
    sorts. The simulated eta=0.10 result is a candidate budget, not a hardware fact.
 4. Measure end-to-end calls, transfers and electronic operations under a defined
    timing boundary; compare with a digital baseline.
-5. Investigate supported native nonlinear functions and regeneration intervals
-   without assuming that an exposed software function proves optical cascading.
+5. Derive and validate a comparison construction from the supported periodic
+   operation. The SDK ReLU is CPU code. Count any added operations/transfers
+   and establish a new noise/scale model before a nonlinear sorter evaluation.
+6. Investigate regeneration intervals only after a supported cascade is
+   documented. A negative finding about cascade support is also a valid result.
 
 Power and energy-efficiency conclusions follow after these boundaries and
-measurements are established. This cleanup changes no physical capability claim.
+measurements are established. The source audit corrects any earlier native-optical-ReLU claim. The counts
+above still describe only the existing linear-difference/electronic-routing baseline.

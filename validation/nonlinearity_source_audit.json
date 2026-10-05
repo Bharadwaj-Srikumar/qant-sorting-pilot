@@ -1,0 +1,48 @@
+{
+  "audit_date": "2026-10-05",
+  "sdk_version": "2.3.1",
+  "sdk_commit": "72a2d99f10240b6df3c6d0f636dfa0e2b5d38902",
+  "source_commit_date": "2026-09-08",
+  "latest_head_verified_on_audit_date": true,
+  "sources": [
+    {
+      "path": "src/non_linear.rs",
+      "sha256": "c6471dada910fbcf87361d7f1b3308809fdaaed8d277d0cf23a85230175cdce1",
+      "url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/non_linear.rs"
+    },
+    {
+      "path": "src/qant_driver_import/backend_driver.rs",
+      "sha256": "a62fd015b4a0c8cc3c943c54b30f34a43c2fdbbcc9840887b950342eae7d88de",
+      "url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/qant_driver_import/backend_driver.rs"
+    },
+    {
+      "path": "src/qant_driver_import/backend_cpu.rs",
+      "sha256": "58d1329b53ae0b4d464645b275ec15cb3232cb1f9f75df39b9be05eaf3d5aab5",
+      "url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/qant_driver_import/backend_cpu.rs"
+    },
+    {
+      "path": "python/qant_native_computing_toolkit/_wrapper.py",
+      "sha256": "9c5f9bca762a6a8931637357b069b15224bb557533f9515372153e00125bf583",
+      "url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/python/qant_native_computing_toolkit/_wrapper.py"
+    },
+    {
+      "path": "src/linear.rs",
+      "sha256": "2dc86a1e79c93e4b0df3708c9ca9745148890ec57391be67695033987183e5f3",
+      "url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/linear.rs"
+    },
+    {
+      "path": "doc/adr/0002-include-driver-via-c-dynamic-library.md",
+      "sha256": "154faef12aefeba82c477c19191c20dcaadc77da4020d6d6d55727872036eab8",
+      "url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/doc/adr/0002-include-driver-via-c-dynamic-library.md"
+    }
+  ],
+  "findings": {
+    "relu": "Host max loop; no driver dispatch; npu_id unused",
+    "periodic": "Native driver entry for scaled periodic nonlinearity",
+    "kan": "Native multiplication and periodic calls, CPU phase addition and sum",
+    "complete_optical_compare_exchange": "Not established in inspected interface",
+    "optical_cascade": "Not established",
+    "cpu_periodic": "Cosine stand-in, not calibrated tcos hardware response"
+  },
+  "no_new_hardware_assumptions": true
+}

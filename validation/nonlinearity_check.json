@@ -1,0 +1,78 @@
+{
+  "sdk_version": "2.3.1",
+  "driver_info": "cpu-backend;commit:none;",
+  "sdk_source_commit": "72a2d99f10240b6df3c6d0f636dfa0e2b5d38902",
+  "hardware_executed": false,
+  "full_sort_experiment": false,
+  "added_noise": false,
+  "sign_only_quantizer_applied": false,
+  "relu_execution": "host CPU, as verified in SDK src/non_linear.rs",
+  "pair_checks": [
+    {
+      "key_bits": 4,
+      "ordered_pairs": 256,
+      "min_max_errors": 0,
+      "equal_pairs": 16,
+      "clipping_counterexample": {
+        "keys": [
+          15,
+          0
+        ],
+        "exact_difference": 0.9375,
+        "clipped_difference": 0.4375,
+        "reconstructed_key_values": [
+          8.0,
+          7.0
+        ],
+        "expected_key_values": [
+          0,
+          15
+        ]
+      }
+    },
+    {
+      "key_bits": 8,
+      "ordered_pairs": 65536,
+      "min_max_errors": 0,
+      "equal_pairs": 256,
+      "clipping_counterexample": {
+        "keys": [
+          255,
+          0
+        ],
+        "exact_difference": 0.99609375,
+        "clipped_difference": 0.49609375,
+        "reconstructed_key_values": [
+          128.0,
+          127.0
+        ],
+        "expected_key_values": [
+          0,
+          255
+        ]
+      }
+    }
+  ],
+  "periodic_cpu_example": {
+    "inputs": [
+      -1,
+      0,
+      1
+    ],
+    "weights": [
+      1,
+      1,
+      1
+    ],
+    "outputs": [
+      0.5390625,
+      1.0,
+      0.5390625
+    ],
+    "interpretation": "Cosine CPU stand-in, not a hardware transfer curve"
+  },
+  "source_sha256": {
+    "check_sdk_nonlinearity.py": "4d4703c56a4606e07ee93f5dcc5e4bd6d678a7389801363682bc3889c9483e3b",
+    "sdk_mapping.py": "70407892960b35ea278fa5ae3111bbbc4697288aa97654ae756456d3c6fde1bd"
+  }
+}

@@ -114,3 +114,17 @@ The reported accuracy is the fraction of **entire input arrays** correctly
 sorted. The digital reference exists only in scoring. It never feeds decisions
 back to the mappings. Wilson intervals describe trial sampling uncertainty;
 100% observed over 1,000 trials is not a claim of universally noiseless behavior.
+
+## 8. Nonlinear C&E: a separate mathematical check
+
+For exact normalized differences, `r = ReLU(a-b)` gives `min = a-r` and
+`max = b+r`. The SDK ReLU executes on the CPU. The new exhaustive pair check
+validates these arithmetic identities with the official CPU backend, without
+our additional sign-only quantizer or noise. It does not replace the original
+record-routing algorithms or their measured results.
+
+At 8 bits, the sign-only quantizer maps `255/256` to `127/256`. Reconstructing
+min/max from that clipped magnitude gives key values 128 and 127 instead of
+0 and 255. Correct signs therefore do not prove correct min/max magnitudes.
+See [the source audit](QANT_NONLINEARITY.md) before developing a native nonlinear
+mapping. Its output scale and noise model require a separate definition.

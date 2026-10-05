@@ -8,6 +8,23 @@ is adapted from Louri. Neither is a device-level replica of the historical sorte
 **The numerical sweep is not a measurement of Q.ANT hardware.** An optional,
 separate control exercises the official Q.ANT **CPU backend**.
 
+## Hardware evidence update: 5 October 2026
+
+The official SDK exposes a **native periodic nonlinearity**, but its **ReLU
+runs on the host CPU**. The existing experiment uses only the linear difference
+API, followed by electronic decisions and routing. No optical min/max kernel
+or unregenerated cascade has been demonstrated.
+
+Read [the source audit and mathematical consequences](docs/QANT_NONLINEARITY.md).
+The new `check_sdk_nonlinearity.py` independently verifies the exact numerical
+min/max identity on the official CPU backend, including every 4/8-bit pair.
+It does not alter the noise sweep, routing, saved inputs or reference results.
+
+After installing the optional SDK, run `python check_sdk_nonlinearity.py`.
+Results go to `results/nonlinearity_reproduced/checks.json`; the saved result is
+`validation/nonlinearity_check.json`. This check has **no extra noise or
+sign-only clipping** and is not a photonic or full-sort experiment.
+
 ## Start in VS Code
 
 Open this folder, open its terminal, and use Python **3.12**:
@@ -47,6 +64,7 @@ and all 576 saved trial arrays** against the previous experiment.
 | `verify_results.py` | Exact comparison against the previously reported results |
 | `sdk_mapping.py`, `run_sdk_control.py` | Optional BF16 difference operation through the official CPU SDK |
 | `hardware_conditions.py` | Operation counts, logical data transfers and conditional execution costs |
+| `check_sdk_nonlinearity.py` | Separate CPU-only ReLU/min-max identity check |
 
 Start with [the mapping explanation](docs/METHOD.md),
 [the results](docs/RESULTS.md), and [the hardware boundary](docs/HARDWARE.md).
@@ -122,7 +140,7 @@ python hardware_conditions.py
 python hardware_conditions.py --verify-sdk
 ```
 
-## What changed in this update
+## Previous code cleanup (reference results unchanged)
 
 - One documented noise-sweep entry point; no mandatory SDK import.
 - Rank accumulation visits each pair once instead of repeatedly scanning all
@@ -148,3 +166,10 @@ Use `run_noise_sweep.py` and `results/reference/` for the current study.
 The [legacy instructions](docs/LEGACY_README_20261002.md) and
 `requirements-legacy.txt` document the older environment; install it separately.
 This update manifest covers the new project files, not unchanged legacy files.
+
+## This delivered revision
+
+See [CHANGELOG.md](CHANGELOG.md) for the exact changes and evidence boundary.
+The archive includes the current project and its updated documents. Historical
+root-level code from the GitHub repository is not needed to reproduce this
+current experiment and is not included in this archive.

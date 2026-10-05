@@ -5,7 +5,10 @@ CPU backend uses BF16 multiplication, FP32 accumulation and BF16 output. Its
 answers validate software integration, not photonic accuracy or NPU speed.
 
 The original integer records stay in electronic memory. Only normalized pairs
-enter the SDK. Their measured signs control record swaps or rank increments.
+enter the SDK. Their returned signs control electronic record swaps or rank increments.
+Only native.linear_fprop is called here. The public SDK implements ReLU on
+the host CPU; this module does not execute a native nonlinear C&E kernel.
+See docs/QANT_NONLINEARITY.md for the source-verified execution boundary.
 """
 from dataclasses import dataclass
 import numpy as np
