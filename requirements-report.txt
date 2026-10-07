@@ -1,0 +1,5 @@
+# Current report renderer; separate from the numerical experiment environments.
+numpy==2.3.5
+matplotlib==3.10.8
+reportlab==4.4.9
+Pillow==12.3.0

@@ -1,0 +1,664 @@
+{
+  "title": "Provenienz der Gesamtdokumentation: Hybride photonische Sortierung",
+  "date": "2026-10-07",
+  "repository": "Bharadwaj-Srikumar/qant-sorting-pilot",
+  "base_branch": "research/feedback-sprint1-cpu-baseline",
+  "base_commit": "fbb418d0b80c04b4fa7c38fe92f56fc7b7317bcd",
+  "supplied_sources": [
+    {
+      "id": "01",
+      "title": "Recherchemappe: Analog Photonic Computing, hybride Architekturen und Sortierung",
+      "filename": "01-APC-Hybrid-Architectures-and-Sorters.pdf",
+      "pages": 460,
+      "sha256": "199ea88f9bf3c29d720c681c7a7a9fd00d9f0d00c4e6defcc0ce81583317f593",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "02",
+      "title": "Bitonic sorting using an optoelectronic recirculating architecture",
+      "filename": "02-Bitonic-Sorting-using-an-optoelectric-recirculating-architecture.pdf",
+      "pages": 9,
+      "sha256": "63aa2b2bc7f6b348be909ef48988c238d67fb45500ae5771d106285074b3903a",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "03",
+      "title": "Constant-time parallel sorting algorithm and its optical implementation using smart pixels",
+      "filename": "03-Constant-time-parallel-sorting-algorithm-and-its-optical-implementation-using-smart-pixels.pdf",
+      "pages": 10,
+      "sha256": "a4a283190cf53139162b9009ecfa36eef0c001a1262c59912abe1f4562a51308",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "04",
+      "title": "In-network stable radix sorter using many FPGAs with high-bandwidth photonics [Invited]",
+      "filename": "04-In-network_stable_radix_sorter_using_many_FPGAs_with_high-bandwidth_photonics_Invited.pdf",
+      "pages": 12,
+      "sha256": "dd5ab9f3c8d3ab6b5b24faf3753648647aa6bf322cbbd5373ad7abbaf8b4d0c9",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "05",
+      "title": "Sammlung optischer Sortierverfahren",
+      "filename": "05-Optische-Sortierverfahren.pdf",
+      "pages": 51,
+      "sha256": "2af985cb246a9f0a96e0e3a0859647575e427d46deec0f7e0098e0e0e2a48b74",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "06",
+      "title": "Perfect-shuffle interconnected bitonic sorter: optoelectronic design",
+      "filename": "06-Perfect-shuffle-interconnected-bitonic-sorter-optoelectronic-design.pdf",
+      "pages": 14,
+      "sha256": "c29e2229698dc94556c34c6256f4858cc0513359af804ce195fdefc500f1b656",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "07",
+      "title": "Sorting with optical compare-and-exchange modules",
+      "filename": "07-Sorting-with-optical-compare-and-exchange-modules.pdf",
+      "pages": 6,
+      "sha256": "d795f4ba6195fbecc159274a6c8b49286b224afbc7a48683d0f48e3525a6da1c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "08",
+      "title": "Digital-analog hybrid matrix multiplication processor for optical neural networks",
+      "filename": "08-Digital-analog-hybrid-matrix-multiplication-processor-for-optical-neural-networks.pdf",
+      "pages": 11,
+      "sha256": "a4cad123de0a704db8e0979f4d6d6e9760fbb76ad6c1b34b69d4ab0b48239fc0",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "09",
+      "title": "Efficient hardware error correction with hybrid on-offline configuration algorithm for optical processor",
+      "filename": "09-Efficient-hardware-error-correction-with-HOOC-algorithm-for-optical-processor.pdf",
+      "pages": 9,
+      "sha256": "7fe7fb249491796198e5b26801721b4ca5fc7465acee5033114fb7f49c40656c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "10",
+      "title": "Hybrid Photonic-digital Accelerator for Attention Mechanism (HyAtten)",
+      "filename": "10-Hybrid-Photonic-digital-Accelerator-for-Attention.pdf",
+      "pages": 7,
+      "sha256": "aacf7231e90444990dce9f6f617cc60f5962987a923ad9f3ebe91a1f51a3716d",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "11",
+      "title": "Integrated lithium niobate photonic computing circuit based on efficient and high-speed electro-optic conversion",
+      "filename": "11-Integrated-lithium-niobate-photonic-computing-circuit-based-on-electro-optic-conversion.pdf",
+      "pages": 11,
+      "sha256": "40380fbd9c6ffd33a9f21d39ea275a00d15674995855adb897463507f8962f16",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "12",
+      "title": "LightMat-HP: A Photonic–Electronic System for Accelerating General Matrix Multiplication With Configurable Precision",
+      "filename": "12-LightMat-HP-Photonic-Electronic-System-for-Accelerating-GEMM-with-configurable-Precision.pdf",
+      "pages": 28,
+      "sha256": "63548c2ba75858c9a536d11f5a4e357f4de063dfd959d99154a577d155ec9494",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "13",
+      "title": "Photonic analog-to-digital conversion by use of nonlinear Fabry–Perot resonators",
+      "filename": "13-Photonic-ADC-by-use-of-nonlinear-Fabry-Perot-resonators.pdf",
+      "pages": 9,
+      "sha256": "1ddaf274344070bf7e1d9e50f63fd962c7a7efc24428676c434a5fa43764b208",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "14",
+      "title": "Photonic Analog-to-Digital Architecture for Accelerating Multiply-Accumulate Operations",
+      "filename": "14-Photonic-ADC-for-Accelerating-MAC-Operations.pdf",
+      "pages": 3,
+      "sha256": "c1e8cdb067382cc4bc342b40028f99f75dc93e6c4abcd8ebbdbadd9548bdb6a6",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "15",
+      "title": "Progress in silicon-based reconfigurable and programmable all-optical signal processing chips",
+      "filename": "15-Progress-in-Silicon-Based-Reconfigurable-All-Optical-Signal-Processing-Chips.pdf",
+      "pages": 53,
+      "sha256": "92d27bf8a685caab8e4f050927d00730b651f99b9a461042446e29710b5f8a84",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "16",
+      "title": "Universal photonic artificial intelligence acceleration",
+      "filename": "16-Universal-photonic-artificial-intelligence-acceleration.pdf",
+      "pages": 8,
+      "sha256": "f7b5405b87c223feb1d22c1bf3bd32b732e27a79c5dfad9b7ee93c90d4bee8ea",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "17",
+      "title": "The spatial complexity of optical computing: toward space-efficient design",
+      "filename": "17-The-spatial-complexity-of-optical-computing-toward-space-efficient-design.pdf",
+      "pages": 11,
+      "sha256": "ba043e27767c08caa7f1c712fdfdc28a0f7556b4c28f8ad41c9f1f52d6fe13c8",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "18",
+      "title": "The physics of optical computing",
+      "filename": "18-The-physics-of-optical-computing.pdf",
+      "pages": 31,
+      "sha256": "e72a17b46bac1c8e2141295f71a17495c8954df69bd9ca077650573c34af4600",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "19",
+      "title": "Space-Time Complexity in Optical Computing",
+      "filename": "19-Space-Time-Complexity-in-Optical-Computing.pdf",
+      "pages": 6,
+      "sha256": "c7d65968762cfbeefd106e56948347b93adde4d30facaec183ec2eb8a2eab697",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "20",
+      "title": "Sorting Networks and Their Applications",
+      "filename": "20-Sorting-Networks-and-Their-Applications.pdf",
+      "pages": 8,
+      "sha256": "a70889def3d8e392e260ad3c11903667e2254b36fd022d3830be8f79cf96e29c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "21",
+      "title": "PRISM: Photonic Similarity Engine for KV Cache Block Selection in Long-Context LLM Inference",
+      "filename": "21-PRISM-Photonic-Similarity-Engine-for-KV-Cache-Block-Selection-in-Long-Context-LLM-Inference.pdf",
+      "pages": 27,
+      "sha256": "1a83c9940274013c7fcf6c405098c099c8de761e1a177624bbe86bffc645f16c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "22",
+      "title": "Noise in analog programmable-photonic computation",
+      "filename": "22-Noise-in-analog-programmable-photonic-computation.pdf",
+      "pages": 27,
+      "sha256": "3c982697860af379e2bf08dda78f89dbf45b1d74631ecfd92ad06298e6411874",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "23",
+      "title": "Energy Efficiency in Analog Photonic Processors: Conversions and Losses at Scale",
+      "filename": "23-Energy_Efficiency_in_Analog_Photonic_Processors_Conversions_and_Losses_at_Scale.pdf",
+      "pages": 9,
+      "sha256": "e92fd7074ba6c0386d1893ba1d3121c5acd546f78558d3dd125e74363696a6e8",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "24",
+      "title": "Area-Time Complexity for VLSI",
+      "filename": "24-Area-Time-Complexityfor-VLSI.pdf",
+      "pages": 8,
+      "sha256": "6e752d2658c2e2a9dbcb4e7873ebb1c68f555d3d8c5cd774bfa5cd19505d85e9",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "25",
+      "title": "Analog Programmable-Photonic Computation",
+      "filename": "25-Analog_Programmable-Photonic_Computation.pdf",
+      "pages": 15,
+      "sha256": "5f2b646375747f999fe29614d9e873193897c7f325573eb0009a30e7e508ea00",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "P1",
+      "title": "Präsentation: Hybride optoelektronische Sortierarchitekturen",
+      "filename": "Hybride optoelektronische Sortierarchitekturen(6).pdf",
+      "pages": 44,
+      "sha256": "2d05061b3c628bebd27018fd4c5390845789387b3d41f5578749e4dd2a5c3c39",
+      "kind": "provided_presentation_or_report"
+    },
+    {
+      "id": "P2",
+      "title": "Präsentation: Machbarkeitsstudie APC für Sortierung",
+      "filename": "Machbarkeitsstudie APC für Sortierung(1).pdf",
+      "pages": 29,
+      "sha256": "c058c2c1272d3c2a29e76ca260e142bc567da6eb7d7d4b3bba4c65224568f39a",
+      "kind": "provided_presentation_or_report"
+    },
+    {
+      "id": "B1",
+      "title": "Bisherige ausführliche Forschungsdokumentation mit korrigiertem Komplexitätsmodell",
+      "filename": "APC_Thesis_Research_Phase_Documentation_Complexity_Corrected(2).pdf",
+      "pages": 50,
+      "sha256": "3ccb5ee5c9ba6fcd2f29a18b34aca2a7b00b3b9109a9c7cdd4a796f0167c90ca",
+      "kind": "provided_presentation_or_report"
+    }
+  ],
+  "repository_evidence": [
+    {
+      "path": "data/inputs.npz",
+      "sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+      "bytes": 1736941
+    },
+    {
+      "path": "results/common_noise_20261007/metadata.json",
+      "sha256": "3c0fee2ee9fd7a80977c1f115454078aaf30c127a3b82c6705bfd4a4c41f2816",
+      "bytes": 4736
+    },
+    {
+      "path": "results/common_noise_20261007/pair_controls.csv",
+      "sha256": "ae364d170c060533bd9a5e2d7c8eccdc9b7cc2e73bb5f7429176ca83cf37ddf4",
+      "bytes": 24542
+    },
+    {
+      "path": "results/common_noise_20261007/signal_scales.csv",
+      "sha256": "28cec659f4bb8cd9ec40ac8095e725fc589092eb5ce335077a4de46d9269d8ce",
+      "bytes": 591
+    },
+    {
+      "path": "results/common_noise_20261007/sort_outputs.npz",
+      "sha256": "0400114fff41623f167cd0e36019488f42907ed1f9fa9c305fe3fc636eaa77b4",
+      "bytes": 1388378
+    },
+    {
+      "path": "results/common_noise_20261007/sort_quality.csv",
+      "sha256": "d5ca0e846a1d4b65023590f228f37f650eae3460b803079d18f1aab535ad36a5",
+      "bytes": 22501
+    },
+    {
+      "path": "results/common_noise_20261007/validation.json",
+      "sha256": "65f719e2aedb25a53b75d468695cee19ccce27fa655c794c4936426dbdd159eb",
+      "bytes": 404
+    },
+    {
+      "path": "results/config.json",
+      "sha256": "64881c2fe179b33cf061b54652c04cb9d21c14a57d41cc718a57698d10fd2a86",
+      "bytes": 802
+    },
+    {
+      "path": "results/cpu_baseline_20261007/metadata.json",
+      "sha256": "d02c8ef17675ccadfeaf6be38b587a0c0df47abee427403225eaf2ae5068fb3e",
+      "bytes": 2139
+    },
+    {
+      "path": "results/cpu_baseline_20261007/samples.csv",
+      "sha256": "15bcd90204363eb24999f06122c314b1317e4f09f9aeb63b87957d94053935fe",
+      "bytes": 168049
+    },
+    {
+      "path": "results/cpu_baseline_20261007/summary.csv",
+      "sha256": "5e6d81361a43004a6cb078d9880b083c03c17aef9a1c5bda1012b440f81a4467",
+      "bytes": 37596
+    },
+    {
+      "path": "results/cpu_baseline_20261007/validation.json",
+      "sha256": "32d2dc92a48434c72f95812a925bb2b69e5a2a9c15a75c23d468c80c767bdecd",
+      "bytes": 9916
+    },
+    {
+      "path": "results/failures.json",
+      "sha256": "2248a35cc770661ccbf145347e1d0c94eeb62f17f3883e50256f0c1c263d0f81",
+      "bytes": 297726
+    },
+    {
+      "path": "results/hardware/batch_sensitivity.csv",
+      "sha256": "7c879bd99a0f30b7f345e07776cc1aa13421a04d56541ddf145771259580493b",
+      "bytes": 5149941
+    },
+    {
+      "path": "results/hardware/resources.csv",
+      "sha256": "79bdcbe13c5bf09b6970f297768f622d7547b9cf210f924b6ea6d0aac068ecd1",
+      "bytes": 1253
+    },
+    {
+      "path": "results/hardware/validation.json",
+      "sha256": "45b976aeb9943ca8164cc7647f88f192a0adf3989ac9d4e0879166dcb00814d1",
+      "bytes": 568
+    },
+    {
+      "path": "results/inputs.npz",
+      "sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+      "bytes": 1736941
+    },
+    {
+      "path": "results/periodic/pair_checks.json",
+      "sha256": "77720940797458c2eb2c15518c67473854fdc258928277b86ffacb132ddee265",
+      "bytes": 3163
+    },
+    {
+      "path": "results/precision.csv",
+      "sha256": "a1ac9d5ac18c1eb91323b7f865e2a4a7808bd256cc53eef0e66248d9e8cb2fea",
+      "bytes": 58778
+    },
+    {
+      "path": "results/ranking_quality_20261007/checks.json",
+      "sha256": "6a1bad40cc8e5bb83d400996cf02ac9881cb33d61709b10d1e3bd98dabf0729c",
+      "bytes": 520
+    },
+    {
+      "path": "results/ranking_quality_20261007/coverage.csv",
+      "sha256": "76fa37f82a333ce9f53ce7bbe66eb78a72dc6ea840fd9612aa1bb1415fff2b97",
+      "bytes": 111444
+    },
+    {
+      "path": "results/ranking_quality_20261007/distance.csv.gz",
+      "sha256": "150a2df1d3fdd1a2f3aa9bacf808fc16391f7b307dad57dba49512a526c2ab63",
+      "bytes": 852198
+    },
+    {
+      "path": "results/ranking_quality_20261007/metadata.json",
+      "sha256": "84091c6b4bc4f281cc4223b604aac74b3d4eda3184f952a1fb3a23c1201e5f35",
+      "bytes": 3796
+    },
+    {
+      "path": "results/ranking_quality_20261007/recall.csv",
+      "sha256": "049b40860ff0ba4b769a4fd6ffe3c346dc62bb0623fefc5bb903d478754ea3fb",
+      "bytes": 499514
+    },
+    {
+      "path": "results/ranking_quality_20261007/summary.csv",
+      "sha256": "9493ba3d02b7b973630245e5b7e1cc83011523c9db1358aec7ab8d985343ba67",
+      "bytes": 269177
+    },
+    {
+      "path": "results/ranking_quality_20261007/validation.json",
+      "sha256": "f7eedd04ce94925f518d70f251126965ce7b800ea384fd7d34622e404712aed0",
+      "bytes": 2314
+    },
+    {
+      "path": "results/reference/accuracy.csv",
+      "sha256": "58cfe5fe65a86c9f94f570517d97e651cf4582c31489707e4ad05c9780636d94",
+      "bytes": 72772
+    },
+    {
+      "path": "results/reference/failures.json",
+      "sha256": "4973cd49e4a07e00dfc4aaf51d99950ff7c0e39132b01b40c235bb48fc5c973c",
+      "bytes": 212573
+    },
+    {
+      "path": "results/reference/metadata.json",
+      "sha256": "77a2004be2df2b184c7d33df43dbc17c81f3142929256010c88f947bab622e96",
+      "bytes": 1746
+    },
+    {
+      "path": "results/reference/trial_outcomes.npz",
+      "sha256": "b4bdf5ce1cc23a4fbc0ad99417bfbe056d7f777f74eefa90232efbf4422e1517",
+      "bytes": 13887921
+    },
+    {
+      "path": "results/reference/validation.json",
+      "sha256": "55194d61a0c9f19df5abdce5d872e54594560f59678f2191d5fad7e52dd09f5f",
+      "bytes": 675
+    },
+    {
+      "path": "results/report_validation.json",
+      "sha256": "0884566dff22516a0700b95e5c0f0080daee78f7798d3599c86c981a46782bd2",
+      "bytes": 191
+    },
+    {
+      "path": "results/resources.csv",
+      "sha256": "64556cf06af98786d2f34ad56ad39744dc6b9c69142d5a0e0ac561dc36eab49f",
+      "bytes": 3097
+    },
+    {
+      "path": "results/run_metadata.json",
+      "sha256": "4f02ea53c31e9f2e9c61c4a044b58f8083aa6e6eeb19d43672c2b9dcce6f89aa",
+      "bytes": 1383
+    },
+    {
+      "path": "results/sdk_reference/metadata.json",
+      "sha256": "a49328d19c0b0e3da9b4577d2c5f0ee0df4c2ed9322360f66041a319ff816285",
+      "bytes": 1896
+    },
+    {
+      "path": "results/sdk_reference/resources.csv",
+      "sha256": "d3bf5fdf5276e5bd43f4b7178a8611d14a1151accf65d7b5c2d6f8d6ee9b9f6f",
+      "bytes": 766
+    },
+    {
+      "path": "results/sdk_reference/results.csv",
+      "sha256": "3e7611f767c707d832805a1ffc76b31b41d36785ba70897172ecff4bf7da7324",
+      "bytes": 10863
+    },
+    {
+      "path": "results/sdk_reference/trial_outcomes.npz",
+      "sha256": "adb13646ea76cbf671b6ca5cdf0155b8ac4f1e5033eae56092d98ee9834afbd5",
+      "bytes": 4777474
+    },
+    {
+      "path": "results/sdk_reference/validation.json",
+      "sha256": "f091ca6f94eb5731d9a98aeb3c49b83f12046af2b15d77107e16b76c03616afd",
+      "bytes": 3965
+    },
+    {
+      "path": "results/source_hashes.json",
+      "sha256": "93a8a74f8061e3017d209bb2725288ac6da34ff5f16af8a8818a9b396588902c",
+      "bytes": 3528
+    },
+    {
+      "path": "results/trial_outcomes.npz",
+      "sha256": "13f1bd0ee65f5c6fb172c02c21ada74f08fd44d023534c1b199942a526483ba6",
+      "bytes": 77199
+    },
+    {
+      "path": "results/validation.json",
+      "sha256": "93d6e2118b3d71e2669d5ab58fba6ad010f56a69b4fcd1968e80efca538b9843",
+      "bytes": 4340
+    },
+    {
+      "path": "validation/code_commenting_20261007.json",
+      "sha256": "f6eeac30f01f96a676064e56e699d25343b9b9068c2218fdbc739a930efff03b",
+      "bytes": 10401
+    },
+    {
+      "path": "validation/current_checks.json",
+      "sha256": "0b807a8dafa26d3ffd282ceb5390719c459c28b2a5cfd55c6f1627f13771ccce",
+      "bytes": 1925
+    },
+    {
+      "path": "validation/hardware_checks.json",
+      "sha256": "6a83efec7831530b31849dd2d618eb22442a765bd65fcaabbdeb8e0c36d182dc",
+      "bytes": 2726
+    },
+    {
+      "path": "validation/hardware_resources.csv",
+      "sha256": "79bdcbe13c5bf09b6970f297768f622d7547b9cf210f924b6ea6d0aac068ecd1",
+      "bytes": 1253
+    },
+    {
+      "path": "validation/noise_run_metadata.json",
+      "sha256": "a13e552836371475507102f4a808e4c69b8d66aa14693aa32fcdfa630d027449",
+      "bytes": 1388
+    },
+    {
+      "path": "validation/nonlinearity_check.json",
+      "sha256": "3bcc2c0f75a2debd560890760f4cfffd7f1442e67cfe118165cd5d645ad26a45",
+      "bytes": 1736
+    },
+    {
+      "path": "validation/nonlinearity_source_audit.json",
+      "sha256": "5ad6ba2a90cc4ed94e3616bca8a486d95d9c4bac64e032c754094ea2966a17e7",
+      "bytes": 2539
+    },
+    {
+      "path": "validation/revision12_checks.json",
+      "sha256": "88b6993ee7eec7cf547928a8a4b06e33f618a5d25a0fa9028d8d4f72e082f98a",
+      "bytes": 1163
+    },
+    {
+      "path": "validation/sdk_run_metadata.json",
+      "sha256": "2cb5b2e441ccbf31e8a4cfdf7e7a3bd12b72bcf71ea6f18ccecfc726b6b56bb6",
+      "bytes": 1306
+    }
+  ],
+  "scientific_code_baseline": [
+    {
+      "path": "check_periodic_pairs.py",
+      "sha256": "845c120bb489cbca7410c77b40850ee8d3f70198411488ada5d1c602f9e1902f"
+    },
+    {
+      "path": "check_sdk_nonlinearity.py",
+      "sha256": "62ba61c83e16bd3cd4cb64ea6a43d1185c1a73b6d78f717f3e16fdad1545697c"
+    },
+    {
+      "path": "common_noise_model.py",
+      "sha256": "5d457896e3ea8fffabd187fd209c1b6ab17b9e46d834d7c8ae1f5cda0dc4e13d"
+    },
+    {
+      "path": "comparison.py",
+      "sha256": "88758c3cafb1b30f219c2506bf46878e0d5254d218c502801b57c12a4feb5748"
+    },
+    {
+      "path": "evaluate.py",
+      "sha256": "e22503cd02a590f0756b79e1e58442328c107da59a3ebd33e61e64b640a02ec6"
+    },
+    {
+      "path": "evaluate_ranking_quality.py",
+      "sha256": "03ec59c524bb154246db1c4109f2df423f81270d2e571b5c5c45fcbf5236284e"
+    },
+    {
+      "path": "hardware_conditions.py",
+      "sha256": "d739d15e470429f8401a65198f520435e7b1aebf5e5051e62d0143a013baadf7"
+    },
+    {
+      "path": "input_validation.py",
+      "sha256": "87628a30a9b236d57da015f459a00f01fc9fff311283603dcc078650e9970066"
+    },
+    {
+      "path": "install_sdk.py",
+      "sha256": "570883a76bde78c3db77706c199f194baf3e298de695ed7a50705fc32b4e2e7e"
+    },
+    {
+      "path": "measure_periodic_curve.py",
+      "sha256": "8fcfe4d1f8a5a510efe64181b131ea438d7bb80298c56d2ff8d4ccafabc94018"
+    },
+    {
+      "path": "metrics.py",
+      "sha256": "ff5a82e91c00f394378e4b7c0f14e2162cedf923c0017534755afb26234f0fe3"
+    },
+    {
+      "path": "model.py",
+      "sha256": "f00e4ce6ff5afc2bf49febaa982b6bca345b21a92a24cc0d90d8d3ee2cf9cd0c"
+    },
+    {
+      "path": "periodic_comparison.py",
+      "sha256": "53b8187aaa63e49b6f426d825b5a08ce5d1eaaca80fecade96d18065c10fbd16"
+    },
+    {
+      "path": "ranking_quality.py",
+      "sha256": "0e97b306ffc6dbf440adea73eba588d18a138c9fb26b57d314a35ea35089f732"
+    },
+    {
+      "path": "run_common_noise_controls.py",
+      "sha256": "66e59ae9f9a8b3c8c288945021f7b6d06b01f1ff38cf4392fa10bee13989d1bd"
+    },
+    {
+      "path": "run_cpu_baseline.py",
+      "sha256": "eb3c56af483e21d590eaf47608db7e97bdbea575abaa40e116749d1aa476f0fe"
+    },
+    {
+      "path": "run_noise_sweep.py",
+      "sha256": "7f3a27162d3785d092dbb43b24c958a0105787f03f62f8ca30070c0e90cf814b"
+    },
+    {
+      "path": "run_periodic_evaluation.py",
+      "sha256": "ebd0e66ddd6a2f06fc888df5cb13a1a31631837c5744b6a8f6b3543c4d94e18d"
+    },
+    {
+      "path": "run_sdk_control.py",
+      "sha256": "8aab7ba30b873b44a2086f9fec49e242090c88342f12381a938a5a81c9cac4d5"
+    },
+    {
+      "path": "saved_output_reader.py",
+      "sha256": "49af3dacc151f04748f65158b86d13e60b3baf8209464efd1a1f509db08ffa30"
+    },
+    {
+      "path": "sdk_mapping.py",
+      "sha256": "03946a1cb09dde38b5e0f2dadfbf1cadb53f1f42aa793250b4d2d7f1c4e9a5c5"
+    },
+    {
+      "path": "sorting.py",
+      "sha256": "bd458fded376126ee4c30837d9a5680372fa8f40103901f107d5161dc4f80072"
+    },
+    {
+      "path": "sorting_schedules.py",
+      "sha256": "b04b20755252667a9934c0db0e7d22f8b2fecfb10e47e0283b14657cede9c835"
+    },
+    {
+      "path": "summarize_periodic_results.py",
+      "sha256": "83b3fd56917f76539fcea7f57894ef426e02b89ed50ed1101e8fc971859ae0c8"
+    },
+    {
+      "path": "tests/test_common_noise_model.py",
+      "sha256": "eff181d0b35507eb26bd542956cd466541d380253f975a9a08d6ce807bf5c045"
+    },
+    {
+      "path": "tests/test_cpu_baseline.py",
+      "sha256": "2c2ff84f542efc624f4af2ac3f5c335392cfc4d40afdc77a4fbf5f6f7297b6cc"
+    },
+    {
+      "path": "tests/test_model.py",
+      "sha256": "61c55fbb83d97f8dbf9b6b8475ad3bdedc3e011610699453b3a62d6874cf21a7"
+    },
+    {
+      "path": "tests/test_periodic.py",
+      "sha256": "0e10c3ecd6df59583168678ee9978cd59e77f6bd82e158827d4bc35f7c2b8499"
+    },
+    {
+      "path": "tests/test_ranking_quality.py",
+      "sha256": "094de3a07299d24edc23c233696a4b9acd3fb8cb38deb0b50028411e71a99f50"
+    },
+    {
+      "path": "validate.py",
+      "sha256": "3b5c5dcdfaef71b59ac0ad5b877ee56d41cefcfd421c6a41a958739ddbc0196e"
+    },
+    {
+      "path": "verify_results.py",
+      "sha256": "e408442b647d53a4f822637c1d924d17c77639e83d60ca1b569d2b752804101c"
+    }
+  ],
+  "removed_report_snapshot": [
+    {
+      "path": "reports/APC_Forschungsstand_Kurzbericht_DE_QANT_Pruefung.pdf",
+      "sha256": "546a00f47a42de7aa5bf332d29f47c8964fb0654643302cd3d90b6c237d8794b",
+      "bytes": 55788
+    },
+    {
+      "path": "reports/APC_Forschungsstand_Thesis_Anmeldung_DE_Aktualisiert.pptx",
+      "sha256": "e392b944c9a391e7127a2600080c6d93fd634ecc2a318a4ce52aeacdff25e240",
+      "bytes": 73465
+    },
+    {
+      "path": "reports/APC_Thesis_Registration_Visual_Guide.html",
+      "sha256": "b1c91f20f108e4f4d05344dc7e3aa44d6f65ed98252fa181c201890292f51cc2",
+      "bytes": 725872
+    },
+    {
+      "path": "reports/APC_Thesis_Research_Phase_Documentation.pdf",
+      "sha256": "843a30b9644ffb855743caf58cea6d02541eda0a321304b1cfd5bd1ad39d9c5d",
+      "bytes": 1049219
+    },
+    {
+      "path": "reports/precision_4bit.png",
+      "sha256": "146e04129c21e6c58c36764dd4b61b231f09e0e384f76eb44f65235593c201f0",
+      "bytes": 173809
+    },
+    {
+      "path": "reports/precision_4bit.svg",
+      "sha256": "b28d3e5b6bb02123449528e7a50b7d0eb2b1184ba5d598143a00906a63d0f4a0",
+      "bytes": 59999
+    },
+    {
+      "path": "reports/precision_8bit.png",
+      "sha256": "17c9c7fa662f38b4665c822f479ceb1233d030a64aca867fdd7df0d574aa97d7",
+      "bytes": 147426
+    },
+    {
+      "path": "reports/precision_8bit.svg",
+      "sha256": "636fd1fa9fa4a5b5ef8ced66bf5a099b35a5f642ee6b853ac586cdc77c4c1244",
+      "bytes": 72309
+    }
+  ],
+  "external_source_policy": "User-provided reading copies are not redistributed. Their hashes identify the reviewed editions. Historical report files remain in Git history.",
+  "known_gaps": [
+    "Original historical periodic sort archives absent from this Git tree; derived metrics and provenance retained.",
+    "Five 8-bit N=256 duplicates-allowed deadband output configurations unavailable; no fabricated quality metrics.",
+    "No measured Q.ANT hardware, GPU baseline or energy traces."
+  ]
+}

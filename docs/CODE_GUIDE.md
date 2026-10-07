@@ -53,13 +53,20 @@ without noise. BF16 is an interface format, not a measured analog ENOB.
 | What do logical call/transfer counts mean? | `hardware_conditions.py`, `summarize_periodic_results.py` |
 | How would repeated actual API outputs be collected? | `measure_periodic_curve.py` |
 | How is the optional pinned CPU SDK installed? | `install_sdk.py` |
-| How were the historical PDF/HTML reports generated? | `build_reports.py`, `report_assets/report_template.html` |
+| How is the current complete thesis report generated? | `build_reports.py`, `report_assets/thesis_report.md`, `report_assets/references.json` |
+| How were the historical PDF/HTML reports generated? | `tools/build_legacy_reports.py`, `report_assets/report_template.html` |
 | Where are independent examples and edge cases? | All five files in `tests/` |
 
-`reports/APC_Thesis_Registration_Visual_Guide.html` is a generated, self-contained
-historical report. Its embedded JavaScript is commented too. The editable source
-is the template; commenting it did not regenerate or update the report's dated
-scientific content, embedded results or visible presentation.
+The [current complete German report](../reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf)
+is the only file in `reports/`. Its builder reads authored Markdown and saved
+evidence, verifies evidence hashes, lays out tables and equations, and writes
+the PDF only after a successful build. Imports have no file-writing side effects.
+Use `requirements-report.txt` in a separate environment.
+
+The earlier generated HTML/PDF reports and standalone figures have been removed
+from `reports/`; Git history retains them. The old editable HTML template remains
+with its historical claims. Running the explicitly named legacy builder writes
+to `tmp/legacy_reports/` and cannot recreate obsolete files in `reports/`.
 
 ## Important contracts
 
@@ -96,15 +103,19 @@ locations. Some historical scripts overwrite their target filenames; use fresh
 output paths when reproducing an experiment. Other runners require an empty
 directory or protect their reference path explicitly.
 
-Importing `build_reports.py` loads evidence and constructs report descriptions.
+Importing `tools/build_legacy_reports.py` loads historical evidence and constructs
+dated report descriptions. The new `build_reports.py` is import-safe.
 Importing `summarize_periodic_results.py` also writes summary files. Read their
 module guides before importing them as if they were passive helper libraries.
 
-The comments-only update preserves Python syntax trees and executable tokens,
+The earlier comments-only update preserved Python syntax trees and executable tokens,
 including original docstrings, for all 32 Python files. Both HTML files preserve
 their noncomment content and pass JavaScript syntax checks. All 148 Python
 function/method/class definitions have a dedicated explanation. The available
-unit run passes 32 tests and explicitly skips the two optional SDK tests.
+unit run passed 32 tests and explicitly skipped the two optional SDK tests.
+These counts describe that dated update, not a new measurement of the report
+renderer. The report consolidation has its own validation record in
+`validation/report_consolidation_20261007.json`.
 
 Adding comments changes source-file hashes. Existing result metadata correctly
 continues to identify the source snapshot that originally generated the data;

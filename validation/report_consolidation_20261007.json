@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-07",
+  "base_commit": "fbb418d0b80c04b4fa7c38fe92f56fc7b7317bcd",
+  "pdf_path": "reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf",
+  "pages": 51,
+  "tables": 23,
+  "figures": 2,
+  "bibliography_entries": 40,
+  "supplied_documents": 28,
+  "removed_reports": [
+    "reports/APC_Forschungsstand_Kurzbericht_DE_QANT_Pruefung.pdf",
+    "reports/APC_Forschungsstand_Thesis_Anmeldung_DE_Aktualisiert.pptx",
+    "reports/APC_Thesis_Registration_Visual_Guide.html",
+    "reports/APC_Thesis_Research_Phase_Documentation.pdf",
+    "reports/precision_4bit.png",
+    "reports/precision_4bit.svg",
+    "reports/precision_8bit.png",
+    "reports/precision_8bit.svg"
+  ],
+  "reports_directory_files": [
+    "Masterarbeit_Hybride_Photonische_Sortierung.pdf"
+  ],
+  "pdf_sha256": "5f94c642597e0fd221cddd6194d354782013e2d28778a0adb2c60f4ddb51a38f",
+  "authored_source_sha256": "d2887869e38be04db3e640cfddfcccc7764f1919c65b15a15a977717bbc0f108",
+  "bibliography_sha256": "d30a7af5fd8517fa01525239bb6e5c3c02fa90882f154a68a118c1745988dbb9",
+  "unchanged_scientific_python_files": 31,
+  "unchanged_evidence_files": 51,
+  "unit_tests": {
+    "run": 34,
+    "passed": 32,
+    "skipped": 2,
+    "reason": "Optional Q.ANT CPU SDK unavailable in this environment; no hardware tests claimed."
+  },
+  "pdf_checks": {
+    "chapter_bookmarks": 20,
+    "unresolved_markers": 0,
+    "replacement_characters": 0,
+    "out_of_bounds_text": 0,
+    "internal_links_valid": true,
+    "all_literature_entries_present": true
+  },
+  "known_gaps": [
+    "Original historical periodic sort archives absent from this Git tree; derived metrics and provenance retained.",
+    "Five 8-bit N=256 duplicates-allowed deadband output configurations unavailable; no fabricated quality metrics.",
+    "No measured Q.ANT hardware, GPU baseline or energy traces."
+  ]
+}
