@@ -1,3 +1,10 @@
+# Reading guide: public validation boundary for integer sorting inputs.
+# Validation happens before conversion/normalization so bad keys are not silently
+# rounded, clipped, or accepted after string/bool coercion. Returned int64 keys
+# support signed differences and the -1 failure markers used by rank sorting.
+# This checks the key domain, not network size, precision matching, or a device's
+# physical input range; those belong to the caller/model that uses the keys.
+
 """Validate raw keys once, before normalization or sorting begins."""
 
 import numbers
@@ -5,6 +12,14 @@ import numbers
 import numpy as np
 
 
+# Input: a nonempty one-dimensional list or rectangular two-dimensional batch,
+# plus an integer key width from 1 to 30. Return a separate int64 array.
+# Object conversion preserves original element types until each is checked;
+# otherwise a string or boolean could silently become an accepted integer.
+# Whole finite real values such as 3.0 are allowed, but fractions/NaN/infinity,
+# booleans, strings, negatives and values above 2**key_bits-1 raise ValueError.
+# Error locations are zero-based. Shape/network and physical-range checks remain
+# the responsibility of the caller that selects a sorting architecture.
 def validate_keys(keys, key_bits):
     """Accept a nonempty 1-D array or batch of whole, finite numbers.
 

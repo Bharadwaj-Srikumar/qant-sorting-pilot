@@ -1,3 +1,12 @@
+# Reading guide: the software boundary of the linear Q.ANT mapping.
+# Pack each pair into one row [a/2**bits, b/2**bits], use weights [1, -1],
+# and reshape the returned single-column tensor back to the caller's pair grid.
+# The returned number is still interpreted and routed by the host sorter.
+# Counters describe buffers visible at the public API, not observed bus traffic.
+# Importing this module requires the optional SDK and ml_dtypes; the pure NumPy
+# reference experiment does not import it. CPU integration checks are in
+# run_sdk_control.py, and backend identity must accompany any reported result.
+
 """Execute the common pair-difference operation through Q.ANT's official API.
 
 This module never substitutes NumPy subtraction for the SDK call. The official
@@ -17,6 +26,10 @@ import qant_native_computing_toolkit as qant
 
 
 
+# Mutable accounting record for one SdkDifference instance.
+# api_calls counts public linear submissions; pair_differences counts scalar pairs.
+# feature/weight/output bytes use actual allocated BF16 buffers. largest_pair_batch
+# records the biggest software submission, not a hardware tile or proven capacity.
 @dataclass
 class CallCounts:
     """Logical API traffic. These are not observed PCIe transaction bytes."""
@@ -28,6 +41,10 @@ class CallCounts:
     largest_pair_batch: int = 0
 
 
+# Adapter from the sorters' arbitrary pair-array shape to the SDK matrix API.
+# For P pairs, features has shape (P,2), weights (1,2), output (P,1).
+# One call handles all supplied pairs regardless of how many trial rows they came
+# from. The supported CPU batch shape is not evidence that physical hardware fits it.
 class SdkDifference:
     """Use X.shape=(number_of_pairs, 2), W.shape=(1, 2), Y=X@W.T.
 
@@ -35,6 +52,10 @@ class SdkDifference:
     bitonic layer, or one rank-pair call. Accepted batch shapes in the CPU
     backend are NOT evidence of a physical tile or maximum hardware batch size.
     """
+    # Accept only the registered 4/8-bit key domains; retain the selected device ID.
+    # Normalize by the declared key range scale 2**bits, never by observed maxima.
+    # Prepare BF16 [1,-1] weights once and initialize logical accounting counters.
+    # The constructor alone does not verify CPU/hardware identity; callers do that.
     def __init__(self, key_bits, device_id=0):
         if key_bits not in (4, 8):
             raise ValueError('This registered pilot accepts 4-bit or 8-bit key domains')
@@ -46,6 +67,11 @@ class SdkDifference:
         self.weights = np.array([[1, -1]], dtype=bfloat16)
         self.counts = CallCounts()
 
+    # Flatten equal-shaped raw key arrays into P two-feature rows and submit them
+    # through native.linear_fprop. Require the documented BF16 single-column output.
+    # Return a float32 view of the returned numbers reshaped to the original pair grid.
+    # Widening the dtype does not recover precision lost inside the SDK.
+    # Every invocation increases call/pair/payload counters; inputs are not modified.
     def __call__(self, a, b):
         """Normalize and pack raw integer pairs, execute SDK, restore shape."""
         if a.shape != b.shape:
@@ -67,6 +93,9 @@ class SdkDifference:
         return result.astype(np.float32).reshape(a.shape)
 
 
+# Return installed SDK version and actual driver description as a small dict.
+# Use this evidence in output metadata and CPU guards. A chosen device_id alone
+# does not prove that an NPU was reached or that an optical computation ran.
 def backend_identity():
     """Report actual runtime identity; never mistake synthetic NPU IDs for hardware."""
     return {'sdk_version': qant.__version__, 'driver_info': qant.info.get_driver_info()}

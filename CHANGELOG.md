@@ -1,3 +1,21 @@
+# 7 October 2026: one complete current thesis report
+
+- Consolidated the supplied presentations, research papers, previous reports and
+  current repository evidence into the German complete thesis documentation.
+- Included foundations, all five architectures, lower/tight/upper bounds,
+  derivations, code paths, quality metrics, common-noise controls, CPU baseline,
+  reproducibility boundaries and the remaining hardware measurement plan.
+- Retained only `reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf` in
+  `reports/`; removed eight obsolete reports, presentation/HTML copies and figures.
+- Added an editable narrative, annotated bibliography and source/evidence hashes.
+  The new report builder reads saved evidence without rerunning experiments.
+- Moved the historical builder to `tools/build_legacy_reports.py` and redirected
+  its output to `tmp/legacy_reports/` so obsolete reports cannot reappear in the
+  current report folder. Updated active documentation links.
+- Preserved scientific source code, inputs and recorded results. Missing
+  historical periodic archives and five unavailable output configurations remain
+  explicit; no hardware, GPU or energy measurements are invented.
+
 # 5 October 2026: nonlinearity evidence correction
 
 - Corrected the distinction between native periodic tcos and host CPU ReLU,

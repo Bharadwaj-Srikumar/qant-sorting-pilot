@@ -8,6 +8,54 @@ is adapted from Louri. Neither is a device-level replica of the historical sorte
 **The numerical sweep is not a measurement of Q.ANT hardware.** An optional,
 separate control exercises the official Q.ANT **CPU backend**.
 
+## Current complete thesis report
+
+[**Hybride photonische Sortierung – Gesamtdokumentation der Masterarbeit**](reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf)
+is the single current report, in German, dated **7 October 2026**. It connects
+the literature and both earlier presentations to the complexity model, five
+architectures, mathematical mappings, current code, noise/quality evaluation,
+CPU baseline and remaining hardware questions. It documents the current thesis
+state, not a completed physical hardware validation.
+
+`reports/` contains only this PDF. Earlier reports, the old presentation copy
+and standalone figures remain recoverable through Git history. The editable
+narrative, bibliography and source inventory live in `report_assets/`.
+
+To regenerate the report from saved results in a separate report environment:
+
+```bash
+python -m pip install -r requirements-report.txt
+python build_reports.py
+```
+
+The builder verifies the pinned evidence hashes and does not rerun experiments.
+See [report provenance](report_assets/report_provenance.json) and
+[consolidation validation](validation/report_consolidation_20261007.json).
+Historical periodic sort archives are **not included in this Git tree**; their
+derived ranking-quality tables are retained, with five explicitly documented
+missing output configurations. The report does not claim full raw-data coverage.
+
+## New readers: code guide
+
+Start with the [code reading guide](docs/CODE_GUIDE.md) for the execution paths,
+array contracts and distinction between historical and current experiments.
+All project-owned Python definitions and HTML/JavaScript behavior have detailed
+source comments. The documentation update preserves the executable logic and
+existing numerical evidence.
+
+## Feedback sprint: common noise model, 7 October 2026
+
+The old upstream/output accuracy contrast uses different decision margins and
+quantization rules. It does not establish a physical noise advantage. The new
+[common model and controls](docs/COMMON_NOISE_MODEL.md) separate upstream noise,
+readout noise, rounding and residual offsets, with explicit source/assumption
+labels and locally matched signal units. This is a Float64 sensitivity model,
+not a Q.ANT calibration or an SDK hardware execution.
+
+Run `python run_common_noise_controls.py` using `requirements-common-noise.txt`.
+Saved pair controls, selected full sorts and quality metrics are in
+`results/common_noise_20261007/`. Historical sweeps below remain unchanged.
+
 ## Hardware evidence update: 5 October 2026
 
 The official SDK exposes a **native periodic nonlinearity**, but its **ReLU
@@ -158,18 +206,22 @@ this update does not assign a new license to the thesis project.
 
 ## Earlier repository snapshot
 
-The root files `model.py`, `sorting.py`, `evaluate.py`, `validate.py`,
-`build_reports.py` and `config.json`, plus the older `reports/`, `report_assets/`
-and top-level result files, are preserved from 2 October for traceability.
+The root files `model.py`, `sorting.py`, `evaluate.py`, `validate.py` and
+`config.json`, plus historical assets and top-level result files, remain for
+traceability. The former report builder is now
+[`tools/build_legacy_reports.py`](tools/build_legacy_reports.py); it writes to
+`tmp/legacy_reports/`, never to the current `reports/` folder.
 They use the **superseded two-step output quantizer and three-architecture scope**.
 Use `run_noise_sweep.py` and `results/reference/` for the current study.
 The [legacy instructions](docs/LEGACY_README_20261002.md) and
 `requirements-legacy.txt` document the older environment; install it separately.
-This update manifest covers the new project files, not unchanged legacy files.
+The root `MANIFEST.json` describes a historical snapshot. Current report sources
+and evidence are identified in `report_assets/report_provenance.json`.
 
 ## This delivered revision
 
 See [CHANGELOG.md](CHANGELOG.md) for the exact changes and evidence boundary.
-The archive includes the current project and its updated documents. Historical
-root-level code from the GitHub repository is not needed to reproduce this
-current experiment and is not included in this archive.
+The repository includes current research and explicitly marked historical code.
+Historical root-level code is not needed to reproduce the current matched-step
+reference or the newer shared-noise and CPU-baseline evaluations.
+

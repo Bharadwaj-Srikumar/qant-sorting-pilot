@@ -1,3 +1,13 @@
+# Reading guide: LEGACY initial precision sweep (not the latest noise sweep).
+# This runner uses model.py/sorting.py, including output step 2/2**output_bits.
+# It generates inputs from config seeds and compares Beyette/Desmulliez/Louri.
+# Later run_noise_sweep.py instead reuses data/inputs.npz and matched 1/L steps.
+# Legacy trial_outcomes stores columns [correct, stable, valid], unlike the later
+# [valid, correct, stable] contract; consumers must know the originating protocol.
+# Running main writes into the requested directory and can overwrite files.
+# The default results directory contains the historical report inputs: reproduce
+# into a separate directory if that evidence must be retained.
+
 """Run the agreed 4/8-bit experiment and save reproducible numerical evidence.
 
 Usage: python evaluate.py [--config config.json] [--output results]
@@ -12,11 +22,18 @@ ROOT = Path(__file__).resolve().parent
 ARCHITECTURES = ['Beyette', 'Desmulliez', 'Louri']
 
 
+# Write nonempty, same-schema dictionaries to a CSV with a header.
+# Column order follows the first row; values are serialized without statistical
+# reinterpretation. Opening in write mode replaces the target file.
+# The caller creates the parent directory and controls preservation of old results.
 def write_csv(path, rows):
     with path.open('w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
 
 
+# Legacy two-sided 95% Wilson interval for count/trials, with trials>0.
+# Return bounded endpoints. This is sampling uncertainty for the selected input
+# distribution, not a measured photonic error bar or deterministic correctness bound.
 def wilson(count, trials):
     """Two-sided 95% Wilson interval for a Bernoulli success probability."""
     p, z = count/trials, 1.959963984540054
@@ -26,6 +43,13 @@ def wilson(count, trials):
     return max(0.,mid-half), min(1.,mid+half)
 
 
+# Load and validate the exact legacy configuration, then run source/model checks.
+# Generate deterministic datasets, evaluate three architecture labels across modes,
+# and explicitly assert identical paired bitonic outputs under the shared schedule.
+# Save summaries, inputs, legacy-ordered flags, first failures and source metadata.
+# Elapsed time is the whole evaluation runner's duration, not sorting latency.
+# The directory is created but is NOT required to be empty; use a fresh output
+# path to avoid replacing historical evidence used by build_reports.py.
 def main(config_path=ROOT/'config.json', output=ROOT/'results'):
     from validate import validate
     cfg = json.loads(Path(config_path).read_text())
@@ -98,6 +122,9 @@ def main(config_path=ROOT/'config.json', output=ROOT/'results'):
                                        for a,b in zip(aa,bb))
                         count=int(correct.sum());lo,hi=wilson(count,trial_count)
                         row_id=f'{dataset_id}_{mode}_{arch}'
+                        # Historical archive schema: these columns are [correct, stable, valid].
+                        # Later metrics.reference_flags uses [valid, correct, stable]; a consumer must
+                        # not interpret these older three-column arrays under the newer contract.
                         flags[row_id]=np.column_stack([correct,stable,valid])
                         rows.append(dict(case_id=row_id,architecture=arch,key_bits=b,input_bits=ib,
                             output_bits=ob,key_min=0,key_max=2**b-1,n=n,family=family,mode=mode,
@@ -129,6 +156,9 @@ def main(config_path=ROOT/'config.json', output=ROOT/'results'):
     print(f'Saved {len(rows)} rows, {len(rows)*trial_count:,} architecture executions.')
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--config',type=Path,default=ROOT/'config.json')
     p.add_argument('--output',type=Path,default=ROOT/'results');args=p.parse_args()

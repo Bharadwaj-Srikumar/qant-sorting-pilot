@@ -1,0 +1,12 @@
+{
+  "analytic_probability_cases_passed": 182,
+  "pair_cases": 280,
+  "pair_decisions": 28000000,
+  "prequantized_identical_paired_decisions": 1400000,
+  "sort_cases": 144,
+  "sort_runs": 14400,
+  "prequantized_identical_paired_sort_outputs": 1200,
+  "noiseless_sort_cases_passed": 24,
+  "source_hashes_unchanged": true,
+  "note": "Synthetic Float64 controls, not SDK executions or Q.ANT measurements."
+}

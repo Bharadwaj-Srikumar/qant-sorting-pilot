@@ -1,3 +1,14 @@
+# Reading guide: exact reproduction of the CURRENT matched-step reference.
+# The immutable input archive supplies keys; this runner does not regenerate them.
+# Each dataset is evaluated at six noise levels with both sorting schedules.
+# Noise streams are identified by experimental settings and absolute trial IDs,
+# so batch_size changes memory use/API grouping without changing the experiment.
+# Positive eta values scale paired random draws; architecture streams differ.
+# Outputs include per-trial record indices, three flags, summary rows, and one
+# counterexample per failed case. verify_results checks numerical identity.
+# The protected reference path is rejected, but other existing output files can
+# be overwritten; choose a fresh result directory for a separate research run.
+
 """Reproduce the agreed six-level experiment using only NumPy.
 
 Run: python run_noise_sweep.py
@@ -31,6 +42,12 @@ MAPPINGS = {
 }
 
 
+# Inputs specify one dataset/precision/eta/sorter/seed context and batch size.
+# For each chunk use absolute row IDs, run the sorter, independently score flags,
+# and accumulate the comparator's event counters over every active layer.
+# Return (flags, original_indices, totals, first_failure) concatenated in input order.
+# The counterexample stores actual routed keys and indices; the complete index
+# archive plus original inputs suffices to reconstruct every output ordering.
 def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
     """Evaluate one width/N/family/noise/mapping condition in small batches."""
     totals = dict.fromkeys(NoisyDifference.counter_names, 0)
@@ -61,6 +78,13 @@ def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
     return np.concatenate(flags), np.concatenate(indices), totals, first_failure
 
 
+# Input output Path and positive batch size. Refuse the immutable reference
+# directory and require the registered input archive hash before any experiment.
+# Loop over saved datasets, six eta values and two schedules; verify pair counts
+# from their analytical formulas and require all noiseless flags to pass.
+# Write accuracy, per-trial outcomes, first failures, validation and provenance.
+# verify_results must confirm exact reference outcomes; differing source hashes
+# after comments are expected, but numerical evidence may not silently change.
 def run(output_directory, batch_size):
     """Use saved inputs and seeds, write evidence, and verify exact reproduction."""
     if batch_size < 1:
@@ -155,6 +179,9 @@ def run(output_directory, batch_size):
     print(f"Results: {output_directory}")
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")

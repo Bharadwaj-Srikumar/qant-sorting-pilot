@@ -1,3 +1,10 @@
+# Reading guide: separate arithmetic proof/check of the ReLU min/max identity.
+# For d=a-b and r=max(d,0), min=a-r and max=b+r. Exact difference magnitudes
+# are needed; sign-preserving clipping alone is not enough for reconstruction.
+# The implementation exercises the official CPU SDK and records a counterexample
+# for the clipped magnitude. It does not sort records or prove stable routing.
+# The SDK's host ReLU and native periodic CPU stand-in are distinct operations.
+
 """Check the min/max identity using the pinned Q.ANT CPU SDK.
 
 This is a separate arithmetic check, NOT a new sorting or optical experiment.
@@ -21,6 +28,11 @@ ROOT = Path(__file__).resolve().parent
 SDK_COMMIT = "72a2d99f10240b6df3c6d0f636dfa0e2b5d38902"
 
 
+# Input bits=4 or 8. Compute every pair through the official linear API, apply
+# the SDK host ReLU, and compare reconstructed normalized min/max with exact keys.
+# Return counts and an extreme-pair counterexample showing why clipped scores
+# cannot substitute for full differences in this identity.
+# This checks arithmetic values only, not stable record identities or optical ReLU.
 def check_pairs(bits):
     """Cover every ordered key pair, including equality and both extremes."""
     levels = 2**bits
@@ -67,6 +79,10 @@ def check_pairs(bits):
     }
 
 
+# Parse output path, require official CPU SDK 2.3.1, run both exhaustive checks,
+# and record a small native-periodic CPU example with source hashes.
+# Create/write the JSON result and print concise counts. SDK/backend identity
+# and explicit hardware_executed=False delimit what the successful checks mean.
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-file", type=Path,
@@ -103,5 +119,8 @@ def main():
     print(f"Saved {args.output_file}")
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     main()

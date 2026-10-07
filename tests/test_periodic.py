@@ -1,3 +1,8 @@
+# Test guide: optional official CPU periodic operation and per-trial seeds.
+# Import failure skips this class, so a skipped result must not be reported as
+# an SDK pass. When the SDK is present, the CPU guard is still required.
+# Exhaustive pair correctness does not prove full-sort robustness under noise.
+
 """Optional official CPU-SDK checks; skipped when the SDK is absent."""
 import unittest
 import numpy as np
@@ -6,8 +11,13 @@ try:
 except ImportError:
     PeriodicComparison = None
 
+# Unit-test group: independent contracts and edge cases for this module family.
+# Each method creates its own fixtures/streams, so tests do not depend on order
+# or change the stored research corpus and reference result archives.
 @unittest.skipIf(PeriodicComparison is None, "optional Q.ANT CPU SDK not installed")
 class PeriodicTests(unittest.TestCase):
+    # On the guarded CPU SDK, enumerate both complete key domains and calibrate
+    # a half-margin tie band. Check noiseless signs with and without that fixed band.
     def test_all_pairs_and_fixed_deadband(self):
         require_cpu_backend()
         reference = calibration_reference()
@@ -21,6 +31,8 @@ class PeriodicTests(unittest.TestCase):
                                             reference, margin / 2)
             np.testing.assert_array_equal(np.sign(calibrated(a, b)), np.sign(a-b))
 
+    # Compare one output-noise batch with two batches using the same absolute IDs.
+    # Bit-for-bit equality ensures CPU noise realization is independent of batching.
     def test_noise_stream_does_not_depend_on_batch_partition(self):
         reference = calibration_reference()
         a = np.array([[10, 9], [9, 9], [255, 0], [2, 3]])

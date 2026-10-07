@@ -1,8 +1,19 @@
 <!doctype html>
+<!-- Developer reading guide: historical offline research report.
+     Python build_reports.py supplies evidence, figures, methods and CSV.
+     The template is report_assets/report_template.html; the file under
+     reports is its self-contained export. Comments below explain the UI
+     without updating dated scientific content or changing saved results. -->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>APC sorting | Explicit 4-bit and 8-bit evaluation</title>
 <style>
+/* Base styles: shared colors, typography, spacing, grids, tables and controls.
+   These present the authored report; they do not encode experiment logic. */
 :root{--ink:#17314a;--muted:#5e7184;--blue:#1964a0;--green:#128168;--line:#dbe5ed;--pale:#f2f6fa;--amber:#9a6618}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f8fafc;color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}header{background:#102f47;color:white;padding:58px max(24px,calc((100% - 1120px)/2)) 45px}header p{max-width:800px;color:#d1e3ee}.eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:700;color:#9bdacb}h1{font-size:clamp(31px,4.5vw,54px);line-height:1.1;letter-spacing:-1.8px;max-width:930px;margin:18px 0}h2{font-size:29px;line-height:1.2;letter-spacing:-.6px;margin:0 0 20px}h3{font-size:19px;line-height:1.4;margin:24px 0 10px}p{margin:12px 0 18px}.tags{display:flex;gap:10px;flex-wrap:wrap}.tag{border:1px solid #53738b;border-radius:30px;padding:5px 12px;font-size:12px}nav{display:flex;gap:24px;flex-wrap:wrap;background:white;border-bottom:1px solid var(--line);padding:15px max(24px,calc((100% - 1120px)/2))}nav a{font-size:14px;font-weight:650;text-decoration:none;color:var(--blue)}main{max-width:1170px;padding:30px 24px 70px;margin:auto}section{margin:24px 0 40px;scroll-margin-top:20px}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:28px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.stat{background:white;border:1px solid var(--line);border-radius:12px;padding:18px}.stat strong{display:block;font-size:30px;letter-spacing:-1px}.stat span{display:block;font-size:13px;color:var(--muted)}.note{border-left:4px solid var(--amber);background:#fff6e6;padding:16px 20px;border-radius:0 8px 8px 0}.good{border-color:var(--green);background:#eaf6f0}.muted,small{color:var(--muted)}.table-wrap{overflow:auto;max-width:100%;margin:15px 0 24px}table{width:100%;border-collapse:collapse;font-size:14px}th{background:#e9f0f6;color:#294962;font-size:12px;text-align:left}td,th{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}tbody tr:nth-child(even){background:#f8fafc}td:first-child{font-weight:600}.controls{display:flex;gap:16px;flex-wrap:wrap;padding:18px;background:#f0f5f9;border-radius:10px}.controls label{display:flex;flex-direction:column;font-size:12px;font-weight:700;gap:5px}select,input{font:inherit;color:var(--ink);border:1px solid #b4c7d6;border-radius:6px;padding:9px 11px;background:white;max-width:100%}input{width:120px}button,.button{display:inline-block;border:0;background:var(--blue);color:white;padding:11px 18px;font:600 14px system-ui;border-radius:7px;text-decoration:none;cursor:pointer}.chart svg,svg{display:block;width:100%;height:auto}.chart{margin:18px 0 5px;max-width:850px}.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13px}.legend span:before{content:'';display:inline-block;width:18px;height:3px;background:var(--blue);vertical-align:middle;margin-right:8px}.legend span:nth-child(2):before{background:var(--green)}.figure{max-width:100%;height:auto}.equation{background:#edf4f8;border:1px solid #d4e4ef;padding:17px;border-radius:8px;font-family:ui-monospace,Consolas,monospace;font-size:14px;overflow-wrap:anywhere;margin:18px 0}details{background:white;border:1px solid var(--line);border-radius:9px;margin:10px 0}summary{padding:17px 21px;font-weight:650;cursor:pointer}.detail-body{padding:0 24px 22px}pre{overflow:auto;background:#eef3f8;padding:17px;border-radius:7px;font-size:12px;line-height:1.65}a{color:var(--blue);overflow-wrap:anywhere}.error{color:#ac2937;font-weight:650}.small{font-size:13px}footer{border-top:1px solid var(--line);padding:22px 24px;text-align:center;color:var(--muted);font-size:12px}.number{font-variant-numeric:tabular-nums}.subtitle{font-size:19px}#example-results td{font-variant-numeric:tabular-nums}
+/* Narrow screens: collapse columns and reduce spacing while retaining
+   horizontally scrollable wide result tables. */
 @media(max-width:720px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.grid.mapping{grid-template-columns:1fr}.card{padding:19px}main{padding:20px 14px}header{padding:35px 22px}.controls{gap:10px}.table-wrap table{min-width:610px}h2{font-size:25px}nav{gap:13px;padding:13px 22px}.stat strong{font-size:25px}.detail-body{padding:0 16px 18px}}
+/* Print view: simplify colors/spacing and hide interactive controls;
+   the browser prints the currently rendered saved-data selection. */
 @media print{body{background:white;font-size:10pt}header{padding:20px;color:#17314a;background:white}header p{color:#17314a}h1{font-size:28pt}.controls,nav,button{display:none}.card{border:0;padding:10px}.stats{grid-template-columns:repeat(4,1fr)}details{break-inside:avoid}summary{padding:8px}section{break-inside:auto}a{color:inherit}.table-wrap{overflow:visible}}
 </style></head><body>
 <header><div class="eyebrow">Master’s thesis · Research milestone · 2 October 2026</div><h1>What happens when sorting comparisons have limited precision?</h1><p class="subtitle">An explicit, reproducible comparison of two bitonic architecture cases and a rank-based mapping.</p><div class="tags"><span class="tag">4-bit keys: 0–15</span><span class="tag">8-bit keys: 0–255</span><span class="tag">Separate input/output settings</span><span class="tag">Illustrative Gaussian noise</span></div></header>
@@ -20,25 +31,71 @@
 <section id="next" class="card"><h2>A concrete thesis path</h2><p class="subtitle">Hardware-Aware Evaluation of Bitonic and Rank Sorting on Hybrid Photonic Accelerators</p><div class="table-wrap"><table><thead><tr><th>Next question</th><th>Why it matters</th></tr></thead><tbody><tr><td>Hold keys fixed; vary converter settings independently.</td><td>Separate signed-output resolution from changing input density and key range.</td></tr><tr><td>Verify the two-input difference kernel and data transfers.</td><td>Establish accepted dimensions, batching, dispatch, transfer and sign accuracy.</td></tr><tr><td>Introduce a justified optical nonlinearity and regeneration interval.</td><td>Test the professor’s central depth/precision question without inventing Q.ANT cascade support.</td></tr><tr><td>Compare complete execution at a common correctness target.</td><td>Identify the useful algorithm under stated conditions; measure digital baselines fairly.</td></tr><tr><td>Add energy once timing and power evidence are sufficient.</td><td>Support a system-level comparison rather than infer energy from optical operation counts.</td></tr></tbody></table></div><p>PRISM remains related photonic scoring followed by electronic selection. Its top-k retrieval task is distinct from full sorting.</p></section>
 <section id="documentation"><h2>Detailed explanation and source validation</h2><p>Expand the sections you need. These explanations also form the updated experimental chapters of the PDF.</p>@@METHODS@@</section>
 </main><footer>Revision 6 · 2 October 2026 · Numerical sensitivity evidence, not a Q.ANT hardware benchmark · Works offline</footer>
+<!-- Data island: application/json is read by the script below, not executed.
+     In the source template, build_reports.py replaces the evidence token. -->
 <script id="evidence-data" type="application/json">@@ROWS@@</script>
 <script>
 'use strict';
+// Load the embedded, already computed CSV-derived evidence once. There is no
+// fetch, remote service or sorter execution in this offline viewer. The $ helper
+// resolves the authored element IDs used by all control/event handlers below.
 const rows=JSON.parse(document.getElementById('evidence-data').textContent),$=id=>document.getElementById(id);
+// Formatting helpers: rates are stored as fractions and displayed as percent;
+// counts use grouping separators. Formatting never changes the saved evidence.
 const percent=x=>(100*x).toFixed(1)+'%',int=x=>x.toLocaleString('en-US');
+// Return saved rows matching key width, input family and experiment mode.
+// N is deliberately not filtered here: the chart needs all available sizes.
+// Number conversion aligns select values (strings) with numeric JSON fields.
 function matching(){return rows.filter(r=>r.key_bits===Number($('bits').value)&&r.family===$('family').value&&r.mode===$('mode').value)}
+// Rebuild the N selector after a width/family/mode change. Preserve the old N
+// when it exists in the new subset; otherwise choose its largest available N.
+// Then render both the selected-size tables and the all-size chart. This assumes
+// the embedded historical dataset contains nonempty rows for every UI choice.
 function updateSizes(){const current=Number($('size').value)||16;const sizes=[...new Set(matching().map(r=>r.n))];$('size').innerHTML=sizes.map(n=>`<option value="${n}">${n}</option>`).join('');$('size').value=String(sizes.includes(current)?current:sizes.at(-1));render()}
+// Refresh the selected-size accuracy and diagnostic tables from saved rows.
+// Correctness, stability and valid output fraction remain separate columns.
+// The fixed 1,000-trial labels belong to this historical report protocol; do not
+// reuse this template for a different trial count without updating its content.
+// innerHTML receives only controlled authored fields from the embedded evidence.
 function render(){const all=matching(),n=Number($('size').value),rr=all.filter(r=>r.n===n);$('case-title').textContent=`N = ${n} · ${$('bits').value}-bit scenario · 1,000 trials per architecture`;
 $('result-rows').innerHTML=rr.map(r=>`<tr><td>${r.architecture}</td><td>${r.correct_sorts} / 1,000</td><td>${percent(r.success_fraction)}</td><td>${percent(r.ci_low)}–${percent(r.ci_high)}</td><td>${percent(r.stable_success)}</td><td>${percent(r.valid_output_fraction)}</td></tr>`).join('');
 $('diagnostics').innerHTML=rr.map(r=>`<tr><td>${r.architecture}</td><td>${int(r.comparisons)}</td><td>${int(r.false_ties)}</td><td>${int(r.sign_reversals)}</td><td>${int(r.saturations)}</td></tr>`).join('');drawChart(all)}
+// Build an accessible inline SVG from all matching sizes, using log2(N) on x
+// and success fraction on y. The local x/y arrow functions map data to pixels.
+// Plot Beyette once for the paired bitonic schedules and Louri separately;
+// the plotted intervals are saved Wilson bounds, not recalculated device noise.
+// The input rows already follow the experiment's ascending size order.
 function drawChart(data){const W=820,H=340,left=65,top=18,width=730,height=265,sizes=[...new Set(data.map(r=>r.n))],last=Math.log2(sizes.at(-1));const x=n=>left+(Math.log2(n)-1)/(last-1)*width,y=p=>top+(1-p)*height;
+// Start the SVG with explicit geometry/background; subsequent fragments add
+// percentage grid lines, N ticks, polylines, saved intervals and point tooltips.
 let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Correct-sort fraction by array length with 95 percent intervals"><rect width="820" height="340" fill="white"/>`;
 for(let t=0;t<=100;t+=20)s+=`<line x1="${left}" y1="${y(t/100)}" x2="${left+width}" y2="${y(t/100)}" stroke="#e0e7ee"/><text x="${left-12}" y="${y(t/100)+4}" text-anchor="end" font-size="12" fill="#5e7184">${t}%</text>`;
 for(const n of sizes)s+=`<text x="${x(n)}" y="307" text-anchor="middle" font-size="12" fill="#5e7184">${n}</text>`;
 for(const [arch,color] of [['Beyette','#1964a0'],['Louri','#128168']]){const rr=data.filter(r=>r.architecture===arch);s+=`<polyline fill="none" stroke="${color}" stroke-width="2.3" ${arch==='Louri'?'stroke-dasharray="6 3"':''} points="${rr.map(r=>x(r.n)+','+y(r.success_fraction)).join(' ')}"/>`;for(const r of rr)s+=`<line x1="${x(r.n)}" y1="${y(r.ci_low)}" x2="${x(r.n)}" y2="${y(r.ci_high)}" stroke="${color}" stroke-width="1.5"/><circle cx="${x(r.n)}" cy="${y(r.success_fraction)}" r="4" fill="${color}" stroke="white"><title>${arch}, N=${r.n}: ${r.correct_sorts}/1000</title></circle>`}
 s+='<text x="420" y="333" text-anchor="middle" font-size="12" fill="#5e7184">Array length N (logarithmic scale)</text></svg>';$('chart').innerHTML=s}
+// Match NumPy nearest-even rounding in the interactive scalar example.
+// Math.round alone resolves exact halves differently. Use floor plus parity
+// for the halfway case, which also handles negative half-integers correctly.
+// The example checks finite inputs before calling this helper.
 function roundEven(x){const f=Math.floor(x),d=x-f;return d===.5?(f%2===0?f:f+1):Math.round(x)}
+// Walk a single user-specified pair through the LEGACY normalization/quantizer.
+// Validate whole keys against [0,2**bits-1] and a finite chosen noise sample;
+// show an input error and clear stale results if validation fails.
+// This example uses output step 2/L, unlike the current matched-step 1/L model.
+// The supplied sample is one disturbance in output-step units, not a generated
+// Gaussian trial or a measured hardware error. Display intermediate quantities,
+// nearest-even code, saturation, sign/tie decision and the two routed keys.
+// Computed numeric strings are inserted into the explanatory table.
 function example(){const bits=Number($('example-bits').value),L=2**bits,M=L-1,a=Number($('key-a').value),b=Number($('key-b').value),e=Number($('sample').value);let error='';for(const [i,k] of [[0,a],[1,b]])if(!Number.isFinite(k)||!Number.isInteger(k)||k<0||k>M)error=`Input index ${i}: key ${k} must be a whole number in range [0, ${M}].`;if(!Number.isFinite(e))error='Noise sample must be finite.';$('example-error').textContent=error;if(error){$('example-results').innerHTML='';return}const qa=a/L,qb=b/L,d=qa-qb,h=2/L,epsilon=e*h,c=roundEven((d+epsilon)/h),clipped=Math.max(-L/2,Math.min(L/2-1,c)),out=clipped*h;const values=[['Validate raw keys',`[${a}, ${b}] are in [0, ${M}].`],['Normalize; quantize inputs',`${a}/${L} = ${qa}; ${b}/${L} = ${qb}`],['Difference',`${qa} − ${qb} = ${d}`],['Output step',`2/${L} = ${h}`],['Chosen noise sample',`${e} × ${h} = ${epsilon}`],['Noisy difference',String(d+epsilon)],['Divide by output step',String((d+epsilon)/h)],['Round to nearest even',String(c)],['Clip rounded code',`${clipped} in [${-L/2}, ${L/2-1}]`],['Measured difference',`${clipped} × ${h} = ${out}`],['Decision',out>0?'Exchange: first record is judged larger.':out<0?'Keep order: first record is judged smaller.':'Measured tie: keep earlier original index first.'],['Two-record output',`[${out>0?b:a}, ${out>0?a:b}]`]];$('example-results').innerHTML=values.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}
+// Connect scenario changes to size rebuilding, N changes to result rendering,
+// and pair-example edits to its local explanatory calculation. These listeners
+// update the display only; they do not modify embedded research records.
 for(const id of ['bits','family','mode'])$(id).addEventListener('change',updateSizes);$('size').addEventListener('change',render);for(const id of ['example-bits','key-a','key-b','sample'])$(id).addEventListener('input',example);
+// The click callback decodes the embedded original CSV into a local Blob,
+// triggers a browser download, then revokes the temporary object URL after a
+// short delay. No server upload or external request is involved.
 $('download-csv').addEventListener('click',()=>{const raw=atob('@@CSV@@'),blob=new Blob([Uint8Array.from(raw,c=>c.charCodeAt(0))],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='precision.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
+// Initialize both views after the document's elements and evidence-data script
+// already exist. Later updates are driven by the event listeners above.
 updateSizes();example();
 </script></body></html>

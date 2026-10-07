@@ -1,0 +1,362 @@
+[
+  {
+    "id": 1,
+    "authors": "Peter L. McMahon",
+    "year": "2023",
+    "title": "The physics of optical computing",
+    "url": "https://doi.org/10.1038/s42254-023-00645-5",
+    "source": "Einzel-PDF 18; bereitgestellte arXiv-Fassung 2308.00088",
+    "role": "Physikalische Vorteile, Grenzen und Systemeinbettung optischer Rechenoperationen; kein Sortierbenchmark."
+  },
+  {
+    "id": 2,
+    "authors": "Andrés Macho-Ortiz, Daniel Pérez-López, José Azaña, José Capmany",
+    "year": "2023; Preprint 2022",
+    "title": "Analog Programmable-Photonic Computation",
+    "url": "https://doi.org/10.1002/lpor.202200360",
+    "source": "Einzel-PDF 25",
+    "role": "Anbits, programmierbare lineare Gatter und Rückkopplung als APC-Grundlage; klassische optische Verarbeitung, keine Q.ANT-API-Spezifikation."
+  },
+  {
+    "id": 3,
+    "authors": "C. D. Thompson",
+    "year": "1979",
+    "title": "Area-Time Complexity for VLSI",
+    "url": "https://doi.org/10.1145/800135.804401",
+    "source": "Einzel-PDF 24",
+    "role": "Physische Flächen-Zeit-Abwägung und Kommunikation; die DFT-Schranke wird nicht als Sortierschranke übernommen."
+  },
+  {
+    "id": 4,
+    "authors": "H. J. Caulfield",
+    "year": "1991",
+    "title": "Space-Time Complexity in Optical Computing",
+    "url": "https://doi.org/10.1007/BF01937172",
+    "source": "Einzel-PDF 19",
+    "role": "Räumliche, zeitliche und Fan-in-Ressourcen als Grenze einfacher Aussagen über konstante optische Zeit."
+  },
+  {
+    "id": 5,
+    "authors": "Yandong Li, Francesco Monticone",
+    "year": "2025",
+    "title": "The spatial complexity of optical computing: toward space-efficient design",
+    "url": "https://doi.org/10.1038/s41467-025-63453-8",
+    "source": "Einzel-PDF 17",
+    "role": "Raumbedarf linearer Operatoren und nichtlokaler Kommunikation; nur bedingt auf die nichtlineare Gesamtsortierung übertragbar."
+  },
+  {
+    "id": 6,
+    "authors": "K. E. Batcher",
+    "year": "1968",
+    "title": "Sorting Networks and Their Applications",
+    "url": "https://doi.org/10.1145/1468075.1468121",
+    "source": "Einzel-PDF 20",
+    "role": "Grundlage der festen Bitonic-Stufen und Vergleichszahlen; kein physikalisches Zeitmodell."
+  },
+  {
+    "id": 7,
+    "authors": "Charles W. Stirk, Ravindra A. Athale",
+    "year": "1988",
+    "title": "Sorting with optical compare-and-exchange modules",
+    "url": "https://doi.org/10.1364/AO.27.001721",
+    "source": "Einzel-PDF 07; auch Sortiersammlung 05",
+    "role": "Räumliche C&E-Pipeline, Implementierungsvarianten und Regeneration; Ausgangspunkt der aktiven Bitonic-Adaption."
+  },
+  {
+    "id": 8,
+    "authors": "F. R. Beyette, Jr., P. A. Mitkas, S. A. Feld, C. W. Wilmsen",
+    "year": "1994",
+    "title": "Bitonic sorting using an optoelectronic recirculating architecture",
+    "url": "https://doi.org/10.1364/AO.33.008164",
+    "source": "Einzel-PDF 02",
+    "role": "Wiederverwendung von Smart-Pixel-Arrays; trennt vollständige Antwortzeit und Ergebnisintervall."
+  },
+  {
+    "id": 9,
+    "authors": "M. P. Y. Desmulliez et al.",
+    "year": "1995",
+    "title": "Perfect-shuffle interconnected bitonic sorter: optoelectronic design",
+    "url": "https://doi.org/10.1364/AO.34.005077",
+    "source": "Einzel-PDF 06",
+    "role": "Perfect Shuffle, Kontrollmasken und bitserielle Zyklen; kein zusätzlicher moderner SDK-Hardwareversuch."
+  },
+  {
+    "id": 10,
+    "authors": "Ahmed Louri, James A. Hatch, Jr., Jongwhoa Na",
+    "year": "1995",
+    "title": "Constant-time parallel sorting algorithm and its optical implementation using smart pixels",
+    "url": "https://doi.org/10.1364/AO.34.003087",
+    "source": "Einzel-PDF 03",
+    "role": "Broadcast-and-Compare, Rangbildung und Gleichstände; konstante breite Ebenenzahl mit quadratischen Ressourcen."
+  },
+  {
+    "id": 11,
+    "authors": "Kenji Mizutani et al.",
+    "year": "2025; online 2024",
+    "title": "In-network stable radix sorter using many FPGAs with high-bandwidth photonics [Invited]",
+    "url": "https://doi.org/10.1364/JOCN.530695",
+    "source": "Einzel-PDF 04",
+    "role": "FPGA/HBM-Sortierung mit photonischen Links; Acht-FPGA-Messung und getrennte Skalierungsprojektion."
+  },
+  {
+    "id": 12,
+    "authors": "Sufi R. Ahmed et al.",
+    "year": "2025",
+    "title": "Universal photonic artificial intelligence acceleration",
+    "url": "https://doi.org/10.1038/s41586-025-08854-x",
+    "source": "Einzel-PDF 16",
+    "role": "Hybrider integrierter Beschleuniger als Referenz für digitale Peripherie und Wandlungskosten; kein Q.ANT-System."
+  },
+  {
+    "id": 13,
+    "authors": "Xiansong Meng et al.",
+    "year": "2025",
+    "title": "Digital-analog hybrid matrix multiplication processor for optical neural networks",
+    "url": "https://doi.org/10.1038/s41467-025-62586-0",
+    "source": "Einzel-PDF 08",
+    "role": "Hybride Präzisionssteigerung bei Matrixoperationen; zusätzliche digitale Arbeit muss mitgezählt werden."
+  },
+  {
+    "id": 14,
+    "authors": "Zichao Zhao et al.",
+    "year": "2025",
+    "title": "Efficient hardware error correction with hybrid on-offline configuration algorithm for optical processor",
+    "url": "https://doi.org/10.1038/s42005-025-02247-2",
+    "source": "Einzel-PDF 09",
+    "role": "Kalibrierung durch Offline-/Online-Konfiguration; motiviert die getrennte Behandlung systematischer Fehler."
+  },
+  {
+    "id": 15,
+    "authors": "Huize Li, Dan Chen, Tulika Mitra",
+    "year": "2025",
+    "title": "Hybrid Photonic-digital Accelerator for Attention Mechanism (HyAtten)",
+    "url": "https://arxiv.org/abs/2501.11286",
+    "source": "Einzel-PDF 10; Preprint",
+    "role": "Selektive digitale Verarbeitung bei beschränkter Analogpräzision; mögliche Anregung, im Sortercode nicht implementiert."
+  },
+  {
+    "id": 16,
+    "authors": "Yaowen Hu et al.",
+    "year": "2025",
+    "title": "Integrated lithium niobate photonic computing circuit based on efficient and high-speed electro-optic conversion",
+    "url": "https://doi.org/10.1038/s41467-025-62635-8",
+    "source": "Einzel-PDF 11",
+    "role": "TFLN-basierte Modulation und Rechenoperationen; kein Beleg für frei kaskadierbare Q.ANT-Funktionen."
+  },
+  {
+    "id": 17,
+    "authors": "Hailong Gong et al.",
+    "year": "2026",
+    "title": "LightMat-HP: A Photonic–Electronic System for Accelerating General Matrix Multiplication With Configurable Precision",
+    "url": "https://arxiv.org/abs/2604.12278",
+    "source": "Einzel-PDF 12; arXiv v1, 14. April 2026",
+    "role": "Niederbitrige photonische Teilprodukte und digitale Rekonstruktion; der DOI-Platzhalter der bereitgestellten Fassung wird nicht als Publikationsnachweis verwendet."
+  },
+  {
+    "id": 18,
+    "authors": "Hajime Sakata",
+    "year": "2001",
+    "title": "Photonic analog-to-digital conversion by use of nonlinear Fabry–Perot resonators",
+    "url": "https://doi.org/10.1364/AO.40.000240",
+    "source": "Einzel-PDF 13",
+    "role": "Nichtlineare optische Wandlung als alternativer Baustein; kein Parameterlieferant für die verwendete Hardware."
+  },
+  {
+    "id": 19,
+    "authors": "Nathaniel Nauman, James Robinson, Yuyang Wang, Kaylx Jang, Xiang Meng, Keren Bergman",
+    "year": "2025",
+    "title": "Photonic Analog-to-Digital Architecture for Accelerating Multiply-Accumulate Operations",
+    "url": "https://doi.org/10.1364/OFC.2025.W3D.5",
+    "source": "Einzel-PDF 14; Veröffentlichung OFC 2025, W3D.5, zusätzlich beim Verlag geprüft",
+    "role": "Photonische ADC-Architektur für MAC; Motivation der Wandlerschnittstelle, keine Q.ANT-Messung."
+  },
+  {
+    "id": 20,
+    "authors": "Jing Xu et al.",
+    "year": "2025",
+    "title": "Progress in silicon-based reconfigurable and programmable all-optical signal processing chips",
+    "url": "https://doi.org/10.1007/s12200-025-00154-6",
+    "source": "Einzel-PDF 15",
+    "role": "Übersicht über programmierbare Signalverarbeitung und Regeneration; Funktionsvielfalt setzt konkrete Bauelemente voraus."
+  },
+  {
+    "id": 21,
+    "authors": "Raúl López-March, Andrés Macho-Ortiz, Francisco Javier Fraile-Peláez, José Capmany",
+    "year": "2026",
+    "title": "Noise in analog programmable-photonic computation",
+    "url": "https://arxiv.org/abs/2604.24541",
+    "source": "Einzel-PDF 22; arXiv v1, 27. April 2026",
+    "role": "Physikalische Störquellen und Fehlerfortpflanzung; Beispielwerte gehören zur dortigen PIP-Anordnung und sind keine Q.ANT-Kalibrierung."
+  },
+  {
+    "id": 22,
+    "authors": "Niklas Bahr, Daniel Steinmeyer, Wolfram Pernice",
+    "year": "2026",
+    "title": "Energy Efficiency in Analog Photonic Processors: Conversions and Losses at Scale",
+    "url": "https://doi.org/10.23919/ISC.2026.11520497",
+    "source": "Einzel-PDF 23; bildbasierte Fassung, zusätzlich OCR gelesen",
+    "role": "Systemkostenmodell für Konversion, Gewichte, Speicher und Verluste; digitale Steuerlogik ausgenommen, kein Sortier-Energiebefund."
+  },
+  {
+    "id": 23,
+    "authors": "Hyoseok Park, Yeonsang Park",
+    "year": "2026",
+    "title": "PRISM: Photonic Similarity Engine for KV Cache Block Selection in Long-Context LLM Inference",
+    "url": "https://arxiv.org/abs/2603.21576",
+    "source": "Einzel-PDF 21; v2 vom 25. März 2026 mit Supplement",
+    "role": "Photonische Scorebildung und elektronische Auswahl; Anwendungsmotivation für Recall, keine vollständige stabile Integer-Sortierung."
+  },
+  {
+    "id": 24,
+    "authors": "Morris Rubinoff",
+    "year": "1953",
+    "title": "Analogue vs. Digital Computers—A Comparison",
+    "url": "https://ieeexplore.ieee.org/document/4051190",
+    "source": "Recherchemappe 01, ab S. 3",
+    "role": "Historische Unterscheidung analoger und digitaler Rechenprinzipien; keine quantitative moderne Hardwarebaseline."
+  },
+  {
+    "id": 25,
+    "authors": "Guo Qi Zhang, Alfred van Roosmalen (Hrsg.)",
+    "year": "2009",
+    "title": "More than Moore: Creating High Value Micro/Nanoelectronics Systems",
+    "url": "https://doi.org/10.1007/978-0-387-75593-9",
+    "source": "Recherchemappe 01, S. 2; Buchverweis",
+    "role": "Technologischer Kontext jenseits reiner Transistorskalierung; kein eigenständiger Sortier- oder Photonikversuch."
+  },
+  {
+    "id": 26,
+    "authors": "H. John Caulfield, Shlomi Dolev",
+    "year": "2010",
+    "title": "Why future supercomputing requires optics",
+    "url": "https://doi.org/10.1038/nphoton.2010.94",
+    "source": "Recherchemappe 01, ab S. 14",
+    "role": "Motivation optischer Kommunikation und Parallelität; die perspektivische Argumentation ist kein Nachweis für den vorliegenden Workload."
+  },
+  {
+    "id": 27,
+    "authors": "Francesco Morichetti",
+    "year": "2025",
+    "title": "High-performance analog signal processing with photonic integrated circuits",
+    "url": "https://doi.org/10.1038/s41377-025-01806-0",
+    "source": "Recherchemappe 01, ab S. 18; Kommentarartikel",
+    "role": "Einordnung integrierter analoger Signalverarbeitung; Kommentare und darin besprochene Primärdemonstratoren bleiben getrennt."
+  },
+  {
+    "id": 28,
+    "authors": "H. Zhou et al.",
+    "year": "2022",
+    "title": "Photonic matrix multiplication lights up photonic accelerator and beyond",
+    "url": "https://doi.org/10.1038/s41377-022-00717-8",
+    "source": "Recherchemappe 01, ab S. 19; Präsentationsliteratur",
+    "role": "Übersicht der Matrixmultiplikation über räumliche, interferometrische und Wellenlängenverfahren; Grundlage der MVM-Einordnung."
+  },
+  {
+    "id": 29,
+    "authors": "P. Bruce Berra, Arif Ghafoor, Pericles A. Mitkas, Slawomir J. Marcinkowski, Mohsen Guizani",
+    "year": "1989",
+    "title": "The Impact of Optics on Data and Knowledge Base Systems",
+    "url": "https://ieeexplore.ieee.org/document/43408",
+    "source": "Recherchemappe 01, ab S. 28",
+    "role": "Früher Kontext optischer Datenbankoperationen und Datenbewegung; keine direkt vergleichbare aktuelle Messung."
+  },
+  {
+    "id": 30,
+    "authors": "Yinyi Liu et al.",
+    "year": "2022",
+    "title": "A Reliability Concern on Photonic Neural Networks",
+    "url": "https://doi.org/10.23919/DATE54114.2022.9774661",
+    "source": "Recherchemappe 01, ab S. 45",
+    "role": "Architekturspezifische Zuverlässigkeit und Übersprechen; keine universelle Modenzahl- oder Rauschgrenze für Q.ANT."
+  },
+  {
+    "id": 31,
+    "authors": "Bibliografischer Eintrag aus der Recherchemappe",
+    "year": "2025",
+    "title": "Integrated PCM-based DAC/ADC Design for Energy-Efficient Photonic Computing Systems",
+    "url": "https://doi.org/10.1117/12.3066474",
+    "source": "Recherchemappe 01, ab S. 108; Auswertungsnotizen",
+    "role": "PCM-basierte Konversion als weiterer Ansatz; nicht separat reproduziert. Prozentuale Einsparungen aus den Notizen werden nicht als eigene oder Q.ANT-bezogene Befunde übernommen."
+  },
+  {
+    "id": 32,
+    "authors": "Nikolaos Farmakidis, Bowei Dong, Harish Bhaskaran",
+    "year": "2024",
+    "title": "Integrated photonic neuromorphic computing: opportunities and challenges",
+    "url": "https://doi.org/10.1038/s44287-024-00050-9",
+    "source": "Recherchemappe 01, ab S. 363",
+    "role": "Systematische Einordnung hybrider neuronaler Photonik und Schnittstellen; Motivation vollständiger Ausführungsgrenzen."
+  },
+  {
+    "id": 33,
+    "authors": "M. A. Al-Qadasi, L. Chrostowski, B. J. Shastri, S. Shekhar",
+    "year": "2022",
+    "title": "Scaling Up Silicon Photonic-Based Accelerators: Challenges and Opportunities",
+    "url": "https://doi.org/10.1063/5.0070992",
+    "source": "Recherchemappe 01, ab S. 377; Preprint 2109.08025",
+    "role": "Optische und elektrische Linkbudgets, Skalierung und Energiekosten; Parameter müssen zum jeweiligen Aufbau passen."
+  },
+  {
+    "id": 34,
+    "authors": "G. Giamougiannis et al.",
+    "year": "2023",
+    "title": "Analog nanophotonic computing going practical: silicon photonic deep learning engines for tiled optical matrix multiplication with dynamic precision",
+    "url": "https://doi.org/10.1515/nanoph-2022-0423",
+    "source": "Recherchemappe 01, ab S. 393",
+    "role": "Tiling und dynamische Präzision als Systemmethoden; keine automatische Garantie für exakte Vergleichsentscheidungen."
+  },
+  {
+    "id": 35,
+    "authors": "Qingyi Zhou et al.",
+    "year": "2026",
+    "title": "Quantum Nonlinearity for Optical Neural Computing",
+    "url": "https://arxiv.org/abs/2601.01690",
+    "source": "Recherchemappe 01, ab S. 413; aktueller arXiv-Eintrag zusätzlich geprüft",
+    "role": "Quantenemitterbasierte Nichtlinearität in einer anderen Architektur; nicht mit klassischem APC oder einem verfügbaren Q.ANT-Kaskadenpfad gleichzusetzen."
+  },
+  {
+    "id": 36,
+    "authors": "Q.ANT GmbH",
+    "year": "SDK 2.3.1",
+    "title": "Q.ANT Native Computing Toolkit: festgelegter Quellstand",
+    "url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/tree/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902",
+    "source": "Offizieller SDK-Quellstand; Prüfsummen und CPU-Paket im Projekt",
+    "role": "API-Verträge, BF16-Formate, Host-ReLU sowie CPU-/Hardware-Unterscheidung; kein offener vollständiger Hardwaretreiber."
+  },
+  {
+    "id": 37,
+    "authors": "Q.ANT GmbH",
+    "year": "abgerufen 7. Oktober 2026",
+    "title": "Photonic Computing: Produktinformationen",
+    "url": "https://qant.com/photonic-computing/",
+    "source": "Offizielle Produktseite; ergänzend Generation-2-Broschüre vom Juni 2026",
+    "role": "Herstellerangaben zu Schnittstelle, Leistung und Produkt; keine eigenen Komparator-, Kennlinien- oder Sortiermessungen."
+  },
+  {
+    "id": 38,
+    "authors": "NumPy Developers",
+    "year": "Dokumentation 2.3",
+    "title": "numpy.argsort und numpy.take_along_axis",
+    "url": "https://numpy.org/doc/2.3/reference/generated/numpy.argsort.html",
+    "source": "Offizielle API-Dokumentation; installierte Benchmarkversion 2.3.5",
+    "role": "Stabile indirekte Sortierung und Einsammeln der Originalwerte; die konkreten Zeitwerte stammen ausschließlich aus den gespeicherten eigenen Messungen."
+  },
+  {
+    "id": 39,
+    "authors": "SciPy Developers",
+    "year": "Dokumentation",
+    "title": "scipy.stats.kendalltau",
+    "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kendalltau.html",
+    "source": "Offizielle Statistikdokumentation; unabhängige Implementierungskontrolle",
+    "role": "Definition und Bindungskorrektur von Kendall-τ-b; keine Ersetzung der getrennten Gültigkeits- und Stabilitätsmetriken."
+  },
+  {
+    "id": 40,
+    "authors": "Nikita Stroev, Natalia G. Berloff",
+    "year": "2023",
+    "title": "Analog Photonics Computing for Information Processing, Inference and Optimisation",
+    "url": "https://arxiv.org/abs/2301.11760",
+    "source": "Präsentation P2, S. 25; arXiv-Eintrag ergänzend geprüft",
+    "role": "Übersicht analoger photonischer Plattformen, Optimierung und Inferenz. Die Präsentation darf daraus keine universell fehlerfreie physikalische Sortierung ableiten."
+  }
+]

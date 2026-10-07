@@ -1,0 +1,63 @@
+{
+  "created_at_utc": "2026-10-07T20:04:45.353043+00:00",
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "elapsed_seconds": 6.184098083002027,
+  "source_sha256": {
+    "data/inputs.npz": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+    "results/reference/trial_outcomes.npz": "b4bdf5ce1cc23a4fbc0ad99417bfbe056d7f777f74eefa90232efbf4422e1517",
+    "results/reference/accuracy.csv": "58cfe5fe65a86c9f94f570517d97e651cf4582c31489707e4ad05c9780636d94",
+    "results/reference/metadata.json": "77a2004be2df2b184c7d33df43dbc17c81f3142929256010c88f947bab622e96",
+    "results/periodic/trial_outcomes.npz": "9a535516650b04d31201a97cdf443cc804bd6b6368385eea6a715d7780f6b1db",
+    "results/periodic/accuracy.csv": "42ff029ca3e7c7bcc7b60835b458d3f7b3733058c15ba685e6a8986098f26a6c",
+    "results/periodic/metadata.json": "800b98ccb354be37adedcabd29d01f44a33d288d07c183aa7d0672aeb2f0d237",
+    "results/periodic_deadband/trial_outcomes.npz": "3286f8d94df8a58ccb2a7783d3890f7617e2842519ead76e416be1db5bc09b0a",
+    "results/periodic_deadband/accuracy.csv": "a9a7f84e579e526b4c8dada7574e2ff9a5763b7f2ea7939d919464fa444d53ea",
+    "results/periodic_deadband/metadata.json": "5fefc8d56eaecdf7faabc4800b3f920c1b5faef29cdabd359c029da001c82180"
+  },
+  "evaluation_code_sha256": {
+    "ranking_quality.py": "968d5fe4ff008101b2a7647d4cd752c770e061181f5b86d4ac50f71a73ec62f4",
+    "saved_output_reader.py": "287ef4fb26886c76cb77f4803820688a2c4b63fa15bbfe903806ab3e2f07d2f3",
+    "evaluate_ranking_quality.py": "4ef1f3fbfa33a09b23d42b80982b0636871706c997d81d6a9100e6b1fee6fd3c"
+  },
+  "archive_audit": {
+    "reference": {
+      "mode": "normal_npz",
+      "complete_archive": true,
+      "complete_members": 576
+    },
+    "periodic": {
+      "mode": "normal_npz",
+      "complete_archive": true,
+      "complete_members": 1152
+    },
+    "periodic_deadband": {
+      "mode": "local_headers_crc_verified",
+      "complete_archive": false,
+      "complete_members": 567,
+      "source_bytes": 12656837,
+      "consumed_bytes": 12656837,
+      "stop_reason": "end_of_file_without_central_directory"
+    }
+  },
+  "allow_incomplete": true,
+  "new_sorter_executions": 0,
+  "sdk_loaded": false,
+  "hardware_executed": false,
+  "kendall": "tau_b(true key of each record, output position of that record); no ties in output positions",
+  "tau_ceiling": "sqrt(M/C); M=unequal-key pairs; C=N(N-1)/2",
+  "tau_key_normalized": "tau_b/ceiling = 1-2*I/M; separate derived normalization, not standard tau-b",
+  "undefined_tau": "Invalid outputs and valid arrays with no unequal-key pair; counts explicitly reported",
+  "distances": "Final output inversions among unequal-key pairs, pooled by exact integer key distance; not internal comparator errors",
+  "recall_cutoffs": "{1,5,10,32} intersect [1,N], plus k=N as full-set control",
+  "top_k": "Largest k keys: suffix of ascending output. Strict reference is suffix of stable (key,original index) order.",
+  "strict_boundary_ties": "Later original indices belong to the reference suffix at an equal-key boundary",
+  "tie_neutral_recall": "Count selected keys strictly above threshold plus min(remaining tie slots, selected keys at threshold), divided by k",
+  "invalid_policy": "Tau/distances and mean_valid recall condition on valid outputs. mean_all_invalid_zero explicitly assigns invalid outputs zero utility.",
+  "dependence": "Same 24,000 inputs reused across conditions; direct and upstream outputs are identical controls, not independent evidence",
+  "limits": [
+    "Existing synthetic noise/quantization scenarios remain physically unmatched",
+    "No hardware advantage or PRISM task performance follows from these quality metrics",
+    "Keys are reconstructed from saved original-record indices; original routed key values are not remeasured"
+  ]
+}

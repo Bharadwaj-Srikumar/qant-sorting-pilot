@@ -1,3 +1,13 @@
+# Reading guide: LEGACY schedules used by model.py and the initial report.
+# The compact network and the fixed-shuffle layout express different routing
+# counts. shuffle_schedule includes bypass steps; only active steps compare keys.
+# Labels in the schedule describe logical wires, while indices travelling with
+# values identify original input records. Confusing these breaks stable ties.
+# The legacy rank routine scans pair masks per record and checks ranks by sorting;
+# the later sorting_schedules.py has different rank-accumulation/validation code.
+# Consequently do not transfer implementation work counts between these modules.
+# Inputs are validated signed 2-D keys; outputs preserve the standard tuple.
+
 """Sorting schedules adapted from the preceding validated pilot.
 
 All functions receive RAW integer keys. Difference handles normalization.
@@ -8,6 +18,11 @@ import math
 import numpy as np
 
 
+# Input N: integer power of two, at least 2. Return a list of triples
+# (left_indices, right_indices, ascending_mask), each describing N/2 disjoint pairs.
+# For m=log2(N), there are m(m+1)/2 dependent layers and N*m(m+1)/4 pair operations.
+# XOR chooses partner wires; the direction mask alternates ordered runs so a
+# larger merge can combine them. These are algorithmic layers, not optical stages.
 def compact_bitonic_layers(n):
     """Return the compare/exchange pairs of the COMPACT bitonic network.
 
@@ -34,6 +49,13 @@ def compact_bitonic_layers(n):
         merge_size *= 2
     return layers
 
+# Input keys: signed integer array (trials,N); difference: callable on pairs.
+# Return (values, original_indices, valid_mask) with the same key-array shape.
+# The routine only exchanges existing records. Each layer must finish before
+# the next layer selects its current pairs; within a layer pairs are disjoint.
+# Measured equality uses original indices to define a stable total order.
+# Validity is always true because swaps preserve the record multiset; sortedness
+# and stability can still fail after noisy comparisons and are scored separately.
 def bitonic_sort(keys, difference):
     """Compare noisy differences, then exchange ORIGINAL electronic records.
 
@@ -55,6 +77,13 @@ def bitonic_sort(keys, difference):
         indices[:, left], indices[:, right] = np.where(exchange, bi, ai), np.where(exchange, ai, bi)
     return values, indices, np.ones(len(keys), dtype=bool)
 
+# Input keys: signed integer rows; each unordered pair (i,j), i<j, is compared
+# once. A measured positive difference votes that i is larger; otherwise j is
+# larger, which includes the stable tie rule favoring earlier index i.
+# The number of smaller records is a proposed zero-based output position.
+# Return valid outputs only when these positions form a permutation of 0..N-1.
+# Inconsistent/noisy comparisons can create collisions; an invalid row contains
+# -1 values AND indices. No digital re-sort or silent collision repair is allowed.
 def rank_sort(keys, difference):
     """Compare all unordered pairs, count ranks electronically, then place keys.
 
@@ -86,6 +115,12 @@ def rank_sort(keys, difference):
     indices[rows[:, None], ranks[rows]] = np.arange(n)
     return output, indices, valid
 
+# Return (destination, schedule) for the historical fixed perfect-shuffle layout.
+# destination maps OLD wire index to NEW wire index; labels track logical wires.
+# Each instruction records whether to compare or bypass and which pairs ascend.
+# For N=2**m there are 1+m(m-1) processing steps, but only m(m+1)/2 compare rounds.
+# Assertions check partner alignment, total/active counts and final natural order.
+# These checks reproduce routing structure, not propagation delays or regeneration.
 def shuffle_schedule(n):
     """Reconstruct the fixed-shuffle schedule of Desmulliez Fig.3, section3.B.
 
@@ -125,6 +160,12 @@ def shuffle_schedule(n):
     assert np.array_equal(labels, np.arange(n))  # Natural output wire order.
     return destination, schedule
 
+# Execute the fixed routing permutation between processing steps, preserving
+# each key's original index. Active steps compare adjacent physical wires;
+# bypass steps route only and deliberately consume no comparison-noise samples.
+# Optional trace is a caller-owned list: append one-based step information and
+# the first example's current values for comparison with the paper's figure.
+# Return the same (values, indices, valid_mask) contract as compact bitonic.
 def shuffle_sort(keys, difference, trace=None):
     """Execute optical-routing permutations and electronic record decisions.
 

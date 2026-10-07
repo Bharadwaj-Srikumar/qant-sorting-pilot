@@ -1,0 +1,2 @@
+# Separate environment for the measured CPU baseline; historical SDK pins stay unchanged.
+numpy==2.3.5

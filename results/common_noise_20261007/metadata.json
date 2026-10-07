@@ -1,0 +1,152 @@
+{
+  "created_utc": "2026-10-07T20:44:58.149568+00:00",
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "seed": 20261007,
+  "pair_samples_per_case": 100000,
+  "first_saved_trials_per_dataset": 100,
+  "sort_datasets": [
+    "b4_n16_distinct",
+    "b4_n16_duplicates_allowed",
+    "b8_n16_distinct",
+    "b8_n16_duplicates_allowed",
+    "b8_n256_distinct",
+    "b8_n256_duplicates_allowed"
+  ],
+  "settings": {
+    "no_noise": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.0,
+      "readout_sigma_lsb": 0.0,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "prequantized_control": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.0,
+      "pre_step_lsb": 1,
+      "post_step_lsb": 0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "upstream_only": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.0,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "readout_only": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.0,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "combined": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "fine_output": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 0.5,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "coarse_output": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 2,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "no_output_quantizer": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.0,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "positive_offset": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.25,
+      "gain_error": 0.0
+    },
+    "negative_offset": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": -0.25,
+      "gain_error": 0.0
+    }
+  },
+  "setting_note": "bits=8 is an example; run covers 4 and 8, both transfers. All noise/drift settings are assumptions.",
+  "source_sha256": {
+    "common_noise_model.py": "8aece0c16769ef601f79674258112fd462d30a229430295932adfa784b6e42c9",
+    "run_common_noise_controls.py": "af3f8ec021606659d9e89614dfd248ecf2e0ff3539bbe3af10120669fde5a319",
+    "ranking_quality.py": "968d5fe4ff008101b2a7647d4cd752c770e061181f5b86d4ac50f71a73ec62f4",
+    "sorting_schedules.py": "f8bc983fb70de16fedc9c41a4318a1f561f689384008f8aae01db32c3cd45415",
+    "data/inputs.npz": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+    "results/periodic/pair_checks.json": "77720940797458c2eb2c15518c67473854fdc258928277b86ffacb132ddee265"
+  },
+  "output_sha256": {
+    "signal_scales.csv": "28cec659f4bb8cd9ec40ac8095e725fc589092eb5ce335077a4de46d9269d8ce",
+    "sort_outputs.npz": "0400114fff41623f167cd0e36019488f42907ed1f9fa9c305fe3fc636eaa77b4",
+    "validation.json": "65f719e2aedb25a53b75d468695cee19ccce27fa655c794c4936426dbdd159eb",
+    "pair_controls.csv": "ae364d170c060533bd9a5e2d7c8eccdc9b7cc2e73bb5f7429176ca83cf37ddf4",
+    "sort_quality.csv": "d5ca0e846a1d4b65023590f228f37f650eae3460b803079d18f1aab535ad36a5"
+  },
+  "random_pairing": "Transfer variants share standard-normal samples. Stages/trials independent; drift fixed.",
+  "exclusions": [
+    "physical tcos/BF16",
+    "measured receiver parameters",
+    "time/channel covariance calibration",
+    "hardware timing/energy"
+  ]
+}

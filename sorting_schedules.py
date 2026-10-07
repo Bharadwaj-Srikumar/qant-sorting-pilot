@@ -1,3 +1,14 @@
+# Reading guide: current sorting control and record routing.
+# Each row is an independent list. A record is (integer key, original index).
+# The supplied difference(a, b) callable is the only interchangeable arithmetic
+# component; it must return the same shape, with positive/zero/negative scores.
+# Bitonic evaluates dependent layers; rank sorting evaluates unordered pairs.
+# All swaps, rank sums, tie decisions and output placement are exact electronic
+# operations in this simulation. Their Python execution is not optical timing.
+# Both functions return (values, indices, valid_mask), with values/indices of
+# shape (trials, N). Rank failures retain signed -1 markers instead of repair.
+# Pass the signed integer arrays produced by input_validation.validate_keys.
+
 """Two algorithmic mappings; electronic records and control remain exact.
 
 Stirk and Athale motivate a pipeline of compare/exchange modules. Here we
@@ -9,6 +20,11 @@ unordered pair once and sums/places records electronically.
 import numpy as np
 
 
+# Input N: integer power of two, at least 2. Return a list of triples
+# (left_indices, right_indices, ascending_mask), each describing N/2 disjoint pairs.
+# For m=log2(N), there are m(m+1)/2 dependent layers and N*m(m+1)/4 pair operations.
+# XOR chooses partner wires; the direction mask alternates ordered runs so a
+# larger merge can combine them. These are algorithmic layers, not optical stages.
 def compact_bitonic_layers(n):
     """Return K=m(m+1)/2 layers, each with N/2 pairs, for N=2**m.
 
@@ -32,6 +48,13 @@ def compact_bitonic_layers(n):
     return layers
 
 
+# Input keys: signed integer array (trials,N); difference: callable on pairs.
+# Return (values, original_indices, valid_mask) with the same key-array shape.
+# The routine only exchanges existing records. Each layer must finish before
+# the next layer selects its current pairs; within a layer pairs are disjoint.
+# Measured equality uses original indices to define a stable total order.
+# Validity is always true because swaps preserve the record multiset; sortedness
+# and stability can still fail after noisy comparisons and are scored separately.
 def bitonic_sort(keys, difference):
     """Sort a validated (trials, N) batch; return values, indices, validity.
 
@@ -58,6 +81,13 @@ def bitonic_sort(keys, difference):
     return values, indices, np.ones(len(keys), dtype=bool)
 
 
+# Input keys: signed integer rows; each unordered pair (i,j), i<j, is compared
+# once. A measured positive difference votes that i is larger; otherwise j is
+# larger, which includes the stable tie rule favoring earlier index i.
+# The number of smaller records is a proposed zero-based output position.
+# Return valid outputs only when these positions form a permutation of 0..N-1.
+# Inconsistent/noisy comparisons can create collisions; an invalid row contains
+# -1 values AND indices. No digital re-sort or silent collision repair is allowed.
 def rank_sort(keys, difference):
     """Compare every unordered pair, count smaller records, then place them.
 
@@ -75,6 +105,9 @@ def rank_sort(keys, difference):
     # np.triu_indices lists (0,1),(0,2),...,(1,2),... in contiguous groups.
     # Visit each group's outcomes once. This removes the old N full scans
     # of all pairs: rank accumulation now uses O(N²) work per input array.
+    # Pairs from triu_indices are grouped by their left endpoint. Consume each
+    # comparison once: wins update that left record, complementary outcomes update
+    # the corresponding right records. A repeated full pair-mask scan is avoided.
     offset = 0
     for i in range(n - 1):
         count = n - i - 1
@@ -85,6 +118,9 @@ def rank_sort(keys, difference):
 
     # Inconsistent comparisons can produce repeated ranks. Count occupied
     # positions in O(N), rather than sorting the ranks or repairing them.
+    # A valid ranking occupies every output position exactly once. Counting these
+    # occupancies checks the condition in linear placement work; it does not sort
+    # or repair inconsistent ranks.
     occupied = np.zeros_like(ranks)
     rows = np.arange(len(keys))[:, None]
     np.add.at(occupied, (rows, ranks), 1)

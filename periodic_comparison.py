@@ -1,3 +1,13 @@
+# Reading guide: the historical SDK periodic-comparison experiment.
+# The host receives d, forms phase pi/2 - (pi/2)*d, calls the periodic API,
+# subtracts a fixed CPU reference, and finally makes an electronic sign decision.
+# Thus sign(d) is already available before the additional call; this code alone
+# does not demonstrate a useful host-free cascade or a speed/energy advantage.
+# The upstream and output branches have DIFFERENT noise units and quantization.
+# Their success percentages cannot be read as a controlled physical comparison.
+# For the later common-unit sensitivity model read common_noise_model.py.
+# The SDK CPU path has BF16 rounding; the later Float64 ideal sine does not.
+
 """A proposed comparison using the official SDK's periodic CPU operation.
 
 This is a hybrid software experiment, not a measured Q.ANT comparator.
@@ -17,6 +27,9 @@ U0 = np.pi / 2
 ALPHA = np.pi / 2
 
 
+# Inspect runtime identity and raise RuntimeError unless the driver advertises
+# cpu-backend. Return the identity dict for metadata after this scope check.
+# This avoids running synthetic comparison/noise controls on an unintended device.
 def require_cpu_backend():
     """Prevent an illustrative noise experiment from silently using a device."""
     identity = backend_identity()
@@ -25,6 +38,11 @@ def require_cpu_backend():
     return identity
 
 
+# Input: normalized difference array of any shape. Output: same-shaped float32
+# array containing the SDK's BF16 periodic result, before reference correction.
+# Host phase preparation and BF16 conversion precede the single native call.
+# The ideal formula is sin(pi*d/2), but phase/output rounding changes the actual
+# CPU score. Do not use a smooth sine derivative as an exact BF16 noise model.
 def periodic_values(difference):
     """Host phase calculation, then one official periodic API call.
 
@@ -40,6 +58,10 @@ def periodic_values(difference):
     return output.astype(np.float32).reshape(difference.shape)
 
 
+# Measure one deterministic CPU response at d=0 through the identical phase/API
+# path and return it as a Python float. Subtracting it restores exact CPU equality.
+# Its noise, temporal drift and calibration cost on a real device are NOT modeled;
+# a hardware reference would need an explicit uncertainty/correlation treatment.
 def calibration_reference():
     """Use the same BF16/API path at d=0; subtracting it preserves true ties.
 
@@ -49,6 +71,11 @@ def calibration_reference():
     return float(periodic_values(np.zeros(1, dtype=np.float32))[0])
 
 
+# Stateful comparison adapter for one width, scenario and trial batch.
+# It composes SdkDifference with a periodic call; the host retains original keys.
+# upstream adds difference noise before fixed rounding, whereas output adds
+# score noise after BF16 readout/reference subtraction. Equal numeric eta does
+# not imply equal signal-to-noise ratio or the same physical disturbance.
 class PeriodicComparison:
     """Return a referenced periodic score for the existing sorting schedules.
 
@@ -62,6 +89,11 @@ class PeriodicComparison:
     fixed-point output quantizer is used. These scenarios must not be merged.
     """
 
+    # Validate scenario, nonnegative eta and optional fixed tie_band; initialize
+    # per-trial RNGs and a linear SDK adapter. reference is supplied by the runner.
+    # tie_band is an externally calibrated electronic threshold, never inferred from
+    # the true keys of the current trial. It can improve equality recognition while
+    # creating false ties. Counters reset for each new batch instance.
     def __init__(self, bits, eta, scenario, context, trial_ids, reference, tie_band=0.0):
         if scenario not in ("upstream", "output"):
             raise ValueError("scenario must be upstream or output")
@@ -80,11 +112,20 @@ class PeriodicComparison:
         self.comparisons = self.false_ties = self.sign_reversals = 0
         self.broken_true_ties = self.saturations = 0
 
+    # Draw one Gaussian array per trial with the shape of that trial's pair row.
+    # Stack the draws so noise aligns with the comparison tensors. Streams persist
+    # across layer calls and depend on absolute trial IDs rather than batch boundaries.
     def noise(self, shape):
         """One stream per input trial, independent of batching."""
         return np.stack([rng.normal(0, self.sigma, shape[1:])
                          for rng in self.rngs])
 
+    # Return measured comparison scores for equal-shaped raw key arrays.
+    # The upstream branch clips/rounds the noisy difference before phase conversion;
+    # the output branch retains the SDK difference and perturbs the corrected score.
+    # Optional deadband maps small scores to zero before electronic tie handling.
+    # Diagnostic false ties, sign reversals and broken true ties inspect ground truth
+    # only to count events. They never change a decision or repair an output record.
     def __call__(self, a, b):
         d = self.difference(a, b)
         if self.scenario == "upstream":
