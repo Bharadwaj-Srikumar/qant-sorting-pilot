@@ -8,6 +8,19 @@ is adapted from Louri. Neither is a device-level replica of the historical sorte
 **The numerical sweep is not a measurement of Q.ANT hardware.** An optional,
 separate control exercises the official Q.ANT **CPU backend**.
 
+## Feedback sprint: common noise model, 7 October 2026
+
+The old upstream/output accuracy contrast uses different decision margins and
+quantization rules. It does not establish a physical noise advantage. The new
+[common model and controls](docs/COMMON_NOISE_MODEL.md) separate upstream noise,
+readout noise, rounding and residual offsets, with explicit source/assumption
+labels and locally matched signal units. This is a Float64 sensitivity model,
+not a Q.ANT calibration or an SDK hardware execution.
+
+Run `python run_common_noise_controls.py` using `requirements-common-noise.txt`.
+Saved pair controls, selected full sorts and quality metrics are in
+`results/common_noise_20261007/`. Historical sweeps below remain unchanged.
+
 ## Hardware evidence update: 5 October 2026
 
 The official SDK exposes a **native periodic nonlinearity**, but its **ReLU

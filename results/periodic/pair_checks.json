@@ -1,0 +1,124 @@
+{
+  "sdk": {
+    "sdk_version": "2.3.1",
+    "driver_info": "cpu-backend;commit:none;"
+  },
+  "hardware_executed": false,
+  "phase_offset": 1.5707963267948966,
+  "alpha": 1.5707963267948966,
+  "reference": 0.000484466552734375,
+  "noise_added": false,
+  "fixed_point_score_quantizer": false,
+  "reference_policy": "One noiseless CPU d=0 measurement per run",
+  "rows": [
+    {
+      "bits": 4,
+      "ordered_pairs": 256,
+      "equal_pairs": 16,
+      "raw_zero_threshold_errors": 16,
+      "referenced_errors": 0,
+      "false_ties": 0,
+      "minimum_cpu_score_margin": 0.10155868530273438
+    },
+    {
+      "bits": 8,
+      "ordered_pairs": 65536,
+      "equal_pairs": 256,
+      "raw_zero_threshold_errors": 256,
+      "referenced_errors": 0,
+      "false_ties": 0,
+      "minimum_cpu_score_margin": 0.007808685302734375
+    }
+  ],
+  "examples": [
+    {
+      "bits": 4,
+      "a": 10,
+      "b": 9,
+      "difference": 0.0625,
+      "phase_ideal": 1.4726215600967407,
+      "phase_bf16": 1.46875,
+      "periodic_output_bf16": 0.10205078125,
+      "reference": 0.000484466552734375,
+      "score": 0.10156631469726562
+    },
+    {
+      "bits": 4,
+      "a": 9,
+      "b": 10,
+      "difference": -0.0625,
+      "phase_ideal": 1.6689711809158325,
+      "phase_bf16": 1.671875,
+      "periodic_output_bf16": -0.10107421875,
+      "reference": 0.000484466552734375,
+      "score": -0.10155868530273438
+    },
+    {
+      "bits": 4,
+      "a": 9,
+      "b": 9,
+      "difference": 0.0,
+      "phase_ideal": 1.5707963705062866,
+      "phase_bf16": 1.5703125,
+      "periodic_output_bf16": 0.000484466552734375,
+      "reference": 0.000484466552734375,
+      "score": 0.0
+    },
+    {
+      "bits": 4,
+      "a": 15,
+      "b": 0,
+      "difference": 0.9375,
+      "phase_ideal": 0.0981748104095459,
+      "phase_bf16": 0.09814453125,
+      "periodic_output_bf16": 0.99609375,
+      "reference": 0.000484466552734375,
+      "score": 0.9956092834472656
+    },
+    {
+      "bits": 8,
+      "a": 10,
+      "b": 9,
+      "difference": 0.00390625,
+      "phase_ideal": 1.5646604299545288,
+      "phase_bf16": 1.5625,
+      "periodic_output_bf16": 0.00830078125,
+      "reference": 0.000484466552734375,
+      "score": 0.007816314697265625
+    },
+    {
+      "bits": 8,
+      "a": 9,
+      "b": 10,
+      "difference": -0.00390625,
+      "phase_ideal": 1.5769323110580444,
+      "phase_bf16": 1.578125,
+      "periodic_output_bf16": -0.00732421875,
+      "reference": 0.000484466552734375,
+      "score": -0.007808685302734375
+    },
+    {
+      "bits": 8,
+      "a": 9,
+      "b": 9,
+      "difference": 0.0,
+      "phase_ideal": 1.5707963705062866,
+      "phase_bf16": 1.5703125,
+      "periodic_output_bf16": 0.000484466552734375,
+      "reference": 0.000484466552734375,
+      "score": 0.0
+    },
+    {
+      "bits": 8,
+      "a": 255,
+      "b": 0,
+      "difference": 0.99609375,
+      "phase_ideal": 0.0061359405517578125,
+      "phase_bf16": 0.006134033203125,
+      "periodic_output_bf16": 1.0,
+      "reference": 0.000484466552734375,
+      "score": 0.9995155334472656
+    }
+  ],
+  "scope": "Full pair comparison check, not full sorting or measured tcos"
+}

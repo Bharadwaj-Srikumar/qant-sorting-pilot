@@ -74,6 +74,13 @@ und eindeutigem Nenner für jede Kennzahl.
 
 ## Sprint 3 – Gemeinsames Rauschmodell
 
+**Stand 07.10.2026: Modell und erste Kontrollen abgeschlossen.**
+Siehe [COMMON_NOISE_MODEL.md](COMMON_NOISE_MODEL.md). Getrennte Störstellen,
+gemeinsame Normierung, explizite Quantisierer und Quellen-/Annahmenregister sind
+implementiert. 182 analytische Kontrollen und 144 ausgewählte Sortierfälle
+(14.400 Läufe) sind ausgewertet; Ergebnisse unter `results/common_noise_20261007/`.
+Q.ANT-spezifische Rauschparameter bleiben unbekannt. Kein Hardwarevorteil abgeleitet.
+
 **Frage:** Welche Unterschiede bleiben bei nachvollziehbaren physikalischen
 Annahmen, Signalabständen und Quantisierung bestehen?
 
