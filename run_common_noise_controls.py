@@ -1,3 +1,14 @@
+# Reading guide: controlled experiments for common_noise_model.py.
+# SETTINGS describes changes within one signal model, all with explicit assumed
+# noise/rounding/offset values. Pair controls run first, selected full sorts second.
+# Direct and ideal-sine variants share standard-normal samples to isolate the
+# transfer's effect; these paired outputs are not independent observations.
+# The saved subset is the FIRST requested rows of six existing datasets, not a
+# new random corpus or the old full 1,000-trial result relabelled as a new run.
+# No SDK, NPU, hardware timing, or incomplete-archive recovery is involved here.
+# Result hashes describe the code that produced them; adding comments changes
+# future source hashes without changing old numerical evidence.
+
 """Small reproducible controls for the common model; no SDK/hardware required."""
 import argparse
 import csv
@@ -35,10 +46,17 @@ SETTINGS = {
 SORT_SETTINGS = ("no_noise", "prequantized_control", "upstream_only", "combined", "coarse_output", "positive_offset")
 
 
+# Hash the exact bytes at a Path with SHA256 and return the hexadecimal string.
+# Do not normalize line endings or reserialize archives before hashing: provenance
+# identifies the actual stored artifact, including its original container bytes.
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+# Write nonempty, same-schema dictionaries to a CSV with a header.
+# Column order follows the first row; values are serialized without statistical
+# reinterpretation. Opening in write mode replaces the target file.
+# The caller creates the parent directory and controls preservation of old results.
 def write_csv(path, rows):
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
@@ -46,6 +64,14 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+# Return (probabilities [negative,zero,positive], clipping_error_bound) when
+# the configured case has the implemented closed form; otherwise return None.
+# Treat rounding as a zero-code interval, not as an added independent variance.
+# For direct mixed Gaussian noise use summed variances; where omitted input
+# clipping can matter, bound the error by the clipped-tail probability.
+# For monotone sine with upstream-only noise invert the decision threshold.
+# For sine with both stochastic stages do not pretend the output remains Gaussian.
+# Deterministic sigma=0 cases are evaluated exactly, including halfway rounding.
 def analytic_probabilities(d, config):
     """Exact negative/zero/positive probabilities for tractable controls.
 
@@ -87,6 +113,14 @@ def analytic_probabilities(d, config):
     return np.array([negative, zero, positive]), bound
 
 
+# Input sample counts and a fresh output path. Verify fixed corpus identity
+# and save hashes of source code plus the archived CPU calibration reference.
+# Pair controls compare shared samples with analytical probabilities where known;
+# failure tolerance includes sampling error and any explicit clipping bound.
+# Then run selected original datasets through both schedules and score saved
+# orders with the independent ranking-quality module. Persist indices and flags.
+# No-noise correctness and prequantized direct/sine identity are required checks.
+# Output counts include paired controls, not that many independent device trials.
 def run(args):
     out = args.output_dir.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -99,6 +133,9 @@ def run(args):
     before = {name: digest(ROOT/name) for name in source_names}
     if before["data/inputs.npz"] != INPUT_SHA:
         raise ValueError("Unexpected saved corpus")
+    # Stage 1: small pair controls establish signal margins and probability checks
+    # before any complete array is sorted. Absolute key gaps include equality,
+    # neighbours and both full-range extremes.
     pair_rows, scale_rows, quality_rows, saved = [], [], [], {}
     checked = control_pairs = 0
     for bits in (4, 8):
@@ -116,6 +153,9 @@ def run(args):
         for setting_index, (name, parameters) in enumerate(SETTINGS.items()):
             for gap in gaps:
                 rng = np.random.default_rng(np.random.SeedSequence([SEED, 3, bits, setting_index, gap+256]))
+                # Draw each stochastic stage once for this case, then reuse those samples for
+                # both transfer functions. This isolates the transfer difference without adding
+                # unrelated Monte Carlo variation between the paired variants.
                 zu, zr = rng.standard_normal((2, args.pair_samples))
                 decisions = []
                 for kind in ("direct", "ideal_sine"):
@@ -143,6 +183,9 @@ def run(args):
                 if name == "prequantized_control":
                     np.testing.assert_array_equal(*decisions)
                     control_pairs += args.pair_samples
+    # Stage 2: use a predeclared small subset of existing arrays. The six settings
+    # exercise noiseless behavior, intermediate/output rounding, combined noise and
+    # a fixed offset; this is model validation rather than a calibrated hardware sweep.
     with np.load(ROOT/"data/inputs.npz", allow_pickle=False) as corpus:
         datasets = [name for name in corpus.files if "_n16_" in name or "_n256_" in name]
         matched_sorts = 0
@@ -164,6 +207,9 @@ def run(args):
                         valid, correct, stable = metrics["flags"].sum(axis=0).tolist()
                         tau = metrics["tau_b"]
                         tau_normalized = metrics["tau_key_normalized"]
+                        # Quality reporting conditions tau and one recall mean on valid permutations.
+                        # Also save a separately named all-trial recall with invalid outputs valued zero,
+                        # so a high conditional score cannot conceal rank-placement failures.
                         recall = metrics["recall"][min(10,n)]["tie_neutral"]
                         inv = metrics["distance_inversions"]
                         pair_den = metrics["distance_pairs"]
@@ -216,6 +262,9 @@ def run(args):
     print(json.dumps(validation, indent=2))
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT/"results/common_noise_reproduced")

@@ -1,3 +1,9 @@
+# Test guide: ranking metric semantics and safe reading of incomplete evidence.
+# Explicit swaps, weak orders and brute-force subsets establish expected scores.
+# The optional SciPy check independently validates standard tau-b, not tau_key.
+# Archive tests construct small in-memory examples and only use temporary files;
+# they never damage or repair actual stored experiment archives.
+
 """Independent permutation examples, tie semantics and evidence recovery."""
 
 import io
@@ -12,7 +18,12 @@ from ranking_quality import prepare_keys, score_saved_order
 from saved_output_reader import SavedOutputs, recover_members
 
 
+# Unit-test group: independent contracts and edge cases for this module family.
+# Each method creates its own fixtures/streams, so tests do not depend on order
+# or change the stored research corpus and reference result archives.
 class RankingQualityTests(unittest.TestCase):
+    # Use hand-countable strict orders to verify inversion count, tau-b, exact gap
+    # histogram and top-k recall. A full reversal provides the tau=-1 endpoint.
     def test_adjacent_swap_and_reversal(self):
         p = prepare_keys(np.array([[0, 1, 2, 3]]), 4)
         result = score_saved_order(p, np.array([[0, 2, 1, 3]]), [1, 2, 4])
@@ -25,6 +36,9 @@ class RankingQualityTests(unittest.TestCase):
         self.assertEqual(reversed_result["inversions"][0], 6)
         self.assertEqual(reversed_result["tau_b"][0], -1)
 
+    # Swap equal-key identities at a top-k boundary: key order remains correct,
+    # stability and strict recall can fail, but tie-neutral recall remains one.
+    # The standard tau-b ceiling is below one because truth contains a tie.
     def test_boundary_ties_do_not_count_as_key_errors(self):
         p = prepare_keys(np.array([[2, 2, 1, 3]]), 4)
         result = score_saved_order(p, np.array([[2, 1, 0, 3]]), [2])
@@ -34,6 +48,8 @@ class RankingQualityTests(unittest.TestCase):
         self.assertEqual(result["recall"][2]["stable"][0], .5)
         self.assertEqual(result["recall"][2]["tie_neutral"][0], 1)
 
+    # Arrays with no unequal pair have no meaningful ordering correlation. Require
+    # NaN tau while preserving valid key correctness and tie-neutral set recall.
     def test_all_equal_and_singleton_tau_are_undefined(self):
         for data, indices in (([[5, 5, 5]], [[2, 1, 0]]), ([[7]], [[0]])):
             p = prepare_keys(np.array(data), 4)
@@ -43,6 +59,8 @@ class RankingQualityTests(unittest.TestCase):
             self.assertEqual(result["recall"][1]["tie_neutral"][0], 1)
             self.assertTrue(result["flags"][0, 1])
 
+    # Use duplicate, negative and too-large indices to ensure invalid permutations
+    # receive neither tau nor recall nor comparable-pair denominators.
     def test_invalid_outputs_never_get_rank_quality(self):
         p = prepare_keys(np.tile([0, 1, 2, 3], (3, 1)), 4)
         result = score_saved_order(p, np.array([[0, 0, 2, 3], [-1, 0, 1, 2], [0, 1, 2, 8]]))
@@ -51,12 +69,17 @@ class RankingQualityTests(unittest.TestCase):
         self.assertEqual(result["distance_pairs"].sum(), 0)
         self.assertTrue(np.isnan(result["recall"][1]["stable"]).all())
 
+    # The reversed pair [0,255] has distance 255, not 1 after unsigned wraparound.
+    # Check both its denominator and inversion histogram use signed differences.
     def test_uint8_key_distances_do_not_wrap(self):
         p = prepare_keys(np.array([[0, 255]], dtype=np.uint8), 8)
         result = score_saved_order(p, np.array([[1, 0]]))
         self.assertEqual(result["distance_pairs"][255], 1)
         self.assertEqual(result["distance_inversions"][255], 1)
 
+    # For all permutations of a strict and a tied five-record dataset, independently
+    # enumerate inversions and optimal top-k subsets. This checks metric semantics
+    # without copying the vectorized implementation formula as the expected answer.
     def test_exhaustive_small_orders_against_pair_enumeration(self):
         # 240 permutations: strict order plus a weak order with ties.
         for keys in ([0, 1, 2, 3, 4], [0, 0, 1, 2, 2]):
@@ -85,6 +108,9 @@ class RankingQualityTests(unittest.TestCase):
                     self.assertEqual(result["recall"][k]["tie_neutral"][row], neutral)
             np.testing.assert_array_equal(result["distance_inversions"], expected_hist)
 
+    # Compare standard tau-b to scipy.stats.kendalltau on random orders with ties.
+    # Skip only if optional SciPy is unavailable; the normalized tau_key is not
+    # substituted for the library's standard statistic.
     def test_tau_b_against_scipy(self):
         try:
             from scipy.stats import kendalltau
@@ -100,7 +126,14 @@ class RankingQualityTests(unittest.TestCase):
             self.assertAlmostEqual(result["tau_b"][i], expected, places=14)
 
 
+# Archive-format controls, independent of actual experimental data files.
+# Small temporary NPZ examples establish what can be recovered and what must fail.
+# The test never modifies a stored trial_outcomes.npz from the research corpus.
 class EvidenceReaderTests(unittest.TestCase):
+    # Remove the central directory of a temporary archive while retaining complete
+    # local members, then verify explicit recovery and source-byte preservation.
+    # Truncate the second header separately to prove a missing indices array is
+    # reported as missing rather than reconstructed from a partially readable file.
     def test_missing_directory_preserves_complete_crc_checked_members(self):
         memory = io.BytesIO()
         np.savez_compressed(memory, flags=np.array([[True, False, False]]), indices=np.array([[1, 0]]))
@@ -124,6 +157,9 @@ class EvidenceReaderTests(unittest.TestCase):
             self.assertEqual(set(arrays), {"flags"})
             self.assertEqual(audit["complete_members"], 1)
 
+    # Flip one payload byte in an uncompressed temporary array member.
+    # The local-header reader must reject the CRC mismatch even though header sizes
+    # and an apparently readable NumPy array still exist.
     def test_corrupted_member_is_rejected(self):
         memory = io.BytesIO()
         np.savez(memory, x=np.arange(10))  # uncompressed member for controlled corruption
@@ -138,5 +174,8 @@ class EvidenceReaderTests(unittest.TestCase):
                 recover_members(path)
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     unittest.main()

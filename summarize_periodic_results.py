@@ -1,3 +1,12 @@
+# Reading guide: historical table assembly from already saved CPU evidence.
+# This module is a SCRIPT WITH TOP-LEVEL SIDE EFFECTS: importing it reads both
+# accuracy CSVs, checks the expected 864 rows, and writes periodic_summary files.
+# It does not execute sorters, fit noise, or resolve the later missing-NPZ issue.
+# Resource tables describe one sort under two assumed capacity settings.
+# The one-time reference-calibration call is excluded and disclosed separately.
+# An all_fit case means all pairs of an independent submission fit, not that
+# dependent bitonic layers become simultaneous. Scenarios retain different units.
+
 """Produce compact tables from saved evidence; no new sorting or fitting."""
 from pathlib import Path
 import csv
@@ -7,6 +16,9 @@ import math
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "results/periodic_summary"
 OUT.mkdir(parents=True, exist_ok=True)
+# Read existing CSV summaries only. This aggregation does not validate that
+# every saved NPZ member remains available; see the later coverage audit for
+# the incomplete deadband archive.
 rows = []
 for folder in ("periodic", "periodic_deadband"):
     with (ROOT / "results" / folder / "accuracy.csv").open() as stream:
@@ -22,6 +34,9 @@ with (OUT / "accuracy.csv").open("w", newline="") as stream:
     writer.writeheader()
     writer.writerows({k: r[k] for k in fields} for r in rows)
 
+# Derive public API traffic for one sort. The periodic variant performs one
+# linear and one periodic call per submitted group, doubling call count and
+# adding BF16 phase/amplitude/return buffers. These are not PCIe measurements.
 resources = []
 for bits in (4, 8):
     for exponent in range(1, bits + 1):

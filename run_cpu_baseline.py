@@ -1,3 +1,12 @@
+# Reading guide: a digital PERFORMANCE baseline, independent of noise models.
+# run validates the frozen corpus, prepares dtype/batch variants, checks output
+# contracts, warms up, then records repeated timed calls to stable_records.
+# The measured call produces BOTH sorted values and original indices; allocation
+# and gather are included. Input loading/conversion and validation are excluded.
+# The timer measures physical host seconds, not the real-RAM complexity T.
+# An amortized batch time per array is not a single-request latency measurement.
+# Run via the CLI into an empty output directory; importing helpers runs no sweep.
+
 """Stable digital CPU baseline on the unchanged 4/8-bit input corpus.
 
 Measures an application call returning sorted keys AND original indices.
@@ -24,11 +33,21 @@ ROOT = Path(__file__).resolve().parent
 INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
 
 
+# Input one key array or batch, with records along the last axis.
+# Return (sorted_values, original_indices) using a stable argsort plus gather.
+# Both outputs are allocated and equal-key indices preserve original order.
+# This COMPLETE helper call is the timed baseline; timing only argsort would
+# omit the required routed-value output and make the comparison inconsistent.
 def stable_records(data):
     indices = np.argsort(data, axis=-1, kind="stable")
     return np.take_along_axis(data, indices, axis=-1), indices
 
 
+# Check shape, integer index type, full permutation, value/index consistency,
+# ascending keys and increasing original indices within equal-key runs.
+# Raise AssertionError at the first violated property; return None on success.
+# This checker is outside the timed scope and does not silently repair outputs.
+# The permutation check precedes value gathering so invalid indices are rejected.
 def validate_records(data, values, indices):
     """Check properties independently of the argsort implementation."""
     if values.shape != data.shape or indices.shape != data.shape:
@@ -47,6 +66,12 @@ def validate_records(data, values, indices):
         raise AssertionError("Equal keys lost their original order")
 
 
+# Input prebuilt batches and repetition count; return total measured seconds.
+# The timed loop includes Python calls, stable sorting, allocation, gathering,
+# and ordinary result release. Corpus loading and batch construction occur earlier.
+# Temporarily disable cyclic garbage collection and restore its previous state
+# even on failure. Reference-count-based result release still occurs in the loop.
+# This measures warm repeated host work, not isolated hardware instruction latency.
 def measure_passes(batches, passes):
     # Inputs/views were prepared before timing. Function calls, result allocation,
     # argsort, gather and ordinary result release remain inside the timed scope.
@@ -64,6 +89,10 @@ def measure_passes(batches, passes):
     return elapsed
 
 
+# Write nonempty, same-schema dictionaries to a CSV with a header.
+# Column order follows the first row; values are serialized without statistical
+# reinterpretation. Opening in write mode replaces the target file.
+# The caller creates the parent directory and controls preservation of old results.
 def write_csv(path, rows):
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
@@ -71,6 +100,11 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+# Collect runtime, CPU visibility/affinity, optional Linux quota, known thread
+# environment variables and timer resolution into a JSON-ready dict.
+# Missing platform-specific facilities yield absent/None observations rather
+# than assumed hardware capacity. Visible logical CPUs are not exclusive cores;
+# these fields help explain why shared-machine timings have limited portability.
 def environment():
     cpu = platform.processor()
     info = Path("/proc/cpuinfo")
@@ -90,6 +124,13 @@ def environment():
     )
 
 
+# Validate CLI settings and the exact corpus hash, then prepare storage/batch
+# variants without changing key values. Require an empty output directory.
+# Validate each dtype's stable output before timing and mark input buffers read-only.
+# Randomize case order with a saved seed; warm up and calibrate the number of
+# passes needed for the target duration. Save raw repeats and median/IQR summaries.
+# The IQR is repeat variation of average batch times, not a tail-latency interval.
+# Write validation and machine/protocol metadata; no SDK/GPU/NPU is executed.
 def run(args):
     if args.repeats < 5 or args.target_ms <= 0 or not math.isfinite(args.target_ms):
         raise ValueError("Use at least 5 repetitions and a finite positive target duration")
@@ -105,6 +146,9 @@ def run(args):
     if any(output.iterdir()):
         raise ValueError("Output directory must be empty; preserve previous measurements")
 
+    # Preparation phase, outside timing: create equal-value storage variants and
+    # batch views, validate stable output, then freeze the input buffers. No padding
+    # or dropped remainder rows are permitted.
     cases, validation = [], []
     with np.load(args.input, allow_pickle=False) as corpus:
         for name in sorted(corpus.files):
@@ -142,6 +186,9 @@ def run(args):
         batches = case["batches"]
         for _ in range(args.warmup_passes):
             measure_passes(batches, 1)
+        # Timing phase: estimate how many full-corpus passes give a measurable interval.
+        # The calibration and warmup times are not themselves reported samples. Each
+        # subsequent repetition produces a mean per batch call.
         calibration_s = measure_passes(batches, 1)
         passes = max(1, math.ceil(args.target_ms / 1000 / max(calibration_s, 1e-9)))
         fields = {key: value for key, value in case.items() if key != "batches"}
@@ -153,6 +200,9 @@ def run(args):
             samples.append(per_batch)
             raw.append(dict(**fields, case_order=order, repeat=repeat, passes=passes,
                             batch_calls=calls, elapsed_s=elapsed, mean_batch_s=per_batch))
+        # Aggregation phase: summarize repeated mean batch times. Dividing the median
+        # by batch_size gives amortized cost per array, not latency of a single request
+        # executed alone. Preserve raw timings so variation remains inspectable.
         q25, median, q75 = np.quantile(samples, [.25, .5, .75])
         summaries.append(dict(**fields, repeats=args.repeats, dataset_arrays=sum(map(len, batches)),
                               median_mean_batch_s=float(median), p25_mean_batch_s=float(q25),
@@ -192,6 +242,9 @@ def run(args):
     print(f"Saved {len(cases)} cases and {len(raw)} timing samples to {output}", flush=True)
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=ROOT / "data/inputs.npz")

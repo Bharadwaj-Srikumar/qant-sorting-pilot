@@ -1,3 +1,13 @@
+# Reading guide: post-process saved sorting outputs, with a coverage audit.
+# Load source hashes/metadata -> prepare original keys -> read each saved case ->
+# recompute flags -> score valid orders -> write quality and coverage tables.
+# Missing flags/indices are recorded and skipped, never simulated or imputed.
+# The direct and upstream controls are checked for identity and remain paired
+# evidence, rather than two independent experiments supporting the same claim.
+# Use --allow-incomplete only to expose CRC-verified members of a damaged source.
+# The script still expects each configured source CSV/metadata/archive to exist;
+# recovering a member is different from downloading an absent whole source file.
+
 """Audit and score saved outputs. Does not import or run the SDK or sorters."""
 
 import argparse
@@ -20,10 +30,17 @@ INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da
 SOURCES = ("reference", "periodic", "periodic_deadband")
 
 
+# Hash the exact bytes at a Path with SHA256 and return the hexadecimal string.
+# Do not normalize line endings or reserialize archives before hashing: provenance
+# identifies the actual stored artifact, including its original container bytes.
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+# Write nonempty, same-schema dictionaries to a CSV with a header.
+# Column order follows the first row; values are serialized without statistical
+# reinterpretation. Opening in write mode replaces the target file.
+# The caller creates the parent directory and controls preservation of old results.
 def write_csv(path, rows):
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
@@ -31,6 +48,10 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+# Discard nonfinite entries and summarize the remaining defined observations.
+# Return mean, median, minimum and 5th percentile with the requested field prefix.
+# If none are defined, return None fields rather than a misleading zero score.
+# This is conditional aggregation: report validity/tau-defined counts separately.
 def statistics(values, prefix):
     values = values[np.isfinite(values)]
     if not len(values):
@@ -39,6 +60,14 @@ def statistics(values, prefix):
             prefix+"_min": float(np.min(values)), prefix+"_p05": float(np.quantile(values, .05))}
 
 
+# Input argparse namespace: project_dir, empty output_dir, allow_incomplete.
+# Audit hashes and metadata for all configured sources before computing metrics.
+# Reconstruct flags from indices and require agreement with saved flags/CSV totals.
+# Write summary.csv, recall.csv, coverage.csv, exact-distance CSV.gz, metadata
+# and validation JSON. Missing case coverage is explicit; no sorter/SDK is run.
+# Direct/upstream identity is checked across the expected 288 paired cases.
+# Hash the source files again at the end to detect changes during evaluation;
+# source data is never edited or silently completed from the RNG seed.
 def run(args):
     start = time.perf_counter()
     root, output = args.project_dir.resolve(), args.output_dir.resolve()
@@ -89,6 +118,9 @@ def run(args):
                         coverage.append(dict(**fields, expected_trials=int(row["trials"]),
                                              flags_available=have_flags, indices_available=have_indices,
                                              status="evaluated" if have_flags and have_indices else "missing_saved_outputs"))
+                        # A missing evidence member is a coverage problem, not a sorting failure.
+                        # Available flags may still be cross-checked, but quality cannot be inferred
+                        # without the record permutation. Keep this case visible in coverage.csv.
                         if not have_flags or not have_indices:
                             if have_flags:
                                 counts = archive[flags_key].sum(axis=0)
@@ -107,6 +139,9 @@ def run(args):
                         trials = len(flags)
                         if trials != int(row["trials"]):
                             raise AssertionError("Unexpected trial count")
+                        # These historical upstream arrays are an identity control for the direct
+                        # reference, not an independent result set. Confirm the pairing explicitly
+                        # before presenting the two source names in aggregate tables.
                         if scenario == "upstream":
                             if not np.array_equal(indices, reference[case+"_indices"]) or not np.array_equal(flags, reference[case+"_flags"]):
                                 raise AssertionError("Upstream and direct reference differ")
@@ -135,6 +170,9 @@ def run(args):
                                 distance_writer.writeheader()
                             distance_writer.writerow(record)
                             distance_rows += 1
+                        # Report conditional recall over valid outputs AND an explicitly named
+                        # all-trial utility with invalid outputs assigned zero. The latter is a declared
+                        # failure policy, not a mathematically defined ranking of an invalid permutation.
                         for k, variants in result["recall"].items():
                             recall = dict(**fields, k=k, selection="largest", full_set_control=(k==n),
                                           trials=trials, valid_outputs=valid, invalid_outputs=trials-valid)
@@ -192,6 +230,9 @@ def run(args):
     print(f"Scored {validation['evaluated_outputs']} existing outputs; {len(missing)} cases unavailable. No new sorts.")
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-dir", type=Path, default=ROOT)

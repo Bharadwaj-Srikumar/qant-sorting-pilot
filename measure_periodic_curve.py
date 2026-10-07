@@ -1,3 +1,13 @@
+# Reading guide: repeated API output acquisition with explicit backend choice.
+# Requested phases are quantized to BF16 BEFORE submission; repeated requested
+# phases may collapse to the same code. Both the actual codes and count are saved.
+# Each repeat measures the complete phase vector, recording time and host/API
+# duration. Per-phase sample standard deviation uses ddof=1, so repeats >= 2.
+# CPU outputs can test data collection but cannot measure hardware noise/drift.
+# Hardware mode requires a real supported backend and externally confirmed legal
+# ranges. Finite-number validation here does not establish hardware safety limits.
+# The output directory is created if needed; existing result names are overwritten.
+
 """Acquire a periodic API curve on CPU or, when available, actual hardware.
 
 This script does not supply a device, credentials or an approved input range.
@@ -20,6 +30,14 @@ from ml_dtypes import bfloat16
 import qant_native_computing_toolkit as qant
 
 
+# Input CLI namespace with explicit cpu/hardware mode, phase interval, point
+# count, repeats, amplitude, device and output directory. Reject backend mismatch
+# and invalid finite ranges/counts; external hardware-range approval is separate.
+# Submit repeated BF16 phase/amplitude vectors and save raw outputs, timestamps,
+# host/API durations, per-code mean/std/min/max and backend identity.
+# Requested points may map to fewer BF16 codes; unique_bf16_phases reports this.
+# Real samples can support later drift/noise analysis; this routine does not fit
+# a noise distribution or infer analog ENOB from the interface dtype.
 def run(args):
     info = qant.info.get_driver_info()
     cpu = "cpu-backend" in info
@@ -60,6 +78,9 @@ def run(args):
     print(json.dumps(metadata,indent=2))
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--mode',choices=('cpu','hardware'),required=True)

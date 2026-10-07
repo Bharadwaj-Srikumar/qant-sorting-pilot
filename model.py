@@ -1,3 +1,12 @@
+# Reading guide: LEGACY experiment retained for historical reproducibility.
+# This file backs evaluate.py/validate.py and the initial three-architecture report.
+# It uses output step 2/2**output_bits. Current comparison.py uses 1/2**bits;
+# the different steps produce different ties even without added noise.
+# Do not use old quantized results as if they came from the later matched-step run.
+# run_sort is the checked public entry point; Difference is the internal kernel.
+# Beyette and Desmulliez share a numerical shuffle schedule and paired noise here;
+# their equal outputs do not imply equal physical time, space or optical depth.
+
 """Declared numerical model, not a calibration of Q.ANT hardware.
 
 RAW keys are checked before encoding. For maximum key M and input levels L:
@@ -12,6 +21,14 @@ import numbers
 import numpy as np
 
 
+# Input: a nonempty one-dimensional list or rectangular two-dimensional batch,
+# plus an integer key width from 1 to 30. Return a separate int64 array.
+# Object conversion preserves original element types until each is checked;
+# otherwise a string or boolean could silently become an accepted integer.
+# Whole finite real values such as 3.0 are allowed, but fractions/NaN/infinity,
+# booleans, strings, negatives and values above 2**key_bits-1 raise ValueError.
+# Error locations are zero-based. Shape/network and physical-range checks remain
+# the responsibility of the caller that selects a sorting architecture.
 def validate_keys(keys, key_bits):
     """Accept a nonempty 1-D array or batch of whole, finite numbers.
 
@@ -37,6 +54,12 @@ def validate_keys(keys, key_bits):
     return a.astype(np.int64)
 
 
+# Legacy stateful difference model with separate key/input/output widths.
+# Modes: ideal bypasses quantizers; quantized uses input/output grids; and
+# quantized_noise additionally adds Gaussian noise in OUTPUT-step units.
+# Counters pool pair events across calls, and RNGs persist across sorter layers.
+# The output step is 2/Lout, so adjacent matched-width keys can round to zero
+# without noise. This intentional historical assumption is not the current model.
 class Difference:
     """Quantize a raw-key subtraction and collect diagnostic event counts.
 
@@ -45,6 +68,11 @@ class Difference:
     Different comparison schedules use independent noise streams. Beyette
     and Desmulliez intentionally receive the SAME stream and schedule.
     """
+    # Prepare the legacy normalization scale (1-1/Lin)/(2**key_bits-1), output
+    # step 2/Lout, valid mode and one stream per supplied absolute trial ID.
+    # Input/output widths support 1..30 here; public run_sort validates key width.
+    # noise_lsb is nonnegative standard deviation in output-code steps, not an offset.
+    # Constructing a new instance resets diagnostic counts and stream positions.
     def __init__(self, key_bits, input_bits, output_bits, mode='ideal',
                  noise_lsb=0.25, seed_context=(0,), trial_ids=(0,)):
         for name, value in [('input_bits', input_bits), ('output_bits', output_bits)]:
@@ -64,6 +92,12 @@ class Difference:
                      for i in trial_ids]
         self.comparisons = self.false_ties = self.sign_reversals = self.saturations = 0
 
+    # Internal raw-key kernel, called after public validation. Return a score array
+    # matching a,b; ideal mode returns the integer difference directly.
+    # Other modes quantize each normalized input, optionally perturb their difference,
+    # then round/clip signed output codes. Counters observe false ties and reversed
+    # signs against true keys only after the score is formed; they never repair it.
+    # Only noisy mode needs the batch-row count to match the stored trial generators.
     def __call__(self, a, b):
         """Internal kernel; the public run_sort entry validates raw inputs once."""
         self.comparisons += a.size
@@ -87,6 +121,13 @@ class Difference:
         return measured
 
 
+# Checked legacy entry point: validate/copy raw keys, promote one row to a
+# batch, select a supported architecture and construct its Difference instance.
+# Return ((values, original_indices, valid_mask), model), allowing the runner
+# to save both output correctness and accumulated comparator diagnostics.
+# Beyette/Desmulliez both use shuffle_sort; Louri uses the legacy rank_sort.
+# If trial_ids is omitted, rows are numbered from zero; batched reproduction
+# must pass absolute IDs explicitly so RNG sequences remain unchanged.
 def run_sort(keys, architecture, key_bits, input_bits, output_bits, mode='ideal',
              noise_lsb=0.25, seed_context=(0,), trial_ids=None):
     """Public checked interface. Outputs always have shape (trials, N).

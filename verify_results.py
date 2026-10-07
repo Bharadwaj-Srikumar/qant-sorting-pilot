@@ -1,3 +1,11 @@
+# Reading guide: strict regression comparison for the six-level reference.
+# Read actual and reference artifacts -> compare CSV row strings/order -> compare
+# NPZ case names and numeric arrays -> compare first-failure JSON records.
+# Source hashes and run durations may change after documentation or environment
+# changes, so metadata is intentionally outside this numerical-equivalence test.
+# This requires complete archives; optional salvage belongs to saved_output_reader.
+# No source is changed and no sorter is executed by the verifier.
+
 """Check a new run against every saved result from the original noise sweep."""
 
 import argparse
@@ -11,6 +19,11 @@ ROOT = Path(__file__).resolve().parent
 REFERENCE = ROOT / "results/reference"
 
 
+# Input actual and reference directories, each with accuracy.csv, outcomes NPZ
+# and failures JSON. Return matched configuration/array counts on exact agreement.
+# Raise on CSV content/order differences, missing/extra array names, changed array
+# values, or a different first-failure record. Compare arrays rather than ZIP bytes
+# because compression/container timestamps need not match equivalent outcomes.
 def verify_results(actual_directory, reference_directory=REFERENCE):
     """Require identical CSV results and per-trial flags/record permutations.
 
@@ -42,6 +55,9 @@ def verify_results(actual_directory, reference_directory=REFERENCE):
     return {"matched_configurations": len(actual_rows), "matched_arrays": array_count}
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path, nargs="?", default=ROOT / "results/reproduced")

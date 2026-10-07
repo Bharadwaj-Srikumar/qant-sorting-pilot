@@ -1,3 +1,11 @@
+# Reading guide: exhaustive CPU calibration evidence for the periodic scorer.
+# For every ordered pair compute SDK difference -> periodic output -> reference
+# subtraction, then compare the resulting three-way sign with the integer truth.
+# The raw output can be nonzero at equality because pi/2 is rounded in BF16.
+# Subtracting the same-path d=0 reference corrects this deterministic offset.
+# The minimum unequal score is an empirical CPU margin, not an analog noise limit.
+# The output-file option writes JSON and may replace an existing calibration file.
+
 """Exhaustively check the proposed periodic CPU comparison, without noise.
 
 Run after install_sdk.py: python check_periodic_pairs.py
@@ -19,6 +27,12 @@ from sdk_mapping import SdkDifference
 ROOT = Path(__file__).resolve().parent
 
 
+# Input destination JSON Path. Guard CPU execution, measure a fixed zero
+# reference, and exhaustively test all ordered pairs for each registered width.
+# Raise on any corrected three-way sign error. Record uncorrected errors and
+# minimum unequal score so the reference's role and BF16 margins are auditable.
+# Selected positive/negative/tie/extreme examples expose phase rounding explicitly.
+# Create the destination parent if needed and write/print the calibration record.
 def run(output):
     identity = require_cpu_backend()
     reference = calibration_reference()
@@ -63,6 +77,9 @@ def run(output):
     print(json.dumps(result, indent=2))
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-file", type=Path,

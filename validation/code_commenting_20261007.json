@@ -1,0 +1,253 @@
+{
+  "base_commit": "f90943f4925b9b943d14cf0b5ee52773399b6b72",
+  "code_files": 34,
+  "python_files": 32,
+  "python_definitions_documented": 148,
+  "html_files": 2,
+  "python_ast_and_executable_tokens_unchanged": true,
+  "html_noncomment_content_unchanged": true,
+  "javascript_syntax_checks": 2,
+  "tests_passed": 32,
+  "optional_sdk_tests_skipped": 2,
+  "added_comment_lines": 1163,
+  "files": [
+    {
+      "path": "build_reports.py",
+      "original_sha256": "9242a93483c54d9e0e058ac9cefd150eef2203b2097a986369368f7a0eabb18b",
+      "commented_sha256": "5e81cfe4bd22944daa4258c4e22a34e2780fdadf99907d865922aacbd57b7a8a",
+      "added_lines": 96,
+      "logic_unchanged": true
+    },
+    {
+      "path": "check_periodic_pairs.py",
+      "original_sha256": "fda03a88b9387fa7d34e33261f7ba64889e3f8d566ea15729ef978fd36bac96b",
+      "commented_sha256": "845c120bb489cbca7410c77b40850ee8d3f70198411488ada5d1c602f9e1902f",
+      "added_lines": 17,
+      "logic_unchanged": true
+    },
+    {
+      "path": "check_sdk_nonlinearity.py",
+      "original_sha256": "4d4703c56a4606e07ee93f5dcc5e4bd6d678a7389801363682bc3889c9483e3b",
+      "commented_sha256": "62ba61c83e16bd3cd4cb64ea6a43d1185c1a73b6d78f717f3e16fdad1545697c",
+      "added_lines": 19,
+      "logic_unchanged": true
+    },
+    {
+      "path": "common_noise_model.py",
+      "original_sha256": "8aece0c16769ef601f79674258112fd462d30a229430295932adfa784b6e42c9",
+      "commented_sha256": "5d457896e3ea8fffabd187fd209c1b6ab17b9e46d834d7c8ae1f5cda0dc4e13d",
+      "added_lines": 71,
+      "logic_unchanged": true
+    },
+    {
+      "path": "comparison.py",
+      "original_sha256": "891e4630ba9d3a5c8e6cde0f961576ce45e3f5a757e05afc516c4eefcc35252b",
+      "commented_sha256": "88758c3cafb1b30f219c2506bf46878e0d5254d218c502801b57c12a4feb5748",
+      "added_lines": 37,
+      "logic_unchanged": true
+    },
+    {
+      "path": "evaluate.py",
+      "original_sha256": "179ae48a81c50c02327b51fb7c29c7dc892d4049717de9c50fae1393ac68cc46",
+      "commented_sha256": "e22503cd02a590f0756b79e1e58442328c107da59a3ebd33e61e64b640a02ec6",
+      "added_lines": 30,
+      "logic_unchanged": true
+    },
+    {
+      "path": "evaluate_ranking_quality.py",
+      "original_sha256": "4ef1f3fbfa33a09b23d42b80982b0636871706c997d81d6a9100e6b1fee6fd3c",
+      "commented_sha256": "03ec59c524bb154246db1c4109f2df423f81270d2e571b5c5c45fcbf5236284e",
+      "added_lines": 41,
+      "logic_unchanged": true
+    },
+    {
+      "path": "hardware_conditions.py",
+      "original_sha256": "4a0c59dac23f16fc5785a06f609142be03ff9e312339783164b6e3950363de0c",
+      "commented_sha256": "d739d15e470429f8401a65198f520435e7b1aebf5e5051e62d0143a013baadf7",
+      "added_lines": 35,
+      "logic_unchanged": true
+    },
+    {
+      "path": "input_validation.py",
+      "original_sha256": "31ce7fa6afc3fbb11589ec224dcdd87ef412247c8a5623831c12e5e2b9a3dc38",
+      "commented_sha256": "87628a30a9b236d57da015f459a00f01fc9fff311283603dcc078650e9970066",
+      "added_lines": 15,
+      "logic_unchanged": true
+    },
+    {
+      "path": "install_sdk.py",
+      "original_sha256": "de99098abf50a87f986723f6f8e1a5b08f33f408d81251eff0470b1e21dd2432",
+      "commented_sha256": "570883a76bde78c3db77706c199f194baf3e298de695ed7a50705fc32b4e2e7e",
+      "added_lines": 16,
+      "logic_unchanged": true
+    },
+    {
+      "path": "measure_periodic_curve.py",
+      "original_sha256": "c764075bd89039d86662ff26df380b2a5b7dc7152087e8a641ef7e793f49b293",
+      "commented_sha256": "8fcfe4d1f8a5a510efe64181b131ea438d7bb80298c56d2ff8d4ccafabc94018",
+      "added_lines": 21,
+      "logic_unchanged": true
+    },
+    {
+      "path": "metrics.py",
+      "original_sha256": "e6a3cda1bb2e5129ff78fe38ad2c82e8918fc6bebd1d75cd846424b5a8ffe23a",
+      "commented_sha256": "ff5a82e91c00f394378e4b7c0f14e2162cedf923c0017534755afb26234f0fe3",
+      "added_lines": 19,
+      "logic_unchanged": true
+    },
+    {
+      "path": "model.py",
+      "original_sha256": "41ea339bc303d49b90eb22737f6b786096bb5f0fcf29928dfc91a40ae281658f",
+      "commented_sha256": "f00e4ce6ff5afc2bf49febaa982b6bca345b21a92a24cc0d90d8d3ee2cf9cd0c",
+      "added_lines": 41,
+      "logic_unchanged": true
+    },
+    {
+      "path": "periodic_comparison.py",
+      "original_sha256": "ca234ddb0ddb9983392e97b4446772e166c8509f8dd69b44e5cdfb8f953f6c08",
+      "commented_sha256": "53b8187aaa63e49b6f426d825b5a08ce5d1eaaca80fecade96d18065c10fbd16",
+      "added_lines": 41,
+      "logic_unchanged": true
+    },
+    {
+      "path": "ranking_quality.py",
+      "original_sha256": "968d5fe4ff008101b2a7647d4cd752c770e061181f5b86d4ac50f71a73ec62f4",
+      "commented_sha256": "0e97b306ffc6dbf440adea73eba588d18a138c9fb26b57d314a35ea35089f732",
+      "added_lines": 49,
+      "logic_unchanged": true
+    },
+    {
+      "path": "report_assets/report_template.html",
+      "original_sha256": "6e1aaa921955ccc3cf0a6c5b45fef54cf4f99ca90f8f1e0f4a5375aa200fe52c",
+      "commented_sha256": "2ff1a21fc6ea7e862accfd6ef3973b1c472f475600459c116e704d35a1c4d2fa",
+      "added_lines": 57,
+      "logic_unchanged": true
+    },
+    {
+      "path": "reports/APC_Thesis_Registration_Visual_Guide.html",
+      "original_sha256": "a239adbc90757a622c3ad476404634d8e45703a1ef339d35ca0f1e523bb7f87d",
+      "commented_sha256": "b1c91f20f108e4f4d05344dc7e3aa44d6f65ed98252fa181c201890292f51cc2",
+      "added_lines": 57,
+      "logic_unchanged": true
+    },
+    {
+      "path": "run_common_noise_controls.py",
+      "original_sha256": "af3f8ec021606659d9e89614dfd248ecf2e0ff3539bbe3af10120669fde5a319",
+      "commented_sha256": "66e59ae9f9a8b3c8c288945021f7b6d06b01f1ff38cf4392fa10bee13989d1bd",
+      "added_lines": 49,
+      "logic_unchanged": true
+    },
+    {
+      "path": "run_cpu_baseline.py",
+      "original_sha256": "11c5a9d5f35c2119cdb49d380610efade76582edf9b64c71606d3884cef5f85c",
+      "commented_sha256": "eb3c56af483e21d590eaf47608db7e97bdbea575abaa40e116749d1aa476f0fe",
+      "added_lines": 53,
+      "logic_unchanged": true
+    },
+    {
+      "path": "run_noise_sweep.py",
+      "original_sha256": "870d2c7ec58a21fe89e6044a89081d02a291e0eafc18101f812adfa843166e23",
+      "commented_sha256": "7f3a27162d3785d092dbb43b24c958a0105787f03f62f8ca30070c0e90cf814b",
+      "added_lines": 27,
+      "logic_unchanged": true
+    },
+    {
+      "path": "run_periodic_evaluation.py",
+      "original_sha256": "94a73dde13f25a2880837bfd6ebd99771fc169293dbcb1236a5cd9413e0db88c",
+      "commented_sha256": "ebd0e66ddd6a2f06fc888df5cb13a1a31631837c5744b6a8f6b3543c4d94e18d",
+      "added_lines": 28,
+      "logic_unchanged": true
+    },
+    {
+      "path": "run_sdk_control.py",
+      "original_sha256": "2946bf31775ef7530dd8dc76d68bd5d00f0c06e7f06865df8fdd599c3d3ec5af",
+      "commented_sha256": "8aab7ba30b873b44a2086f9fec49e242090c88342f12381a938a5a81c9cac4d5",
+      "added_lines": 16,
+      "logic_unchanged": true
+    },
+    {
+      "path": "saved_output_reader.py",
+      "original_sha256": "287ef4fb26886c76cb77f4803820688a2c4b63fa15bbfe903806ab3e2f07d2f3",
+      "commented_sha256": "49af3dacc151f04748f65158b86d13e60b3baf8209464efd1a1f509db08ffa30",
+      "added_lines": 40,
+      "logic_unchanged": true
+    },
+    {
+      "path": "sdk_mapping.py",
+      "original_sha256": "70407892960b35ea278fa5ae3111bbbc4697288aa97654ae756456d3c6fde1bd",
+      "commented_sha256": "03946a1cb09dde38b5e0f2dadfbf1cadb53f1f42aa793250b4d2d7f1c4e9a5c5",
+      "added_lines": 29,
+      "logic_unchanged": true
+    },
+    {
+      "path": "sorting.py",
+      "original_sha256": "f8b432d00c79b5a6ee2650b37a10afdda54b0efd5152a5dec0754dd6b5e4a05e",
+      "commented_sha256": "bd458fded376126ee4c30837d9a5680372fa8f40103901f107d5161dc4f80072",
+      "added_lines": 41,
+      "logic_unchanged": true
+    },
+    {
+      "path": "sorting_schedules.py",
+      "original_sha256": "f8bc983fb70de16fedc9c41a4318a1f561f689384008f8aae01db32c3cd45415",
+      "commented_sha256": "b04b20755252667a9934c0db0e7d22f8b2fecfb10e47e0283b14657cede9c835",
+      "added_lines": 36,
+      "logic_unchanged": true
+    },
+    {
+      "path": "summarize_periodic_results.py",
+      "original_sha256": "810e97ff2cded25d771b68ee037c5538949cb56f53aa12e5aec84ea83be5775e",
+      "commented_sha256": "83b3fd56917f76539fcea7f57894ef426e02b89ed50ed1101e8fc971859ae0c8",
+      "added_lines": 15,
+      "logic_unchanged": true
+    },
+    {
+      "path": "tests/test_common_noise_model.py",
+      "original_sha256": "87d4527bd8495c3ade90fe65462c51a1a599e68e1a6f3b6e115c6bea0bc40b23",
+      "commented_sha256": "eff181d0b35507eb26bd542956cd466541d380253f975a9a08d6ce807bf5c045",
+      "added_lines": 31,
+      "logic_unchanged": true
+    },
+    {
+      "path": "tests/test_cpu_baseline.py",
+      "original_sha256": "a9f7e297ff82ff0073bfcefb9ed305bbc258170b19dc1168117b888b14fd3265",
+      "commented_sha256": "2c2ff84f542efc624f4af2ac3f5c335392cfc4d40afdc77a4fbf5f6f7297b6cc",
+      "added_lines": 17,
+      "logic_unchanged": true
+    },
+    {
+      "path": "tests/test_model.py",
+      "original_sha256": "1ead7c9f4906291a16618580e9f320cd1447d569cd60eb4899086fcabb461f75",
+      "commented_sha256": "61c55fbb83d97f8dbf9b6b8475ad3bdedc3e011610699453b3a62d6874cf21a7",
+      "added_lines": 34,
+      "logic_unchanged": true
+    },
+    {
+      "path": "tests/test_periodic.py",
+      "original_sha256": "c6727514438f457a35d7152aa126cdb205af0f216cc8c6ae3fc37bbe45011304",
+      "commented_sha256": "0e10c3ecd6df59583168678ee9978cd59e77f6bd82e158827d4bc35f7c2b8499",
+      "added_lines": 12,
+      "logic_unchanged": true
+    },
+    {
+      "path": "tests/test_ranking_quality.py",
+      "original_sha256": "83d520b311ce01a814ed32cb33312d67b1adc03c5a169fad00d8930d5eb5c9c9",
+      "commented_sha256": "094de3a07299d24edc23c233696a4b9acd3fb8cb38deb0b50028411e71a99f50",
+      "added_lines": 39,
+      "logic_unchanged": true
+    },
+    {
+      "path": "validate.py",
+      "original_sha256": "9824b3d7f82c7f21ccb4376be0d4f694e970745c372306cf24c677a58a8db33f",
+      "commented_sha256": "3b5c5dcdfaef71b59ac0ad5b877ee56d41cefcfd421c6a41a958739ddbc0196e",
+      "added_lines": 18,
+      "logic_unchanged": true
+    },
+    {
+      "path": "verify_results.py",
+      "original_sha256": "59c62c95e885a72dc7cf13ae29f8f9b1be12abccd8ba9b195c9a98ea6b5363c8",
+      "commented_sha256": "e408442b647d53a4f822637c1d924d17c77639e83d60ca1b569d2b752804101c",
+      "added_lines": 16,
+      "logic_unchanged": true
+    }
+  ]
+}

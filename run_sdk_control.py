@@ -1,3 +1,11 @@
+# Reading guide: optional, noiseless integration check of the pinned SDK.
+# First verify every 4/8-bit difference pair, then replay the stored input corpus
+# through both sorters and compare flags/indices against saved SDK CPU outputs.
+# The version/backend guard prevents these CPU expectations from being silently
+# treated as a hardware experiment. No synthetic noise or fixed-point output
+# quantizer is added. The result directory is results/sdk_reproduced.
+# Both original inputs and results/sdk_reference/trial_outcomes.npz are required.
+
 """Optional software-integration control using Q.ANT's official CPU backend.
 
 This is separate from the Gaussian sweep: BF16 SDK arithmetic receives no
@@ -20,6 +28,11 @@ from sorting_schedules import bitonic_sort, rank_sort
 ROOT = Path(__file__).resolve().parent
 
 
+# Run the pinned-CPU guard, exhaustive difference checks and saved-corpus replay.
+# Require numerical equality of every generated flag/index array with sdk_reference.
+# Verify total scalar pair counts independently from analytical sorter counts.
+# Write the reproduced CSV, NPZ and identity/hash metadata under sdk_reproduced;
+# do not interpret logical buffer size or total script duration as NPU performance.
 def main():
     identity = backend_identity()
     if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
@@ -90,5 +103,8 @@ def main():
     print(f"Verified {metadata['executions']:,} SDK CPU sorting executions.")
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     main()

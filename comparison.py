@@ -1,3 +1,13 @@
+# Reading guide: the matched-width, six-level reference experiment.
+# Data flow: validated integer keys -> normalized difference -> synthetic
+# Gaussian disturbance -> fixed-point rounding/clipping -> electronic decision.
+# Arrays normally have shape (trials, pairs); counters pool scalar comparisons.
+# The callable returns measured differences, never repaired keys or a sorted array.
+# This model uses delta_in = delta_out = 2**(-bits). The older model.py uses
+# output step 2/2**bits and must not be substituted into this experiment.
+# For sorter routing read sorting_schedules.py; for flags read metrics.py.
+# Neither bit width nor synthetic eta is a measured Q.ANT converter specification.
+
 """The agreed equal-step, signed, saturating difference model.
 
 This is a numerical sensitivity model, NOT a measured Q.ANT noise model.
@@ -11,6 +21,10 @@ from dataclasses import dataclass
 import numpy as np
 
 
+# Contract: immutable description of the registered key/input/output widths.
+# Only (4,4,4) and (8,8,8) are accepted. Separate fields make the experiment's
+# assumption visible; they do not imply arbitrary mixed widths are implemented.
+# Properties expose normalized steps, rather than physical volts or ADC ENOB.
 @dataclass(frozen=True)
 class Precision:
     """Keep the three settings separate, even in matched-width experiments.
@@ -23,6 +37,9 @@ class Precision:
     input_bits: int
     output_bits: int
 
+    # Validate the complete width tuple after dataclass construction.
+    # Rejecting unsupported combinations prevents silently changing input density,
+    # output range, and noise scaling under the same experiment label.
     def __post_init__(self):
         widths = (self.key_bits, self.input_bits, self.output_bits)
         if any(type(width) is not int for width in widths):
@@ -30,15 +47,24 @@ class Precision:
         if widths not in ((4, 4, 4), (8, 8, 8)):
             raise ValueError("This evaluation supports (4,4,4) and (8,8,8) only")
 
+    # Return the unsigned input-key grid step, 1 / 2**input_bits.
+    # Valid matched-width integer keys are exact multiples of this value.
     @property
     def delta_in(self):
         return 1 / 2**self.input_bits
 
+    # Return the AGREED output step, 1 / 2**output_bits.
+    # This is not the older model.py step 2 / 2**output_bits. The signed code range
+    # is therefore [-1/2, 1/2-delta_out], not the full difference magnitude range.
     @property
     def delta_out(self):
         return 1 / 2**self.output_bits
 
 
+# Stateful callable: one instance belongs to one experimental batch.
+# It owns trial RNG streams and diagnostic counters accumulated over all calls,
+# including the successive layers of a bitonic sort. Decisions depend only on
+# the measured score; true-key comparisons below are diagnostic observations.
 class NoisyDifference:
     """Normalize pairs, add Gaussian noise, then round and saturate.
 
@@ -52,6 +78,11 @@ class NoisyDifference:
         "broken_true_ties",
     )
 
+    # Inputs: Precision, dimensionless eta>=0, experiment seed components, and
+    # absolute trial IDs. sigma=eta*delta_out converts eta into signal units.
+    # Trial IDs must remain the same when a batch is split; resetting IDs per chunk
+    # would repeat streams. eta=0 avoids RNG construction and leaves exact controls.
+    # All event counters start at zero and later count scalar pair observations.
     def __init__(self, precision, eta=0.0, seed_context=(), trial_ids=()):
         if not np.isfinite(eta) or eta < 0:
             raise ValueError("eta must be finite and nonnegative")
@@ -66,6 +97,12 @@ class NoisyDifference:
         for name in self.counter_names:
             setattr(self, name, 0)
 
+    # Inputs a,b: equal-shaped raw key arrays, normally (trials, pairs).
+    # The public runner validates key values before calling this internal kernel.
+    # Return: same-shaped float array after noise, nearest-even rounding and clipping.
+    # When eta>0, row count must match the configured per-trial generators.
+    # Clipping preserves noiseless sign but destroys some magnitudes; this output
+    # may guide record routing, but cannot safely reconstruct min/max by subtraction.
     def __call__(self, a, b):
         if a.shape != b.shape:
             raise ValueError("Both pair arrays must have the same shape")

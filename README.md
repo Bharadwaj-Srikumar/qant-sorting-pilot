@@ -8,6 +8,14 @@ is adapted from Louri. Neither is a device-level replica of the historical sorte
 **The numerical sweep is not a measurement of Q.ANT hardware.** An optional,
 separate control exercises the official Q.ANT **CPU backend**.
 
+## New readers: code guide
+
+Start with the [code reading guide](docs/CODE_GUIDE.md) for the execution paths,
+array contracts and distinction between historical and current experiments.
+All project-owned Python definitions and HTML/JavaScript behavior have detailed
+source comments. The documentation update preserves the executable logic and
+existing numerical evidence.
+
 ## Feedback sprint: common noise model, 7 October 2026
 
 The old upstream/output accuracy contrast uses different decision margins and
@@ -186,3 +194,4 @@ See [CHANGELOG.md](CHANGELOG.md) for the exact changes and evidence boundary.
 The archive includes the current project and its updated documents. Historical
 root-level code from the GitHub repository is not needed to reproduce this
 current experiment and is not included in this archive.
+

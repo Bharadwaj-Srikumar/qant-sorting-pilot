@@ -1,3 +1,14 @@
+# Reading guide: LEGACY report generator tied to the initial precision protocol.
+# Imports load results/precision.csv, config/validation/resources and construct
+# static page descriptions. This is not an import-safe general reporting library.
+# The strict protocol check prevents a different experiment being silently shown
+# with old narrative text. Current common-noise results need their own presentation.
+# figures -> build_pdf -> build_html is the intended CLI execution order.
+# The PDF preserves an existing historical foundation and appends generated pages;
+# the HTML template embeds the same saved evidence and figures for offline use.
+# Rendering creates/overwrites files under reports; no sorting is performed.
+# Comments added here explain the generator without revising dated report claims.
+
 """Rebuild both reports from saved evidence; never invent or rerun result rows.
 
 The historical-foundation PDF preserves the already-agreed definitions and
@@ -21,6 +32,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 ROOT=Path(__file__).resolve().parent
 R=ROOT/'results';OUT=ROOT/'reports';ASSET=ROOT/'report_assets'
 OUT.mkdir(exist_ok=True)
+# Import-time evidence loading: these CSV rows belong to the dated initial
+# protocol. Do not point this generator at common-noise/quality tables without
+# also revising its schema checks and authored narrative.
 ROWS=list(csv.DictReader((R/'precision.csv').open()))
 for row in ROWS:
     for key in ['key_bits','input_bits','output_bits','n','trials','correct_sorts','stable_sorts','valid_outputs','comparisons','false_ties','sign_reversals','saturations']:
@@ -37,10 +51,19 @@ VALIDATION=json.loads((R/'validation.json').read_text())
 RES=list(csv.DictReader((R/'resources.csv').open()))
 
 
+# Select the saved row identified by key width, N, family, mode and architecture.
+# Return the first exact match from the already parsed global ROWS collection.
+# Missing evidence raises StopIteration rather than inventing an interpolated value;
+# the historical input protocol is checked when this script is imported.
 def lookup(b,n,family,mode,arch):
     return next(r for r in ROWS if (r['key_bits'],r['n'],r['family'],r['mode'],r['architecture'])==(b,n,family,mode,arch))
 
 
+# Build 4-bit and 8-bit static plots from saved success fractions/intervals.
+# Each contains distinct-key and duplicates-allowed panels, with paired bitonic
+# curves represented once and rank curves shown separately.
+# Write PNG and SVG versions under reports; their filenames feed both renderers.
+# The shaded intervals come from CSV evidence, not a new fit or resimulation.
 def figures():
     """Publication-style static figures, with every point from the saved CSV."""
     plt.rcParams.update({'font.size':10,'axes.spines.top':False,'axes.spines.right':False})
@@ -69,16 +92,43 @@ def figures():
 
 
 PAGES=[]
+# Append one declarative page to the global PAGES list; return None.
+# title is a heading string and blocks are tagged tuples from the helpers below.
+# Building this list describes content only; layout occurs later in build_pdf/html.
 def page(title,*blocks):PAGES.append({'title':title,'blocks':list(blocks)})
+# Return a ('p', value) content tuple representing a body paragraph.
+# This helper does not render or write files. PDF/HTML dispatchers interpret the
+# same tag later, keeping content selection separate from output formatting.
 def p(s):return ('p',s)
+# Return a ('h', value) content tuple representing a subheading.
+# This helper does not render or write files. PDF/HTML dispatchers interpret the
+# same tag later, keeping content selection separate from output formatting.
 def h(s):return ('h',s)
+# Return a ('eq', value) content tuple representing a equation-style callout.
+# This helper does not render or write files. PDF/HTML dispatchers interpret the
+# same tag later, keeping content selection separate from output formatting.
 def eq(s):return ('eq',s)
+# Return ('table', headers, rows, widths) as a declarative content block.
+# Optional widths are PDF column widths in points; None requests equal widths.
+# The HTML renderer uses the same cell content with its responsive table wrapper.
 def table(headers,rows,widths=None):return ('table',headers,rows,widths)
+# Return a ('code', value) content tuple representing a literal code sample.
+# This helper does not render or write files. PDF/HTML dispatchers interpret the
+# same tag later, keeping content selection separate from output formatting.
 def code(s):return ('code',s)
+# Return a ('picture', value) content tuple representing a saved figure filename.
+# This helper does not render or write files. PDF/HTML dispatchers interpret the
+# same tag later, keeping content selection separate from output formatting.
 def picture(name):return ('picture',name)
+# Return a ('diagram', value) content tuple representing a mapping selector, bitonic or rank.
+# This helper does not render or write files. PDF/HTML dispatchers interpret the
+# same tag later, keeping content selection separate from output formatting.
 def diagram(kind):return ('diagram',kind)
 
 
+# The following page declarations are historical authored report content.
+# They are not fresh scientific conclusions recalculated from current branches.
+# The rendering helpers below consume their tagged blocks for PDF and HTML.
 page('7.2 Precision and nonlinearity: updated evidence',
  p('The public Q.ANT evidence in the preceding pages is retained as a dated snapshot checked on 1 October 2026. This revision reruns the numerical experiment on 2 October 2026. It does not establish a new device specification or execute the Q.ANT SDK.'),
  table(['Quantity','Meaning in this study'],[
@@ -241,6 +291,10 @@ page('11. Results: what the new run establishes',
  p('Dashed: quantization only. Solid: quantization plus sigma=0.25 output steps. Shading: 95% Wilson intervals for noisy points. Ideal cases are 100% throughout and omitted from the plot for readability. Both bitonic curves overlap by construction.'),
  p('The exact tables on the next pages report correct runs out of 1,000. Complete three-architecture rows, intervals, stable counts and validity counts are available in the HTML inspector and precision.csv.'))
 
+# Select saved counts for one key width and input family over configured sizes.
+# Show quantized and noisy bitonic/rank correct counts plus noisy rank validity.
+# Return a table block with explicit PDF widths; this aggregates existing rows
+# without rerunning sorters, calculating new metrics, or altering their denominators.
 def result_table(b,family):
     rr=[]
     for n in next(c['sizes'] for c in CONFIG['precision_cases'] if c['key_bits']==b):
@@ -376,6 +430,11 @@ for start,end in [(0,8),(8,15)]:
          p('Primary supplied literature and the preceding inspected hardware snapshot support the architectural account. Experimental settings and new results are explicitly identified as such. Source PDFs are not redistributed in the project ZIP or repository.'))
 
 
+# Return a self-contained SVG illustrating the four steps of a mapping.
+# kind='bitonic' selects dependent layer routing; the other branch depicts rank.
+# Numbered boxes distinguish electronic work from a candidate photonic operation.
+# The schematic is explanatory only: it does not establish measured device fusion,
+# optical depth, latency, or absence of intermediate conversions.
 def diagram_svg(kind):
     if kind=='bitonic':
         title='Bitonic: repeat K active layers'
@@ -395,6 +454,9 @@ def diagram_svg(kind):
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 206" role="img" aria-label="'+title+'"><rect width="620" height="206" fill="white"/><text x="12" y="18" font-family="sans-serif" font-size="15" font-weight="bold">'+title+'</text><g font-family="sans-serif">'+''.join(rects)+'</g></svg>'
 
 
+# Return the PDF equivalent as a ReportLab vector Drawing, with selectable text.
+# Use the same two mapping choices and electronic/candidate-photonic boundaries
+# as diagram_svg. Required report fonts are registered by build_pdf before use.
 def draw_diagram(kind):
     # PDF uses ReportLab primitives; no rasterized diagram text.
     from reportlab.graphics.shapes import Drawing,Rect,String
@@ -409,6 +471,13 @@ def draw_diagram(kind):
     return d
 
 
+# Register bundled fonts, render a front section and new page descriptions,
+# and insert the pre-existing historical_foundation.pdf between them.
+# Find chapter pages from rendered text, replace the one-page contents placeholder,
+# add footer/page numbers/bookmarks/metadata, and save the report under reports.
+# Return the final page count. Missing chapter headings fail instead of producing
+# guessed page references. This overwrites the dated report, so it is not run
+# merely to validate a comments-only code change.
 def build_pdf():
     pdfmetrics.registerFont(TTFont('DV',str(ASSET/'DejaVuSans.ttf')))
     pdfmetrics.registerFont(TTFont('DV-Bold',str(ASSET/'DejaVuSans-Bold.ttf')))
@@ -420,7 +489,14 @@ def build_pdf():
         'eq':ParagraphStyle('eq',fontName='DV',fontSize=10,leading=16,spaceBefore=7,spaceAfter=15,backColor=colors.HexColor('#edf4f8'),borderPadding=8),
         'cell':ParagraphStyle('cell',fontName='DV',fontSize=8,leading=11.5),
         'code':ParagraphStyle('code',fontName='Courier',fontSize=8,leading=12,backColor=colors.HexColor('#f0f4f8'),borderPadding=8,spaceAfter=15)}
+    # Convert one string to a ReportLab Paragraph using a named local style.
+    # Normalize Unicode dash variants for this report font/layout path; existing
+    # supported inline markup is retained. The function returns a flowable, not a page.
     def par(s,sty='p'):return Paragraph(str(s).replace('−','-').replace('—','-').replace('–','-'),styles[sty])
+    # Dispatch one tagged content tuple into a LIST of ReportLab flowables.
+    # Preserve figure aspect ratio, repeat table headers on overflow, and use vector
+    # diagrams. Table cells are paragraph objects so long text wraps within columns.
+    # Unknown block types raise ValueError rather than disappearing from the report.
     def render_block(b):
         typ=b[0]
         if typ in ('p','h','eq'):return [par(b[1],typ)]
@@ -438,6 +514,10 @@ def build_pdf():
             t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#dfebf4')),('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.HexColor('#f4f7fa')]),('VALIGN',(0,0),(-1,-1),'TOP'),('TOPPADDING',(0,0),(-1,-1),7),('BOTTOMPADDING',(0,0),(-1,-1),7),('LEFTPADDING',(0,0),(-1,-1),7),('RIGHTPADDING',(0,0),(-1,-1),7),('LINEBELOW',(0,0),(-1,-1),.35,colors.HexColor('#d5e1eb'))]))
             return [t,Spacer(1,12)]
         raise ValueError(typ)
+    # Render an ordered list of page descriptions into an in-memory PDF document.
+    # Insert explicit page breaks between descriptions; flowables may still overflow.
+    # Use fixed A4 dimensions/margins and return a PyMuPDF document for composition.
+    # This helper is reused for front matter, tail chapters and the final contents page.
     def make_pages(pages):
         flow=[]
         for i,pg in enumerate(pages):
@@ -472,6 +552,9 @@ def build_pdf():
     tail=make_pages(PAGES);document.insert_pdf(tail)
     # Find each chapter start from its actual rendered title; no hard-coded page guesses.
     titles=['1. Executive research position','2. Concepts needed to read the study','3. The four parameters: T, S, H and D','4. Historical models and their relationship to C','5. Five sorters compared with C=(T,S,H,D)','6. Why bitonic versus rank is the focused thesis comparison','7. Q.ANT: what its capabilities mean for sorting','8. One difference operation, two sorting mappings','9. What was validated against the papers','10. The agreed experimental protocol','11. Results: what the new run establishes','12. Next experiments and hardware questions','13. Thesis registration: a concrete research goal','14. Reproduce and inspect the evaluation','15. Glossary and evidence boundary']
+    # Resolve the table of contents from the actual composed PDF, including the
+    # inserted historical pages. Whitespace normalization makes text matching robust
+    # to line wrapping; every expected chapter must still be found.
     normalized=[' '.join(pg.get_text().split()) for pg in document]
     toc=[]
     for title in titles:
@@ -492,6 +575,11 @@ def build_pdf():
     return len(document)
 
 
+# Convert one content tuple to an HTML fragment, preserving the shared report
+# structure. Convert ReportLab link markup to anchors; escape literal code blocks.
+# Embed figure bytes as base64 so the generated guide works offline.
+# Other prose/table fields are trusted authored report content, not arbitrary
+# untrusted user HTML. Unknown tags raise ValueError like the PDF dispatcher.
 def block_html(b):
     typ=b[0]
     if typ in ('p','h','eq'):
@@ -504,6 +592,11 @@ def block_html(b):
     raise ValueError(typ)
 
 
+# Read report_template.html and replace its named @@...@@ placeholders with
+# saved rows, generated method sections, base64 figures/CSV, and SVG diagrams.
+# Escape closing-script-like sequences in embedded JSON to keep it inside its
+# data script element. The browser only explores these saved rows; it does not
+# rerun experiments. Write the self-contained historical HTML guide under reports.
 def build_html():
     template=(ASSET/'report_template.html').read_text()
     methods=''.join('<details><summary>'+pg['title']+'</summary><div class="detail-body">'+''.join(block_html(b) for b in pg['blocks'])+'</div></details>' for pg in PAGES if not pg['title'].startswith('11.'))
@@ -513,6 +606,9 @@ def build_html():
     (OUT/'APC_Thesis_Registration_Visual_Guide.html').write_text(text)
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__=='__main__':
     figures();count=build_pdf();build_html()
     print(f'Generated HTML report and {count}-page updated PDF from {len(ROWS)} saved rows.')

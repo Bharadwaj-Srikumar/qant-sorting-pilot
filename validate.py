@@ -1,3 +1,11 @@
+# Reading guide: LEGACY model/source checks used by evaluate.py.
+# The source examples reproduce arithmetic and schedules, not physical devices.
+# This validator deliberately predicts adjacent-key false ties for the older
+# 2/L output step; it must not be used as the expected behavior for comparison.py.
+# Assertions combine literature examples, exhaustive small inputs, key-validation
+# failures and seeded batching invariance. validate returns a JSON-ready report.
+# Direct CLI execution prints the report; evaluate.py decides where to save it.
+
 """Independent source examples, analytic controls, and input/model checks.
 
 Run: python validate.py. Assertions fail loudly; results are also saved by the
@@ -9,6 +17,13 @@ from model import Difference, run_sort, validate_keys
 from sorting import shuffle_schedule, shuffle_sort, compact_bitonic_layers
 
 
+# Run legacy source-example arithmetic and model controls; return a report dict.
+# Independent expectations include fixed-shuffle traces, biased-matrix ranks,
+# exhaustive small binary inputs, ideal stable ordering, ReLU identities and the
+# old quantizer's exact adjacent-pair failure counts. Reject malformed raw keys
+# and check that changing batch partition preserves seeded noisy outcomes.
+# Assertions stop at the first contradiction; reported historical time formulas
+# are source arithmetic, not executed-device measurements or modern benchmarks.
 def validate():
     result={}
     # Source: Beyette Eq.1 p.8165 and section3.C p.8171.
@@ -110,5 +125,8 @@ def validate():
     return result
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__=='__main__':
     print(json.dumps(validate(),indent=2))

@@ -1,3 +1,14 @@
+# Reading guide: reproduce historical periodic CPU-SDK sorting scenarios.
+# The raw corpus and reference outcomes are prerequisites; pair_checks.json
+# supplies the optional fixed equality band. No true keys tune that band at run time.
+# Each batch calls the SDK linear difference and then the periodic operation.
+# Electronic routing follows each bitonic layer or the single rank-pair stage.
+# Only upstream is required to match the original direct outcomes exactly.
+# Output noise is in a different score scale; see common_noise_model.py for the
+# later controlled model. Buffer counts are logical API data, not device timing.
+# This script writes to its chosen directory and can replace existing files;
+# use --output-dir with a fresh path when preserving an earlier run.
+
 """Run both sorters with the actual periodic SDK CPU operation.
 
 Uses the unchanged 24,000 saved inputs and six eta values. The upstream
@@ -24,6 +35,14 @@ from run_noise_sweep import ETA_VALUES, INPUT_SHA256, MASTER_SEED, MAPPINGS
 ROOT = Path(__file__).resolve().parent
 
 
+# Inputs: output Path, positive batch size, and requested historical scenarios.
+# Require a CPU backend, immutable input hash, reference outcomes and CPU pair
+# calibration file. Calibrate d=0 once, then derive optional fixed tie bands.
+# Replay each case in chunks with persistent per-trial stream identities.
+# Count both linear and periodic submissions and their public BF16 buffers;
+# the separate one-time reference call is disclosed in metadata.
+# Save complete flag/index outputs, row summaries and failure examples. This
+# routine can overwrite matching names in output; use a fresh path for new runs.
 def run(output, batch_size, scenarios=("upstream", "output")):
     identity = require_cpu_backend()
     if batch_size < 1:
@@ -34,6 +53,9 @@ def run(output, batch_size, scenarios=("upstream", "output")):
     output.mkdir(parents=True, exist_ok=True)
     reference = calibration_reference()
     pairs = json.loads((ROOT / "results/periodic/pair_checks.json").read_text())
+    # The threshold is frozen from an exhaustive noiseless CPU calibration. It is
+    # not fitted to these noisy sort outcomes and is not a measured hardware band.
+    # Using half the minimum unequal margin balances two bounded-error distances.
     tie_bands = {r["bits"]: r["minimum_cpu_score_margin"] / 2
                  for r in pairs["rows"]}
     rows, saved, failures = [], {}, []
@@ -88,6 +110,9 @@ def run(output, batch_size, scenarios=("upstream", "output")):
                         noise_tag = "zero" if eta == 0 else f"noise{round(eta*100):03d}"
                         mapping_tag = "bitonic" if stream_id == 1 else "rank"
                         case = f"{dataset}_{noise_tag}_{mapping_tag}"
+                        # Identity check applies to the upstream protocol only. The output protocol
+                        # changes both the disturbance location and fixed-rounding boundary; equal eta
+                        # therefore does not make these two protocols physically matched.
                         if scenario == "upstream":
                             if not np.array_equal(f, baseline[case+"_flags"]) or not np.array_equal(ind, baseline[case+"_indices"]):
                                 raise AssertionError(f"Upstream baseline mismatch: {case}")
@@ -146,6 +171,9 @@ def run(output, batch_size, scenarios=("upstream", "output")):
     print(json.dumps(metadata, indent=2))
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/periodic")

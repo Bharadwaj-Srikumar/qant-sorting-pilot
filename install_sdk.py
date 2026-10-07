@@ -1,3 +1,11 @@
+# Reading guide: explicit installer, not a module required by all experiments.
+# The entry point checks Python, virtual environment, platform and archive hash
+# before extracting one official wheel and invoking pip with historical pins.
+# Those pins reproduce the SDK setup; the separate CPU-baseline/common-model
+# requirements files document their own environments. Do not conflate the pins.
+# Running this script modifies the ACTIVE virtual environment and may require
+# package-index access for dependencies. Importing the module does not install.
+
 """Install the bundled official CPU SDK into a Python 3.12 virtual environment.
 
 The vendor archive is unmodified and checksum-checked. The Gaussian sweep does
@@ -13,6 +21,11 @@ import tempfile
 import zipfile
 
 
+# Require Python 3.12 and an active virtual environment, then choose a wheel
+# for a supported OS/architecture and verify the entire bundled archive hash.
+# Extract only the selected wheel basename into a temporary directory, invoke
+# pip using the same Python interpreter, and propagate installation failures.
+# This is an environment-changing command; no installation occurs on import.
 def main():
     if sys.version_info[:2] != (3, 12):
         raise SystemExit("Use Python 3.12 for the supplied official wheels")
@@ -46,5 +59,8 @@ def main():
     print("Installed the official CPU backend. Run python run_sdk_control.py")
 
 
+# Direct execution starts this file's command-line/test entry point.
+# Importing helpers does not run THIS block; the module reading guide
+# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     main()
