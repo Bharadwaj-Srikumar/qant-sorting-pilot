@@ -42,12 +42,22 @@ abschließenden Leistungsbehauptungen auf einer kontrollierten Maschine prüfen.
 
 ## Sprint 2 – Aussagekräftige Sortierqualität
 
+**Stand 7. Oktober 2026:** Implementiert und auf den vorhandenen Ausgaben
+ausgeführt. 1.147 von 1.152 Konfigurationen sind auswertbar, einschließlich
+der zur Upstream-Variante identischen direkten Referenz. Fünf Konfigurationen
+der Toleranzbereich-Variante haben keine vollständigen gespeicherten Ausgaben.
+Die Quelle wurde nicht verändert und keine Sortierung neu ausgeführt.
+Definitionen, Ergebnisse und Datenlücke: [RANKING_QUALITY.md](RANKING_QUALITY.md).
+
 **Frage:** Wie stark sind fehlerhafte Ergebnisse tatsächlich gestört?
 
 - Vorhandene gespeicherte Ausgaben auswerten, bevor Sortierungen neu ausgeführt werden.
 - Vollständige Korrektheit und Stabilität beibehalten.
 - Kendall-tau-b mit definiertem Umgang mit gleichen Schlüsseln ergänzen.
   Bei konstanten Listen ist tau nicht definiert; diese Fälle separat berichten.
+  Da die Ausgabe eindeutige Positionen und die Schlüssel Gleichstände haben,
+  wird zusätzlich die erreichbare tau-b-Obergrenze angegeben. Die auf diese
+  Obergrenze normierte Schlüsselordnung wird getrennt bezeichnet.
 - Vertauschte ungleiche Schlüsselpaare nach ursprünglichem Schlüsselabstand
   auswerten. Diese Ausgabequalität nicht mit der Fehlerrate einzelner interner
   Komparatoraufrufe verwechseln.

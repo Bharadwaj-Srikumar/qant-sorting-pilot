@@ -1,0 +1,15 @@
+{
+  "targeted_tests_passed": 9,
+  "exhaustive_small_permutations": 240,
+  "independent_scipy_cases": 40,
+  "scipy_version": "1.17.0",
+  "numpy_version": "2.3.5",
+  "python": "3.12.14",
+  "noiseless_cases_checked": 192,
+  "recall_rows_checked": 3911,
+  "noiseless_correctness_and_tau_ceiling_passed": true,
+  "invalid_recall_weighting_passed": true,
+  "full_set_recall_control_passed": true,
+  "source_counts_reproduced": true,
+  "test_source_sha256": "83d520b311ce01a814ed32cb33312d67b1adc03c5a169fad00d8930d5eb5c9c9"
+}
