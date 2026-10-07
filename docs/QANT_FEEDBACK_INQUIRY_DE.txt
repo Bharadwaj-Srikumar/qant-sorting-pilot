@@ -1,0 +1,52 @@
+Betreff: Masterarbeit – Datenwege, Kennlinien und möglicher Testzugang zur Q.ANT NPU
+
+Sehr geehrtes Q.ANT-Team,
+
+im Rahmen meiner Masterarbeit in Informatik an der Hochschule Bochum bei
+Prof. Henrik Blunck untersuche ich die Abbildung von Bitonic- und Rangsortierung
+auf hybride photonische Prozessoren. Die Arbeit soll auch ohne Hardwarezugang
+durch Modellierung und reproduzierbare Evaluierung tragfähige Ergebnisse liefern.
+
+Mit Ihrem SDK 2.3.1 habe ich auf dem CPU-Backend lineare Differenzberechnungen
+und einen Vergleich auf Basis der periodischen Funktion untersucht. Im jetzigen
+Ablauf erhält der Host die Differenz d und berechnet u = u0 - alpha*d, bevor
+die periodische Funktion aufgerufen wird. Für die Entscheidung genügt dann
+bereits sign(d). Deshalb möchte ich klären, ob eine andere Ausführung der
+nativen Nichtlinearität eine sinnvolle Rolle im Gesamtablauf geben könnte.
+
+Für eine technische Einschätzung wären folgende Informationen besonders hilfreich:
+
+1. Lassen sich MVM beziehungsweise eine affine Berechnung und die periodische
+   Nichtlinearität innerhalb der NPU ohne Rückgabe des Zwischenergebnisses an
+   den Host verbinden? Wird ein konstanter Offset unterstützt? Welche internen
+   elektronischen Verarbeitungsschritte, Puffer sowie E/O- und O/E-Wandlungen
+   bleiben dabei bestehen? Existiert hierfür eine dokumentierte Schnittstelle?
+
+2. Welche reale Kennlinie, Eingangsbereiche und Auflösungen gelten für die
+   periodische Funktion? Gibt es Daten zu Kanalunterschieden, Drift und
+   wiederholten Ausgaben, insbesondere nahe einer Entscheidungsgrenze?
+
+3. Liegen Messwerte oder Modelle für Rauschen und Quantisierung vor, jeweils
+   mit Signalreferenz, Messbandbreite und Betriebsbedingungen? Wie werden die
+   BF16-Werte der SDK-Schnittstelle auf die physischen Signalbereiche abgebildet?
+
+4. Welche Kapazitäts-, Aufruf- und Transfergrenzen sind für die linearen und
+   periodischen Operationen dokumentiert? Können Gewichte und Zwischenergebnisse
+   auf dem Gerät verbleiben?
+
+5. Wäre ein begrenzter wissenschaftlicher Testzugang oder alternativ die
+   Bereitstellung geeigneter Kennlinien- und Rauschdaten möglich?
+
+Ein Messplan und ein vorbereitetes Kennlinien-Skript liegen vor. Die bisherigen
+CPU-Ergebnisse behandle ich ausdrücklich nicht als Nachweis realer Kennlinien,
+optischer Kaskadierbarkeit oder eines Laufzeit-/Energievorteils.
+
+Das öffentliche Projekt-Repository finden Sie unter:
+https://github.com/Bharadwaj-Srikumar/qant-sorting-pilot
+
+Vielen Dank für Ihre Unterstützung.
+
+Mit freundlichen Grüßen
+Bharadwaj Srikumar
+
+[Entwurf zur Abstimmung; noch nicht versendet.]

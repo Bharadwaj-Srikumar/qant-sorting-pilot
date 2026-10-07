@@ -1,0 +1,439 @@
+{
+  "all_passed": true,
+  "checks": [
+    {
+      "dataset": "b4_n16_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n16_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n2_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n2_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n2_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n2_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n4_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n4_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n4_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n4_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n8_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n8_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n8_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b4_n8_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n128_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n128_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n128_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n128_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n2_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n2_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n2_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n2_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n32_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n32_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n32_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n32_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n4_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n4_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n4_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n4_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n64_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n64_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n64_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n64_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n8_distinct",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n8_distinct",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n8_duplicates_allowed",
+      "storage_dtype": "uint8",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    },
+    {
+      "dataset": "b8_n8_duplicates_allowed",
+      "storage_dtype": "int64",
+      "arrays": 1000,
+      "valid": true,
+      "sorted": true,
+      "stable": true,
+      "input_unchanged": true
+    }
+  ],
+  "unique_input_arrays": 24000,
+  "note": "The same numerical arrays are checked once per storage dtype; these are not independent new inputs."
+}
