@@ -1,0 +1,6 @@
+# SDK 2.3.1 CPU wheel is installed separately from the hash-verified vendor ZIP.
+# See docs/PERIODIC_FEASIBILITY.md; preserve the original experiment's pins.
+numpy==2.3.5
+ml-dtypes==0.6.0
+cffi==2.1.1
+pycparser==3.0

@@ -107,6 +107,14 @@ Herstellerantworten können später einfließen.
 
 ## Sprint 4 – Rolle der periodischen Funktion und Q.ANT-Anfrage
 
+**Stand 9. Oktober 2026: CPU-Machbarkeitsprüfung abgeschlossen.**
+Der öffentliche SDK-Vertrag zeigt weiterhin einen Host-Zwischenwert. Die
+konkrete affine BF16-Phasenbildung erzeugt 40 falsche Gleichstände bei 8 Bit;
+beide Kontrollpfade bleiben korrekt. 3.600 ausgewählte vollständige Sortierläufe
+bestätigen die Auswirkung in beiden Mappings. Ergebnis, Quellprüfung und Grenzen:
+[PERIODIC_FEASIBILITY.md](PERIODIC_FEASIBILITY.md). Herstellerfragen sind im
+Anfrageentwurf präzisiert; Versand, Antwort und Hardwaremessungen stehen aus.
+
 **Frage:** Kann die Funktion einen nützlichen Teil des Sortierablaufs übernehmen?
 
 - Mathematische Möglichkeit `u = u0 - alpha*a + alpha*b` von belegter

@@ -33,6 +33,7 @@ can therefore produce a wrong order even when no score reverses its sign.
 | `comparison.py`, `sorting_schedules.py`, `run_noise_sweep.py` | Matched-step reference and exact reproduction | Input/output steps `1/2**bits`; six synthetic noise levels |
 | `sdk_mapping.py`, `run_sdk_control.py` | Official CPU linear API integration | BF16 API, no added reference-sweep quantizer/noise |
 | `periodic_comparison.py`, `run_periodic_evaluation.py` | Historical periodic CPU comparison | BF16 phase/output; upstream and output noise have different boundaries/units |
+| `check_affine_periodic.py` | Affine phase feasibility, exhaustive pairs and bounded full sorts | CPU-only BF16 products; known 8-bit false ties retained as evidence |
 | `common_noise_model.py`, `run_common_noise_controls.py` | Shared signal/noise sensitivity controls | Float64 identity/normalized ideal sine, explicit stage noise and quantizers |
 
 These paths coexist to preserve evidence. They must not be swapped without
@@ -48,6 +49,7 @@ without noise. BF16 is an interface format, not a measured analog ENOB.
 | How is a damaged archive inspected without inventing outputs? | `saved_output_reader.py` |
 | How do we check exact reference reproduction? | `verify_results.py` |
 | What does the digital CPU timing include? | `run_cpu_baseline.py` |
+| Can an affine MVM form the phase without changing precision behavior? | `check_affine_periodic.py`, `docs/PERIODIC_FEASIBILITY.md` |
 | How are the periodic reference and margins obtained? | `check_periodic_pairs.py` |
 | Why does min/max reconstruction need an unclipped magnitude? | `check_sdk_nonlinearity.py` |
 | What do logical call/transfer counts mean? | `hardware_conditions.py`, `summarize_periodic_results.py` |
@@ -55,7 +57,7 @@ without noise. BF16 is an interface format, not a measured analog ENOB.
 | How is the optional pinned CPU SDK installed? | `install_sdk.py` |
 | How is the current complete thesis report generated? | `build_reports.py`, `report_assets/thesis_report.md`, `report_assets/references.json` |
 | How were the historical PDF/HTML reports generated? | `tools/build_legacy_reports.py`, `report_assets/report_template.html` |
-| Where are independent examples and edge cases? | All five files in `tests/` |
+| Where are independent examples and edge cases? | The modules in `tests/` |
 
 The [current complete German report](../reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf)
 is the only file in `reports/`. Its builder reads authored Markdown and saved

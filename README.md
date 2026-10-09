@@ -11,7 +11,7 @@ separate control exercises the official Q.ANT **CPU backend**.
 ## Current complete thesis report
 
 [**Hybride photonische Sortierung – Gesamtdokumentation der Masterarbeit**](reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf)
-is the single current report, in German, dated **7 October 2026**. It connects
+is the single current report, in German, dated **9 October 2026**. It connects
 the literature and both earlier presentations to the complexity model, five
 architectures, mathematical mappings, current code, noise/quality evaluation,
 CPU baseline and remaining hardware questions. It documents the current thesis
@@ -42,6 +42,22 @@ array contracts and distinction between historical and current experiments.
 All project-owned Python definitions and HTML/JavaScript behavior have detailed
 source comments. The documentation update preserves the executable logic and
 existing numerical evidence.
+
+## Feedback sprint: periodic feasibility, 9 October 2026
+
+Moving phase formation into an affine SDK MVM does not establish a host-free
+cascade. The tested BF16 implementation produces **40 false ties among all
+65,536 ordered 8-bit pairs**, even without noise; all 4-bit pairs pass.
+The direct-difference and existing host-phase controls remain correct.
+A fixed sample of 3,600 complete CPU sorts documents the consequence in both
+mappings. No physical hardware or performance result is claimed.
+
+See [the feasibility analysis and reproduction instructions](docs/PERIODIC_FEASIBILITY.md),
+`check_affine_periodic.py`, and `results/affine_periodic_20261009/`.
+The separate candidate does not replace the existing comparator. The Q.ANT
+inquiry draft is updated but has not been sent.
+The [validation record](validation/affine_feasibility_20261009.json) documents
+37 passing tests, retained historical evidence and the PDF checks.
 
 ## Feedback sprint: common noise model, 7 October 2026
 

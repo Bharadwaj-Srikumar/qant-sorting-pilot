@@ -1,0 +1,546 @@
+{
+  "sdk": {
+    "sdk_version": "2.3.1",
+    "driver_info": "cpu-backend;commit:none;"
+  },
+  "python": "3.12.14",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "packages": {
+    "numpy": "2.3.5",
+    "ml-dtypes": "0.6.0",
+    "cffi": "2.1.1",
+    "pycparser": "3.0"
+  },
+  "hardware_executed": false,
+  "added_noise": false,
+  "extra_quantizer": false,
+  "deadband": 0,
+  "phase_constants": {
+    "u0": 1.5707963267948966,
+    "alpha": 1.5707963267948966
+  },
+  "calibration": "One same-path (0,0) evaluation per affine instance; no per-pair correction",
+  "sample": {
+    "datasets": [
+      "b4_n16_distinct",
+      "b4_n16_duplicates_allowed",
+      "b8_n16_distinct",
+      "b8_n16_duplicates_allowed",
+      "b8_n256_distinct",
+      "b8_n256_duplicates_allowed"
+    ],
+    "first_trials": 100,
+    "batch_size": 10
+  },
+  "input_sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+  "sdk_archive_sha256": "99b4669d3256d92cc35efc1a2d6d59deef7a033d78397d71150333011eb93898",
+  "source_sha256": {
+    "check_affine_periodic.py": "919ee0dd62b5317f6adfe1fd60966b1e70abd64a71ecc1924dc4ce9a62096fcd",
+    "periodic_comparison.py": "53b8187aaa63e49b6f426d825b5a08ce5d1eaaca80fecade96d18065c10fbd16",
+    "sdk_mapping.py": "03946a1cb09dde38b5e0f2dadfbf1cadb53f1f42aa793250b4d2d7f1c4e9a5c5",
+    "sorting_schedules.py": "b04b20755252667a9934c0db0e7d22f8b2fecfb10e47e0283b14657cede9c835",
+    "metrics.py": "ff5a82e91c00f394378e4b7c0f14e2162cedf923c0017534755afb26234f0fe3"
+  },
+  "outputs_sha256": "43254aeface387b4dfd597b58ff54a80ab9e76d0828d40f7eb3f42767f5748cd",
+  "pairs": [
+    {
+      "bits": 4,
+      "path": "direct_difference",
+      "ordered_pairs": 256,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.0625,
+      "minimum_nonzero_unequal_magnitude": 0.0625
+    },
+    {
+      "bits": 4,
+      "path": "host_phase",
+      "ordered_pairs": 256,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.10155868530273438,
+      "minimum_nonzero_unequal_magnitude": 0.10155868530273438
+    },
+    {
+      "bits": 4,
+      "path": "affine_phase",
+      "ordered_pairs": 256,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.09374618530273438,
+      "minimum_nonzero_unequal_magnitude": 0.09374618530273438,
+      "reference": 0.000484466552734375,
+      "encoded_weights": [
+        [
+          -1.5703125,
+          1.5703125,
+          1.5703125
+        ]
+      ],
+      "first_failures": []
+    },
+    {
+      "bits": 8,
+      "path": "direct_difference",
+      "ordered_pairs": 65536,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.00390625,
+      "minimum_nonzero_unequal_magnitude": 0.00390625
+    },
+    {
+      "bits": 8,
+      "path": "host_phase",
+      "ordered_pairs": 65536,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.007808685302734375,
+      "minimum_nonzero_unequal_magnitude": 0.007808685302734375
+    },
+    {
+      "bits": 8,
+      "path": "affine_phase",
+      "ordered_pairs": 65536,
+      "errors": 40,
+      "false_ties": 40,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.0,
+      "minimum_nonzero_unequal_magnitude": 0.007808685302734375,
+      "reference": 0.000484466552734375,
+      "encoded_weights": [
+        [
+          -1.5703125,
+          1.5703125,
+          1.5703125
+        ]
+      ],
+      "first_failures": [
+        {
+          "a": 165,
+          "b": 166,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.015625,
+            1.015625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 166,
+          "b": 165,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.015625,
+            1.015625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 169,
+          "b": 170,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0390625,
+            1.0390625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 170,
+          "b": 169,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0390625,
+            1.0390625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 174,
+          "b": 175,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0703125,
+            1.0703125,
+            1.5703125
+          ]
+        },
+        {
+          "a": 175,
+          "b": 174,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0703125,
+            1.0703125,
+            1.5703125
+          ]
+        },
+        {
+          "a": 179,
+          "b": 180,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.1015625,
+            1.1015625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 180,
+          "b": 179,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.1015625,
+            1.1015625,
+            1.5703125
+          ]
+        }
+      ]
+    }
+  ],
+  "sorts": [
+    {
+      "dataset": "b4_n16_distinct",
+      "mapping": "bitonic",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_distinct",
+      "mapping": "bitonic",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_distinct",
+      "mapping": "bitonic",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_distinct",
+      "mapping": "rank",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_distinct",
+      "mapping": "rank",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_distinct",
+      "mapping": "rank",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "mapping": "rank",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "mapping": "rank",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b4_n16_duplicates_allowed",
+      "mapping": "rank",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "mapping": "bitonic",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "mapping": "bitonic",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "mapping": "bitonic",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 95,
+      "stable": 95
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "mapping": "rank",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "mapping": "rank",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_distinct",
+      "mapping": "rank",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 95,
+      "stable": 95
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 97,
+      "stable": 97
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "mapping": "rank",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "mapping": "rank",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n16_duplicates_allowed",
+      "mapping": "rank",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 97,
+      "stable": 97
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "mapping": "bitonic",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "mapping": "bitonic",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "mapping": "bitonic",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 0,
+      "stable": 0
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "mapping": "rank",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "mapping": "rank",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_distinct",
+      "mapping": "rank",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 0,
+      "stable": 0
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "mapping": "bitonic",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 0,
+      "stable": 0
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "mapping": "rank",
+      "path": "direct_difference",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "mapping": "rank",
+      "path": "host_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 100,
+      "stable": 100
+    },
+    {
+      "dataset": "b8_n256_duplicates_allowed",
+      "mapping": "rank",
+      "path": "affine_phase",
+      "trials": 100,
+      "valid": 100,
+      "correct": 0,
+      "stable": 0
+    }
+  ]
+}

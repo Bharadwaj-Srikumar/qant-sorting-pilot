@@ -99,6 +99,25 @@ def evidence_tables():
         ["Qualität und Rauschen", "Referenz, τ, Abstandsfehler, Recall; gemeinsame Kontrollen", "Gerätespezifische Kennlinie, Rauschen und Drift"],
         ["Leistung", "Stabile digitale CPU-Baseline", "GPU, vollständige NPU-Zeit und Energie"],
     ], [1, 2.0, 1.6])
+    # New CPU feasibility evidence remains separate from historical pair results.
+    affine = json.loads((ROOT / "results/affine_periodic_20261009/summary.json").read_text())
+    pair_rows = [["Breite", "Paare je Pfad", "Direkt: Fehler", "Host-Phase: Fehler", "Affin: Fehler"]]
+    for bits in (4, 8):
+        chosen = {r["path"]: r for r in affine["pairs"] if r["bits"] == bits}
+        pair_rows.append([f"{bits} Bit", number(chosen["affine_phase"]["ordered_pairs"])] +
+                         [number(chosen[path]["errors"]) for path in
+                          ("direct_difference", "host_phase", "affine_phase")])
+    add("affine_pairs", "Affine CPU-Phase im Vergleich zu zwei Kontrollen", pair_rows,
+        [.7, 1.1, 1.1, 1.2, 1.0], "Quelle D7: summary.json; alle geordneten Paare, einschließlich Gleichständen. SDK 2.3.1, kein Zusatzrauschen.")
+    sort_rows = [["Affine Variante", "Bitonic korrekt / stabil", "Rang korrekt / stabil"]]
+    for dataset in affine["sample"]["datasets"]:
+        bits, size, family = dataset.split("_", 2)
+        label = f"{bits[1:]} Bit, N={size[1:]}, " + ("verschieden" if family == "distinct" else "Duplikate erlaubt")
+        selected = [select_one(affine["sorts"], dataset=dataset, mapping=mapping, path="affine_phase")
+                    for mapping in ("bitonic", "rank")]
+        sort_rows.append([label] + [f"{r['correct']} / {r['stable']}" for r in selected])
+    add("affine_sorts", "Vollständige Sortierkontrolle der affinen Variante", sort_rows,
+        [2.0, 1.2, 1.2], "Quelle D7: je Zelle 100 gespeicherte Listen. Alle Ausgaben gültig. Beide Kontrollpfade: jeweils 100 korrekt und stabil in jeder Zelle.")
     for label, symbol, description in [("lower", "Ω", "Untere"), ("tight", "Θ", "Enge"), ("upper", "O", "Obere")]:
         def bound(expr):
             """Apply a bound symbol to the same architecture-specific scaling expression."""
@@ -139,6 +158,7 @@ def evidence_tables():
         ["Referenz, sechs η", "288 Konfigurationen; 288.000 Sortierungen", "Gespeicherte vollständige Ausgaben"],
         ["Lineares CPU-SDK", "48.000 rauschfreie Sortierungen", "Softwareintegration, kein Timing"],
         ["Periodische Paare", "256 + 65.536 geordnete Paare", "Vollständige endliche Domänenprüfung"],
+        ["Affine CPU-Phase", "3 × (256 + 65.536) Paare; 3.600 Sortierungen", "Begrenzte Machbarkeitskontrolle mit zwei Kontrollpfaden"],
         ["Periodische Szenarien", "864 Konfigurationen; nominell 864.000 Sortierungen", "Historische Serie; Roharchive fehlen im Git-Stand"],
         ["Zusätzliche Rankingmetriken", "1.147 / 1.152 Konfigurationen; 1.147.000 Ausgaben", "Referenz + historische Szenarien; 5 Lücken"],
         ["Gemeinsames Rauschmodell", "28 Mio. Paarentscheidungen; 14.400 Sortierungen", "Synthetische Kontrollen, eigenes Protokoll"],
@@ -196,6 +216,7 @@ def evidence_tables():
         ["sdk_mapping.py; run_sdk_control.py; install_sdk.py", "Gepinnte CPU-SDK-Installation, BF16-Differenz und rauschfreie Integration"],
         ["periodic_comparison.py; run_periodic_evaluation.py", "Phasencodierung, Referenzkorrektur, historische Szenarien und Nullbereich"],
         ["check_periodic_pairs.py; check_sdk_nonlinearity.py", "Endliche Paarprüfung und getrennte ReLU-/Min-Max-Kontrolle"],
+        ["check_affine_periodic.py", "Affine CPU-Phasenbildung, erschöpfende Paare und begrenzte vollständige Sortierkontrolle"],
         ["measure_periodic_curve.py", "Wiederholte API-Ausgaben, Codes und Zeiten; explizite Backendprüfung"],
         ["ranking_quality.py; evaluate_ranking_quality.py; saved_output_reader.py", "τ, Inversionen, Recall und CRC-geprüfte eingeschränkte Archivlesung"],
         ["common_noise_model.py; run_common_noise_controls.py", "Gemeinsame Einheiten, explizite Störstellen und analytische / Monte-Carlo-Kontrollen"],
@@ -230,6 +251,7 @@ def evidence_tables():
         ["D5: results/common_noise_20261007", "Paarfälle, Skalen, Sortierausgaben und Qualität", "Vollständige gespeicherte Kontrollserie"],
         ["D6: results/cpu_baseline_20261007", "Einzelzeiten, Aggregation, Umgebung und Validierung", "Gemessene CPU-Baseline"],
         ["data/inputs.npz", "24 Datensätze mit je 1.000 Eingaben", "Gemeinsamer Korpus mit festem Datei-Hash"],
+        ["D7: results/affine_periodic_20261009", "Alle Paarscores, 3.600 Sortierausgaben, Zählungen und SDK-Quellprüfung", "Neue CPU-Kontrolle; keine Hardwaremessung"],
         ["validation; docs", "Prüfprotokolle, Methoden und Hardwaregrenzen", "Versionsabhängige Belege; Zeitstempel beachten"],
     ], [1.55, 1.6, 1.65])
     add("glossary", "Zentrale Begriffe", [
@@ -260,7 +282,8 @@ def check_provenance():
     initially reviewed source edition. Scientific inputs must match that edition.
     """
     manifest = json.loads((ASSETS / "report_provenance.json").read_text())
-    for item in manifest["repository_evidence"]:
+    additions = json.loads((ASSETS / "affine_evidence.json").read_text())
+    for item in manifest["repository_evidence"] + additions["repository_evidence"]:
         path = ROOT / item["path"]
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         if digest != item["sha256"]:
@@ -417,7 +440,7 @@ def build(output):
         """Track headings for bookmarks, the table of contents and running headers."""
         def __init__(self, filename):
             """Create one printable A4 text frame with consistent page furniture."""
-            super().__init__(str(filename), pagesize=(PAGE_W,PAGE_H), leftMargin=LEFT, rightMargin=RIGHT, topMargin=TOP, bottomMargin=BOTTOM, title="Hybride photonische Sortierung – Gesamtdokumentation der Masterarbeit", author="Bharadwaj Srikumar", subject="Recherche, Modelle, Code und Evaluierung; Stand 7. Oktober 2026")
+            super().__init__(str(filename), pagesize=(PAGE_W,PAGE_H), leftMargin=LEFT, rightMargin=RIGHT, topMargin=TOP, bottomMargin=BOTTOM, title="Hybride photonische Sortierung – Gesamtdokumentation der Masterarbeit", author="Bharadwaj Srikumar", subject="Recherche, Modelle, Code und Evaluierung; Stand 9. Oktober 2026")
             self.chapter = "Gesamtdokumentation der Masterarbeit"
             frame = Frame(LEFT,BOTTOM,CONTENT_W,PAGE_H-TOP-BOTTOM,leftPadding=0,rightPadding=0,topPadding=0,bottomPadding=0)
             self.addPageTemplates(PageTemplate(id="report", frames=frame, onPage=self.decorate))
@@ -434,7 +457,7 @@ def build(output):
                 canvas.line(LEFT,PAGE_H-40,PAGE_W-RIGHT,PAGE_H-40)
                 canvas.setFont("Report",7); canvas.setFillColor(colors.HexColor(MUTED))
                 canvas.drawString(LEFT,PAGE_H-31,"HYBRIDE PHOTONISCHE SORTIERUNG")
-                canvas.drawRightString(PAGE_W-RIGHT,PAGE_H-31,"Forschungsstand · 07.10.2026")
+                canvas.drawRightString(PAGE_W-RIGHT,PAGE_H-31,"Forschungsstand · 09.10.2026")
                 canvas.drawString(LEFT,30,"Bharadwaj Srikumar · Masterarbeit")
                 canvas.drawRightString(PAGE_W-RIGHT,30,str(doc.page))
             canvas.restoreState()
@@ -453,7 +476,7 @@ def build(output):
     # The cover is typeset explicitly; its authored metadata remains in Markdown.
     title_style = ParagraphStyle("cover_title", fontName="ReportBold", fontSize=29, leading=35, textColor=colors.HexColor(INK), spaceAfter=20)
     sub_style = ParagraphStyle("cover_sub", fontName="Report", fontSize=15, leading=21, textColor=colors.HexColor(ACCENT), spaceAfter=15)
-    story = [Spacer(1,72), para("MASTERARBEIT · FORSCHUNGS- UND IMPLEMENTIERUNGSSTAND", "note"), Spacer(1,16), Paragraph("Hybride photonische<br/>Sortierung",title_style), Paragraph("Gesamtdokumentation der Masterarbeit",sub_style), para("Recherche, mathematische Modelle, Implementierung und Evaluierung"), Spacer(1,30), para("**Bharadwaj Srikumar**"), para("Master Informatik · Hochschule Bochum<br/>".replace("<br/>", "")), para("Betreuung: Prof. Dr. Henrik Blunck"), para("Stand: 7. Oktober 2026"), Spacer(1,25), para("**Arbeitstitel**"), para("Mapping Hybrid Optoelectronic Sorting Architectures onto Modern Photonic Accelerators: A Hardware-Aware Evaluation and Simulation"), Spacer(1,20), para("Diese Dokumentation beschreibt den erreichten Stand der Masterarbeit. Sie verbindet Literatur, mathematische Herleitung, ausführbaren Code und gespeicherte Ergebnisse. Reale Hardwarevalidierung, photonische Laufzeitvorteile und Energieeffizienz sind noch offen.","note"), PageBreak(), para("Inhaltsverzeichnis","h1")]
+    story = [Spacer(1,72), para("MASTERARBEIT · FORSCHUNGS- UND IMPLEMENTIERUNGSSTAND", "note"), Spacer(1,16), Paragraph("Hybride photonische<br/>Sortierung",title_style), Paragraph("Gesamtdokumentation der Masterarbeit",sub_style), para("Recherche, mathematische Modelle, Implementierung und Evaluierung"), Spacer(1,30), para("**Bharadwaj Srikumar**"), para("Master Informatik · Hochschule Bochum<br/>".replace("<br/>", "")), para("Betreuung: Prof. Dr. Henrik Blunck"), para("Stand: 9. Oktober 2026"), Spacer(1,25), para("**Arbeitstitel**"), para("Mapping Hybrid Optoelectronic Sorting Architectures onto Modern Photonic Accelerators: A Hardware-Aware Evaluation and Simulation"), Spacer(1,20), para("Diese Dokumentation beschreibt den erreichten Stand der Masterarbeit. Sie verbindet Literatur, mathematische Herleitung, ausführbaren Code und gespeicherte Ergebnisse. Reale Hardwarevalidierung, photonische Laufzeitvorteile und Energieeffizienz sind noch offen.","note"), PageBreak(), para("Inhaltsverzeichnis","h1")]
     toc = TableOfContents()
     toc.levelStyles = [ParagraphStyle("toc", fontName="Report", fontSize=9.3, leading=13.5, leftIndent=0, firstLineIndent=0, spaceBefore=6, textColor=colors.HexColor(INK))]
     story += [toc]
