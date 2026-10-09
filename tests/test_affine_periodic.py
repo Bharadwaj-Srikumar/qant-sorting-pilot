@@ -8,7 +8,7 @@ import unittest
 import numpy as np
 
 try:
-    from check_affine_periodic import AffinePeriodicComparison, comparator
+    from qant_sorting.experiments.check_affine_periodic import AffinePeriodicComparison, comparator
 except ImportError:
     AffinePeriodicComparison = None
 

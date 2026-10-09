@@ -7,13 +7,10 @@
 import unittest
 import numpy as np
 try:
-    from periodic_comparison import PeriodicComparison, calibration_reference, require_cpu_backend
+    from qant_sorting.periodic_comparison import PeriodicComparison, calibration_reference, require_cpu_backend
 except ImportError:
     PeriodicComparison = None
 
-# Unit-test group: independent contracts and edge cases for this module family.
-# Each method creates its own fixtures/streams, so tests do not depend on order
-# or change the stored research corpus and reference result archives.
 @unittest.skipIf(PeriodicComparison is None, "optional Q.ANT CPU SDK not installed")
 class PeriodicTests(unittest.TestCase):
     # On the guarded CPU SDK, enumerate both complete key domains and calibrate

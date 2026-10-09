@@ -13,7 +13,7 @@
 This script does not supply a device, credentials or an approved input range.
 Before hardware use, obtain the permissible phase/amplitude ranges from Q.ANT.
 Example CPU control:
- python measure_periodic_curve.py --mode cpu --phase-min 0 --phase-max 3.141592653589793 --points 257 --repeats 20
+ python -m qant_sorting curve --mode cpu --phase-min 0 --phase-max 3.141592653589793 --points 257 --repeats 20
 
 For hardware: install the native driver and hardware SDK, specify the confirmed
 range, and explicitly select --mode hardware. All results record backend identity.
@@ -78,9 +78,6 @@ def run(args):
     print(json.dumps(metadata,indent=2))
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--mode',choices=('cpu','hardware'),required=True)

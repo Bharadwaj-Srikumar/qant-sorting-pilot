@@ -1,0 +1,151 @@
+{
+  "date": "2026-10-09",
+  "base_commit": "a750d88b217b0dd6ae732a4e1e5dcb27ade2e75f",
+  "scope": "Package layout, shared I/O, CLI, documentation; scientific kernels unchanged",
+  "structure": {
+    "root_python_files_before": 28,
+    "root_python_files_after": 0,
+    "commands": [
+      "noise",
+      "verify",
+      "common-noise",
+      "quality",
+      "cpu",
+      "resources",
+      "sdk",
+      "periodic-pairs",
+      "affine",
+      "nonlinearity",
+      "periodic",
+      "periodic-summary",
+      "curve",
+      "install-sdk",
+      "report"
+    ],
+    "legacy_python_lines": 1256,
+    "legacy_files_byte_identical": [
+      "legacy/model.py",
+      "legacy/sorting.py",
+      "legacy/evaluate.py",
+      "legacy/validate.py",
+      "legacy/build_reports.py",
+      "legacy/config.json",
+      "legacy/MANIFEST.json"
+    ],
+    "documentation": {
+      "README.md": {
+        "words_before": 1545,
+        "words_after": 443,
+        "lines_before": 243,
+        "lines_after": 84
+      },
+      "docs/CODE_GUIDE.md": {
+        "words_before": 1082,
+        "words_after": 694,
+        "lines_before": 124,
+        "lines_after": 86
+      }
+    }
+  },
+  "scientific_definitions_ast_unchanged": [
+    "comparison.Precision",
+    "comparison.NoisyDifference",
+    "common_noise_model.NoiseConfig",
+    "common_noise_model.quantize",
+    "common_noise_model.transfer_value",
+    "common_noise_model.evaluate_difference",
+    "common_noise_model.CommonNoiseComparison",
+    "common_noise_model.receiver_current_variance",
+    "common_noise_model.projected_variance",
+    "input_validation.validate_keys",
+    "metrics.reference_flags",
+    "metrics.wilson_interval",
+    "periodic_comparison.require_cpu_backend",
+    "periodic_comparison.periodic_values",
+    "periodic_comparison.calibration_reference",
+    "periodic_comparison.PeriodicComparison",
+    "ranking_quality.PreparedKeys",
+    "ranking_quality.prepare_keys",
+    "ranking_quality.selected_k",
+    "ranking_quality.score_saved_order",
+    "saved_output_reader.recover_members",
+    "saved_output_reader.SavedOutputs",
+    "sdk_mapping.CallCounts",
+    "sdk_mapping.SdkDifference",
+    "sdk_mapping.backend_identity",
+    "sorting_schedules.compact_bitonic_layers",
+    "sorting_schedules.bitonic_sort",
+    "sorting_schedules.rank_sort"
+  ],
+  "existing_evidence_files_byte_identical": 60,
+  "unit_tests": {
+    "run": 41,
+    "passed": 41,
+    "skipped": 0,
+    "command": "python -m unittest discover -s tests -v"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "sdk": "2.3.1 CPU",
+    "ml_dtypes": "0.6.0"
+  },
+  "reproduction": {
+    "affine_arrays": 116,
+    "common_arrays": 288,
+    "signal_scales.csv": "byte-identical",
+    "sort_quality.csv": "byte-identical",
+    "affine_counts": "identical",
+    "noise": {
+      "matched_configurations": 288,
+      "matched_arrays": 576
+    },
+    "common": {
+      "analytic_probability_cases_passed": 182,
+      "pair_cases": 280,
+      "pair_decisions": 28000000,
+      "prequantized_identical_paired_decisions": 1400000,
+      "sort_cases": 144,
+      "sort_runs": 14400,
+      "prequantized_identical_paired_sort_outputs": 1200,
+      "noiseless_sort_cases_passed": 24,
+      "source_hashes_unchanged": true,
+      "note": "Synthetic Float64 controls, not SDK executions or Q.ANT measurements."
+    },
+    "sdk": 48000
+  },
+  "total_full_sorts_verified": 354000,
+  "additional_checks": [
+    "All 15 CLI help commands",
+    "Top-level help without site-packages",
+    "No summary file reads/writes on import",
+    "All three common-noise CSVs byte-identical",
+    "Noiseless periodic calibration JSON identical",
+    "SDK nonlinear pair checks pass",
+    "Legacy validate.py still passes",
+    "Active Markdown links resolve",
+    "Text diff whitespace check passes"
+  ],
+  "pdf": {
+    "path": "reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf",
+    "pages": 53,
+    "tables": 25,
+    "sha256": "9297a0184779b3e392f48c7c7b4b842b16d62ff8c57f9e32d9d05c825bc03cd7",
+    "source_sha256": "2d680549ddeb8cbfb30a8b19c22942357e9a1c5e7668cc78c85be5a1597fdf05",
+    "unresolved_markers": 0,
+    "out_of_bounds_text": 0,
+    "internal_links_valid": true,
+    "visual_review": "Full overview and detailed changed pages 38-41"
+  },
+  "reports_directory_files": [
+    "Masterarbeit_Hybride_Photonische_Sortierung.pdf"
+  ],
+  "not_rerun": [
+    "CPU timing benchmark: timing kernel unchanged; existing contract tests pass",
+    "Full historical ranking analysis/periodic summary: source CSV/NPZ archives absent",
+    "GPU and physical Q.ANT measurements"
+  ],
+  "compatibility": "Root script filenames/imports replaced by python -m qant_sorting commands and qualified imports; docs/source_layout.json records moves",
+  "provenance": "Original result metadata and hashes retained; historical affine source hashes identified at original Git commit; current report still verifies original numerical evidence hashes"
+}

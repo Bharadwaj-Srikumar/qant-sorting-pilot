@@ -1,4 +1,0 @@
-# Independent analysis of saved outputs; NumPy is used by the evaluator.
-numpy==2.3.5
-# Independent Kendall-tau-b check in the targeted tests.
-scipy==1.17.0

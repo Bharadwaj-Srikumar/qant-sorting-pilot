@@ -13,19 +13,21 @@ extra fixed-point quantizer or added noise. It verifies the API mapping only.
 It is deliberately guarded against accidental execution on a hardware driver.
 """
 
-import csv
+from qant_sorting.io import source_hashes, write_csv
+
+import argparse
 import hashlib
 import json
 from pathlib import Path
 
 import numpy as np
 
-from input_validation import validate_keys
-from metrics import reference_flags
-from sdk_mapping import SdkDifference, backend_identity
-from sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.input_validation import validate_keys
+from qant_sorting.metrics import reference_flags
+from qant_sorting.sdk_mapping import SdkDifference, backend_identity
+from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
 
-ROOT = Path(__file__).resolve().parent
+from qant_sorting.paths import ROOT
 
 
 # Run the pinned-CPU guard, exhaustive difference checks and saved-corpus replay.
@@ -34,6 +36,9 @@ ROOT = Path(__file__).resolve().parent
 # Write the reproduced CSV, NPZ and identity/hash metadata under sdk_reproduced;
 # do not interpret logical buffer size or total script duration as NPU performance.
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/sdk_reproduced")
+    args = parser.parse_args()
     identity = backend_identity()
     if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
         raise RuntimeError("This control requires the pinned official 2.3.1 CPU backend")
@@ -44,7 +49,7 @@ def main():
         if not np.array_equal(SdkDifference(bits)(a, b), (a - b) / 2**bits):
             raise AssertionError("The CPU backend did not reproduce exact pair differences")
 
-    output = ROOT / "results/sdk_reproduced"
+    output = args.output_dir
     output.mkdir(parents=True, exist_ok=True)
     rows, outcomes = [], {}
     with np.load(ROOT / "data/inputs.npz") as corpus:
@@ -87,24 +92,18 @@ def main():
                     ))
                 print(f"{dataset}: SDK CPU verified", flush=True)
 
-    with (output / "accuracy.csv").open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
+    write_csv(output / "accuracy.csv", rows)
     np.savez_compressed(output / "trial_outcomes.npz", **outcomes)
     metadata = dict(
         **identity, hardware_executed=False, added_noise=False,
         executions=sum(row["trials"] for row in rows), matched_arrays=len(outcomes),
         inputs_sha256=hashlib.sha256((ROOT / "data/inputs.npz").read_bytes()).hexdigest(),
-        source_sha256={path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in ROOT.glob("*.py")},
+        source_sha256=source_hashes(),
         scope="Official CPU API control, not optical accuracy, throughput or power measurement.",
     )
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2))
     print(f"Verified {metadata['executions']:,} SDK CPU sorting executions.")
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     main()

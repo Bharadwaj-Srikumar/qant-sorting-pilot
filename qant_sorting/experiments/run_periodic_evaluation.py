@@ -16,8 +16,9 @@ scenario is checked trial-by-trial against the previous reference outcomes.
 The output scenario is an explicitly separate noise-location experiment.
 Full-sort correctness and stable record order remain separate measurements.
 """
+from qant_sorting.io import source_hashes, write_csv
+
 import argparse
-import csv
 import hashlib
 import json
 from pathlib import Path
@@ -25,14 +26,14 @@ import time
 
 import numpy as np
 
-from input_validation import validate_keys
-from metrics import reference_flags, wilson_interval
-from periodic_comparison import (
+from qant_sorting.input_validation import validate_keys
+from qant_sorting.metrics import reference_flags, wilson_interval
+from qant_sorting.periodic_comparison import (
     PeriodicComparison, calibration_reference, require_cpu_backend,
 )
-from run_noise_sweep import ETA_VALUES, INPUT_SHA256, MASTER_SEED, MAPPINGS
+from qant_sorting.experiments.settings import ETA_VALUES, MASTER_SEED, MAPPINGS
 
-ROOT = Path(__file__).resolve().parent
+from qant_sorting.paths import ROOT, INPUT_SHA256
 
 
 # Inputs: output Path, positive batch size, and requested historical scenarios.
@@ -143,10 +144,7 @@ def run(output, batch_size, scenarios=("upstream", "output")):
                         if first:
                             failures.append(dict(scenario=scenario, case=case, **first))
             print(f"{dataset}: both scenarios complete", flush=True)
-    with (output / "accuracy.csv").open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
+    write_csv(output / "accuracy.csv", rows)
     np.savez_compressed(output / "trial_outcomes.npz", **saved)
     (output / "failures.json").write_text(json.dumps(failures, indent=2)+"\n")
     metadata = dict(
@@ -164,19 +162,15 @@ def run(output, batch_size, scenarios=("upstream", "output")):
         host_operations="Phase scaling/offset, reference subtraction, sign/ties, exchanges, rank sums, placement",
         transfers="Logical public API buffer bytes, not measured PCIe traffic",
         timing="Runtime only, not a hardware latency benchmark",
-        source_sha256={p.name:hashlib.sha256(p.read_bytes()).hexdigest()
-                       for p in ROOT.glob("*.py")},
+        source_sha256=source_hashes(),
     )
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2)+"\n")
     print(json.dumps(metadata, indent=2))
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/periodic")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/periodic_reproduced")
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--scenario", choices=("both", "upstream", "output", "output_deadband"), default="both")
     args = parser.parse_args()

@@ -15,16 +15,16 @@ These analytical counts need no SDK. --verify-sdk optionally tests chunking
 against the official CPU backend, which still does not measure real hardware.
 """
 
+from qant_sorting.io import write_csv
+
 import argparse
-import csv
 import json
-from pathlib import Path
 
 import numpy as np
 
-from sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
 
-ROOT = Path(__file__).resolve().parent
+from qant_sorting.paths import ROOT
 # PCIe Gen4 x8: 16 GT/s per lane, eight lanes, 128/130 line coding, 8 bits/byte.
 # This is a directional link ceiling before protocol/driver overhead.
 B_PEAK = 16e9 * 8 * (128 / 130) / 8
@@ -59,7 +59,7 @@ def counts(n, cap):
 def verify_sdk_chunks():
     """Verify submitted shapes/counts, without inferring physical tiling."""
     # Lazy imports keep the analytical accounting and main sweep NumPy-only.
-    from sdk_mapping import SdkDifference, backend_identity
+    from qant_sorting.sdk_mapping import SdkDifference, backend_identity
 
     identity = backend_identity()
     if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
@@ -97,17 +97,6 @@ def verify_sdk_chunks():
                     raise AssertionError("Logical SDK call or transfer counts changed")
                 checks.append(dict(n=n, mapping=name, cap=cap, pairs=pairs, calls=calls, correct=True))
     return checks
-
-
-# Write nonempty, same-schema dictionaries to a CSV with a header.
-# Column order follows the first row; values are serialized without statistical
-# reinterpretation. Opening in write mode replaces the target file.
-# The caller creates the parent directory and controls preservation of old results.
-def write_csv(path, rows):
-    with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
 
 
 # Generate per-sort logical resource rows and a complete integer cap sweep.
@@ -157,9 +146,6 @@ def main(verify_sdk=False):
     print(f"Saved {len(resources)} resource rows and {len(sensitivity):,} conditional sensitivity rows.")
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify-sdk", action="store_true", help="Also check chunked submissions on the CPU SDK")

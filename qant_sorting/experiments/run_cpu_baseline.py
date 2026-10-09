@@ -13,8 +13,9 @@ Measures an application call returning sorted keys AND original indices.
 No Q.ANT SDK, simulated noise, or photonic timing is involved.
 """
 
+from qant_sorting.io import source_hashes, write_csv
+
 import argparse
-import csv
 from datetime import datetime, timezone
 import gc
 import hashlib
@@ -29,8 +30,7 @@ import time
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent
-INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
+from qant_sorting.paths import ROOT, INPUT_SHA256
 
 
 # Input one key array or batch, with records along the last axis.
@@ -87,17 +87,6 @@ def measure_passes(batches, passes):
         if was_enabled:
             gc.enable()
     return elapsed
-
-
-# Write nonempty, same-schema dictionaries to a CSV with a header.
-# Column order follows the first row; values are serialized without statistical
-# reinterpretation. Opening in write mode replaces the target file.
-# The caller creates the parent directory and controls preservation of old results.
-def write_csv(path, rows):
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
 
 
 # Collect runtime, CPU visibility/affinity, optional Linux quota, known thread
@@ -223,7 +212,7 @@ def run(args):
     ), indent=2) + "\n", encoding="utf-8")
     metadata = dict(
         created_at_utc=datetime.now(timezone.utc).isoformat(), environment=environment(),
-        input_sha256=input_hash, source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        input_sha256=input_hash, source_sha256=source_hashes(),
         baseline="NumPy stable argsort + take_along_axis", input_storage_dtypes=args.dtypes,
         index_dtype=str(np.dtype(np.intp)), batch_sizes=args.batch_sizes,
         repeats=args.repeats, target_ms=args.target_ms, warmup_passes=args.warmup_passes,
@@ -242,9 +231,6 @@ def run(args):
     print(f"Saved {len(cases)} cases and {len(raw)} timing samples to {output}", flush=True)
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=ROOT / "data/inputs.npz")

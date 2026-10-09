@@ -74,9 +74,9 @@ und Sweep-Abhängigkeiten werden nicht geändert:
 ```bash
 python -m venv .venv-baseline
 # Umgebung aktivieren, anschließend:
-python -m pip install -r requirements-cpu-baseline.txt
+python -m pip install -r requirements/cpu.txt
 python -m unittest discover -s tests -p test_cpu_baseline.py -v
-python run_cpu_baseline.py --output-dir results/cpu_baseline_reproduced
+python -m qant_sorting cpu --output-dir results/cpu_baseline_reproduced
 ```
 
 Das Ausgabeverzeichnis muss leer sein. Der SHA-256 des Korpus wird vor dem Lauf

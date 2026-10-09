@@ -10,11 +10,11 @@
 # future source hashes without changing old numerical evidence.
 
 """Small reproducible controls for the common model; no SDK/hardware required."""
+from qant_sorting.io import file_hash, write_csv
+
 import argparse
-import csv
-from dataclasses import asdict, replace
+from dataclasses import asdict
 from datetime import datetime, timezone
-import hashlib
 import json
 from pathlib import Path
 import platform
@@ -23,12 +23,11 @@ import numpy as np
 import scipy
 from scipy.special import ndtr
 
-from common_noise_model import NoiseConfig, CommonNoiseComparison, evaluate_difference, transfer_value, ALPHA
-from ranking_quality import prepare_keys, score_saved_order
-from sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.common_noise_model import NoiseConfig, CommonNoiseComparison, evaluate_difference, transfer_value, ALPHA
+from qant_sorting.ranking_quality import prepare_keys, score_saved_order
+from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
 
-ROOT = Path(__file__).resolve().parent
-INPUT_SHA = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
+from qant_sorting.paths import ROOT, INPUT_SHA256 as INPUT_SHA
 SEED = 20261007
 # Controlled changes within ONE model. Every numeric noise/drift setting is assumed.
 SETTINGS = {
@@ -44,24 +43,6 @@ SETTINGS = {
     "negative_offset": dict(upstream_sigma_lsb=.25, readout_sigma_lsb=.25, output_drift_lsb=-.25),
 }
 SORT_SETTINGS = ("no_noise", "prequantized_control", "upstream_only", "combined", "coarse_output", "positive_offset")
-
-
-# Hash the exact bytes at a Path with SHA256 and return the hexadecimal string.
-# Do not normalize line endings or reserialize archives before hashing: provenance
-# identifies the actual stored artifact, including its original container bytes.
-def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-# Write nonempty, same-schema dictionaries to a CSV with a header.
-# Column order follows the first row; values are serialized without statistical
-# reinterpretation. Opening in write mode replaces the target file.
-# The caller creates the parent directory and controls preservation of old results.
-def write_csv(path, rows):
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
 
 
 # Return (probabilities [negative,zero,positive], clipping_error_bound) when
@@ -128,9 +109,10 @@ def run(args):
         raise ValueError("Use an empty output directory to preserve prior evidence")
     if args.pair_samples < 10000 or not 1 <= args.sort_trials <= 1000:
         raise ValueError("Need >=10000 pair samples and 1..1000 sort trials")
-    source_names = ("common_noise_model.py", "run_common_noise_controls.py", "ranking_quality.py",
-                    "sorting_schedules.py", "data/inputs.npz", "results/periodic/pair_checks.json")
-    before = {name: digest(ROOT/name) for name in source_names}
+    source_names = ("qant_sorting/common_noise_model.py", "qant_sorting/experiments/run_common_noise_controls.py", "qant_sorting/ranking_quality.py",
+                    "qant_sorting/sorting_schedules.py", "qant_sorting/io.py", "qant_sorting/paths.py",
+                    "data/inputs.npz", "results/periodic/pair_checks.json")
+    before = {name: file_hash(ROOT/name) for name in source_names}
     if before["data/inputs.npz"] != INPUT_SHA:
         raise ValueError("Unexpected saved corpus")
     # Stage 1: small pair controls establish signal margins and probability checks
@@ -233,7 +215,7 @@ def run(args):
                     if name == "prequantized_control":
                         np.testing.assert_array_equal(*orders)
                         matched_sorts += len(keys)
-    after = {name: digest(ROOT/name) for name in source_names}
+    after = {name: file_hash(ROOT/name) for name in source_names}
     if after != before:
         raise AssertionError("Sources changed during evaluation")
     write_csv(out/"signal_scales.csv", scale_rows)
@@ -255,16 +237,13 @@ def run(args):
         sort_datasets=datasets, settings={name: asdict(NoiseConfig(8, **p)) for name,p in SETTINGS.items()},
         setting_note="bits=8 is an example; run covers 4 and 8, both transfers. All noise/drift settings are assumptions.",
         source_sha256=before,
-        output_sha256={p.name:digest(p) for p in out.iterdir()},
+        output_sha256={p.name:file_hash(p) for p in out.iterdir()},
         random_pairing="Transfer variants share standard-normal samples. Stages/trials independent; drift fixed.",
         exclusions=["physical tcos/BF16", "measured receiver parameters", "time/channel covariance calibration", "hardware timing/energy"])
     (out/"metadata.json").write_text(json.dumps(metadata, indent=2)+"\n")
     print(json.dumps(validation, indent=2))
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT/"results/common_noise_reproduced")

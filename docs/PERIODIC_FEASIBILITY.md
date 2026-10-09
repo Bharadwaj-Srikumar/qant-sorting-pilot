@@ -128,12 +128,12 @@ Eine eigene Umgebung lässt sich mit Python 3.12 wie folgt einrichten:
 ```bash
 python3.12 -m venv .venv-affine
 . .venv-affine/bin/activate
-python -m pip install -r requirements-affine-control.txt
+python -m pip install -r requirements/sdk.txt
 sha256sum vendor/qant-native-computing-toolkit-wheels-cpu-backend-v2.3.1.zip
 wheel_dir=$(mktemp -d)
 python -m zipfile -e vendor/qant-native-computing-toolkit-wheels-cpu-backend-v2.3.1.zip "$wheel_dir"
 python -m pip install --no-deps "$wheel_dir/qant_native_computing_toolkit-2.3.1-cp312-cp312-linux_x86_64.whl"
-python check_affine_periodic.py --output-dir results/affine_periodic_reproduced
+python -m qant_sorting affine --output-dir results/affine_periodic_reproduced
 ```
 
 Der ZIP-Hash muss

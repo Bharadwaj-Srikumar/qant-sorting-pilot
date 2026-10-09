@@ -11,13 +11,14 @@
 
 """Reproduce the agreed six-level experiment using only NumPy.
 
-Run: python run_noise_sweep.py
+Run: python -m qant_sorting noise
 The saved reference is never overwritten. Every result is checked against it.
 No SDK, NPU, digital repair, repeated comparison or new noise rule is used.
 """
 
+from qant_sorting.io import source_hashes, write_csv
+
 import argparse
-import csv
 import hashlib
 import json
 from pathlib import Path
@@ -26,20 +27,13 @@ import time
 
 import numpy as np
 
-from comparison import NoisyDifference, Precision
-from input_validation import validate_keys
-from metrics import reference_flags, wilson_interval
-from sorting_schedules import bitonic_sort, rank_sort
-from verify_results import REFERENCE, verify_results
+from qant_sorting.comparison import NoisyDifference, Precision
+from qant_sorting.input_validation import validate_keys
+from qant_sorting.metrics import reference_flags, wilson_interval
+from qant_sorting.experiments.verify_results import REFERENCE, verify_results
 
-ROOT = Path(__file__).resolve().parent
-ETA_VALUES = (0.0, 0.05, 0.10, 0.15, 0.20, 0.25)
-MASTER_SEED = 20260930
-INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
-MAPPINGS = {
-    "Pipelined bitonic adaptation": (bitonic_sort, 1),
-    "Rank adaptation": (rank_sort, 2),
-}
+from qant_sorting.paths import ROOT, INPUT_SHA256
+from qant_sorting.experiments.settings import ETA_VALUES, MASTER_SEED, MAPPINGS
 
 
 # Inputs specify one dataset/precision/eta/sorter/seed context and batch size.
@@ -151,10 +145,7 @@ def run(output_directory, batch_size):
                     rows.append(row)
             print(f"{dataset}: complete", flush=True)
 
-    with (output_directory / "accuracy.csv").open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
+    write_csv(output_directory / "accuracy.csv", rows)
     np.savez_compressed(output_directory / "trial_outcomes.npz", **saved)
     (output_directory / "failures.json").write_text(json.dumps(failures, indent=2))
 
@@ -171,7 +162,7 @@ def run(output_directory, batch_size):
         hardware_executed=False, sdk_noise_model=False,
         noise="Independent Gaussian draws per comparison and between mappings; paired streams across positive eta levels.",
         timing="Run duration only; not a hardware latency or sorting performance benchmark.",
-        source_sha256={path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in ROOT.glob("*.py")},
+        source_sha256=source_hashes(),
         **validation,
     )
     (output_directory / "metadata.json").write_text(json.dumps(metadata, indent=2))
@@ -179,9 +170,6 @@ def run(output_directory, batch_size):
     print(f"Results: {output_directory}")
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")

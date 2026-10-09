@@ -31,7 +31,7 @@ from pathlib import Path
 import re
 import tempfile
 
-ROOT = Path(__file__).resolve().parent
+from qant_sorting.paths import ROOT
 ASSETS = ROOT / "report_assets"
 DEFAULT_OUTPUT = ROOT / "reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf"
 PAGE_W, PAGE_H = 595.276, 841.890
@@ -222,10 +222,10 @@ def evidence_tables():
         ["common_noise_model.py; run_common_noise_controls.py", "Gemeinsame Einheiten, explizite Störstellen und analytische / Monte-Carlo-Kontrollen"],
         ["run_cpu_baseline.py", "Stabile digitale Sortierung, Kalibrierung, Batchzeit und Metadaten"],
         ["hardware_conditions.py; summarize_periodic_results.py", "Logische Ressourcen und historische Zusammenfassungen; keine physische Zeitmessung"],
-        ["model.py; sorting.py; evaluate.py; validate.py", "Historisches gröberes Ausgangsmodell und zugehörige Validierung"],
-        ["build_reports.py; report_assets/thesis_report.md", "Aktueller Gesamtbericht aus Text, Quellen und gespeicherten Tabellen"],
-        ["tools/build_legacy_reports.py; report_assets/report_template.html", "Historischer Generator; Ausgabe nach tmp/legacy_reports"],
-        ["tests/test_model.py; test_periodic.py; test_ranking_quality.py; test_cpu_baseline.py; test_common_noise_model.py", "Gezielte Modell-, Qualitäts-, Backend- und Benchmark-Vertragsprüfungen (alle unter tests/)"],
+        ["legacy/: model.py; sorting.py; evaluate.py; validate.py", "Historisches gröberes Ausgangsmodell und zugehörige Validierung"],
+        ["qant_sorting/report.py; report_assets/thesis_report.md", "Aktueller Gesamtbericht aus Text, Quellen und gespeicherten Tabellen"],
+        ["legacy/build_reports.py; report_assets/report_template.html", "Historischer Generator; Ausgabe nach tmp/legacy_reports"],
+        ["tests/: Modell-, Metrik-, SDK- und Strukturtests", "Gezielte Modell-, Qualitäts-, Backend- und Benchmark-Vertragsprüfungen (alle unter tests/)"],
     ], [2, 2.6])
     add("hardware_plan", "Benötigte Herstellerinformationen und Messungen", [
         ["Frage", "Konkrete Erhebung", "Nutzen für das Mapping"],

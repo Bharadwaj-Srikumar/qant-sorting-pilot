@@ -8,7 +8,7 @@
 
 """Exhaustively check the proposed periodic CPU comparison, without noise.
 
-Run after install_sdk.py: python check_periodic_pairs.py
+Run after install_sdk.py: python -m qant_sorting periodic-pairs
 Checks every ordered key pair, including duplicates and domain extremes.
 Reports raw zero-threshold errors as well as the corrected reference result.
 """
@@ -19,12 +19,12 @@ from pathlib import Path
 import numpy as np
 from ml_dtypes import bfloat16
 
-from periodic_comparison import (
+from qant_sorting.periodic_comparison import (
     ALPHA, U0, calibration_reference, periodic_values, require_cpu_backend,
 )
-from sdk_mapping import SdkDifference
+from qant_sorting.sdk_mapping import SdkDifference
 
-ROOT = Path(__file__).resolve().parent
+from qant_sorting.paths import ROOT
 
 
 # Input destination JSON Path. Guard CPU execution, measure a fixed zero
@@ -77,11 +77,8 @@ def run(output):
     print(json.dumps(result, indent=2))
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-file", type=Path,
-                        default=ROOT / "results/periodic/pair_checks.json")
+                        default=ROOT / "results/periodic_reproduced/pair_checks.json")
     run(parser.parse_args().output_file)
