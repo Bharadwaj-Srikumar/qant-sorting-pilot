@@ -1,3 +1,14 @@
+# 9 October 2026: affine periodic feasibility control
+
+- Audited the pinned SDK's public MVM/periodic boundary and CPU product rounding.
+- Added a documented, CPU-guarded affine candidate with exhaustive 4/8-bit pair
+  checks, two independent mapping controls and 3,600 selected complete sorts.
+- Recorded 40 false 8-bit ties caused by BF16 products; retained every output
+  and the negative result without changing the existing comparison algorithms.
+- Updated the single current thesis report and the unsent Q.ANT inquiry draft.
+- Preserved all earlier scientific code, inputs and result evidence. No hardware
+  run, host-free cascade, physical transfer, latency or energy claim was added.
+
 # 7 October 2026: one complete current thesis report
 
 - Consolidated the supplied presentations, research papers, previous reports and

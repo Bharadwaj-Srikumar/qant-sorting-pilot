@@ -1,0 +1,87 @@
+{
+  "sdk_version": "2.3.1",
+  "commit": "72a2d99f10240b6df3c6d0f636dfa0e2b5d38902",
+  "verified_against": "GitHub recursive Git tree; locally read files match Git blob SHA-1",
+  "files": [
+    {
+      "path": "python/qant_native_computing_toolkit/_wrapper.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9966a72c0c905a680ef6d46c2a89e5c4edf9e90",
+      "size": 28981,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/b9966a72c0c905a680ef6d46c2a89e5c4edf9e90",
+      "sha256": "9c5f9bca762a6a8931637357b069b15224bb557533f9515372153e00125bf583",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/python/qant_native_computing_toolkit/_wrapper.py"
+    },
+    {
+      "path": "python/qant_native_computing_toolkit/_utils.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "290c0f62e3e7b34ef93628b36fd22fc5fac1f0c8",
+      "size": 1949,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/290c0f62e3e7b34ef93628b36fd22fc5fac1f0c8",
+      "sha256": "3014fac3d43fd0fb61aad1f70f712620eaa1ea21175d7d67ce1b70fc12233fc0",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/python/qant_native_computing_toolkit/_utils.py"
+    },
+    {
+      "path": "python/qant_native_computing_toolkit/native/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54ab48ee1715d3d686c5bd93189c6b94a9e46112",
+      "size": 280,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/54ab48ee1715d3d686c5bd93189c6b94a9e46112",
+      "sha256": "f53a894e9c9722e49681456505b9fa4eec66cfe560f2fc42a0e74525d542cb0f",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/python/qant_native_computing_toolkit/native/__init__.py"
+    },
+    {
+      "path": "src/linear.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62ed331bb759a7b0e73e9e1e6779052dd60cbd08",
+      "size": 4527,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/62ed331bb759a7b0e73e9e1e6779052dd60cbd08",
+      "sha256": "2dc86a1e79c93e4b0df3708c9ca9745148890ec57391be67695033987183e5f3",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/linear.rs"
+    },
+    {
+      "path": "src/non_linear.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2cf731ec49943d450eae3c6d732019b30858e9fa",
+      "size": 10663,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/2cf731ec49943d450eae3c6d732019b30858e9fa",
+      "sha256": "c6471dada910fbcf87361d7f1b3308809fdaaed8d277d0cf23a85230175cdce1",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/non_linear.rs"
+    },
+    {
+      "path": "src/qant_driver_import/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2a72dca821d489303cd5ee790de4b50cdfb859c0",
+      "size": 9907,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/2a72dca821d489303cd5ee790de4b50cdfb859c0",
+      "sha256": "2d5e3c678540e99ac9c53330b5dcc2af81c448acefe6d63df014615447cdc40b",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/qant_driver_import/mod.rs"
+    },
+    {
+      "path": "src/qant_driver_import/backend_cpu.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9bd5f7f31ec991acd52cadda974ed564f6da1455",
+      "size": 5915,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/9bd5f7f31ec991acd52cadda974ed564f6da1455",
+      "sha256": "58d1329b53ae0b4d464645b275ec15cb3232cb1f9f75df39b9be05eaf3d5aab5",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/qant_driver_import/backend_cpu.rs"
+    },
+    {
+      "path": "src/qant_driver_import/backend_driver.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4fc81cc4fa2f0abad15af2c4989ca8ff5a0eca68",
+      "size": 2367,
+      "url": "https://api.github.com/repos/Q-ANT-GmbH/qant_native_computing_toolkit/git/blobs/4fc81cc4fa2f0abad15af2c4989ca8ff5a0eca68",
+      "sha256": "a62fd015b4a0c8cc3c943c54b30f34a43c2fdbbcc9840887b950342eae7d88de",
+      "source_url": "https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/blob/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902/src/qant_driver_import/backend_driver.rs"
+    }
+  ]
+}

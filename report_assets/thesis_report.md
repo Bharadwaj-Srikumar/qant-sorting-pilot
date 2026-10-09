@@ -8,7 +8,7 @@ Bharadwaj Srikumar · Master Informatik · Hochschule Bochum
 
 Betreuung: Prof. Dr. Henrik Blunck
 
-Forschungs- und Implementierungsstand: 7. Oktober 2026
+Forschungs- und Implementierungsstand: 9. Oktober 2026
 
 Arbeitstitel: Mapping Hybrid Optoelectronic Sorting Architectures onto Modern Photonic Accelerators: A Hardware-Aware Evaluation and Simulation
 
@@ -22,7 +22,9 @@ Die Arbeit untersucht, unter welchen Genauigkeits- und Ressourcenbedingungen vol
 
 Aus fünf untersuchten Architekturen werden Bitonic und Rangsortierung vertieft. Bitonic verarbeitet relativ wenige Vergleiche in abhängigen Stufen; Rangsortierung bündelt eine quadratische Paarphase. Das unveränderte Modell C = (T, S, H, D) trennt skalare sequenzielle Gesamtarbeit, logischen Speicher, installierte Verarbeitungspositionen und unregenerierte optische Tiefe. T ist eine real-RAM-artige Operationszahl, keine physische Sekundenzahl.
 
-Gespeicherte Eingaben, erschöpfende 4-/8-Bit-Paarprüfungen und vollständige Sortierläufe stützen die mathematische und CPU-seitige Funktionsfähigkeit. Der periodische SDK-Baustein entscheidet nach Referenzkorrektur korrekt. Im vorhandenen Ablauf liegt seine Ausgangsdifferenz jedoch bereits auf dem Host; der zusätzliche Aufruf bietet dort keinen nachgewiesenen Entscheidungsnutzen.
+Gespeicherte Eingaben, erschöpfende 4-/8-Bit-Paarprüfungen und vollständige Sortierläufe stützen die mathematische und CPU-seitige Funktionsfähigkeit. Der periodische SDK-Baustein mit Phasenbildung auf dem Host entscheidet nach Referenzkorrektur korrekt. Im vorhandenen Ablauf liegt seine Ausgangsdifferenz jedoch bereits auf dem Host; der zusätzliche Aufruf bietet dort keinen nachgewiesenen Entscheidungsnutzen.
+
+Eine separate affine Phasenbildung innerhalb der MVM ist mathematisch äquivalent, verliert im geprüften CPU-Backend jedoch Präzision: 40 von 65.536 geordneten 8-Bit-Paaren werden ohne Zusatzrauschen fälschlich gleich. Die öffentliche Schnittstelle liefert auch dabei den Zwischenwert an den Host zurück. Dieser Befund begrenzt die konkrete Variante; er belegt keine generelle Hardwaregrenze.
 
 Zusätzliche Qualitätsmetriken zeigen den Unterschied zwischen vollständiger Ordnung und brauchbarer Rangfolge: Bei 8 Bit, N = 256, verschiedenen Schlüsseln und η = 0,25 sind im Referenzmodell nur 5,9 % der Bitonic-Ausgaben vollständig korrekt, aber das mittlere Kendall-τ-b beträgt 0,999826 und Recall@10 99,88 %. Die Fehler betreffen überwiegend benachbarte Schlüssel.
 
@@ -375,13 +377,37 @@ Im vorhandenen Ablauf liegt d nach dem linearen API-Aufruf bereits auf dem Host.
 
 Die benötigte Nichtlinearität ist die Ordnungsentscheidung. Auch nach der periodischen Transformation liest die Elektronik das Vorzeichen beziehungsweise einen Toleranzbereich. Der zusätzliche Aufruf vermeidet im aktuellen Code keinen elektronischen Zwischenschritt.
 
-## 7.4 Bedingte Rolle innerhalb der Masterarbeit
+## 7.4 Affine Phasenbildung: Machbarkeit und Präzisionsgrenze
 
-Die mathematische Phase lässt sich auch als affine Kombination u = u₀ − αa + αb schreiben. Interessant wäre ein dokumentierter Datenweg, der diese Transformation und die native Nichtlinearität ohne Host-Rückkehr ausführt. Dazu müssten Biasdarstellung, zulässige Bereiche, Wandlungen, Puffer und Auslese geklärt sein. Eine hostfreie Ausführung wäre noch kein Beleg für eine unregenerierte optische Kaskade.
+Die Host-Phasenberechnung kann algebraisch in die lineare Operation verlagert werden. Für die normierten Schlüssel x = a/2ʷ und y = b/2ʷ mit Schlüsselbreite w gilt:
 
-Die periodische Variante wird daher als begrenzte Machbarkeitsstudie geführt. Ein weiterer Nutzen müsste konkret gezeigt werden: etwa eine vermiedene Zwischenkonversion oder ein besseres, gemessenes Entscheidungsbudget bei gleichem Gesamtaufwand. Dass eine native nichtlineare Funktion existiert, beweist weder die Eignung für dieses Teilproblem noch einen Systemvorteil.
+$$u = [x,y,1]\cdot[-\alpha,\alpha,u_0]^{\mathsf{T}},\quad u_0=\alpha=\pi/2$$
 
-## 7.5 Herstellerangaben und offene Gerätewerte
+Die konstante Eingabe eins stellt den Bias bereit. check_affine_periodic.py führt genau diese BF16-MVM und anschließend den periodischen SDK-Aufruf aus. Es berechnet keine Differenz auf dem Host. Allerdings wird die Phase weiterhin als NumPy-Array zurückgegeben und an den zweiten Aufruf übergeben. Die konkrete API-Komposition spart somit Host-Phasenarithmetik, aber weder einen Aufruf noch den sichtbaren Zwischenpuffer. Ein dokumentierter residenter MVM-/Nichtlinearitätspfad wurde im geprüften öffentlichen Vertrag nicht gefunden. Dies schließt weitergehende Möglichkeiten im nicht offenen Hardwaretreiber nicht aus. [36, D7]
+
+Die algebraische Umformung erhält nicht automatisch das Verhalten in endlicher Präzision. Das CPU-Backend rundet jedes MVM-Produkt auf BF16, summiert in FP32 und rundet die Ausgabe erneut auf BF16. Bei getrennten Produkten αx und αy kann die Information eines kleinen Schlüsselabstands bereits vor der Summation verloren gehen. Die zusätzlichen Prüfungen verwenden kein Rauschen, keine weitere Festkommarundung und keinen Toleranzbereich. [36, D7]
+
+{{table:affine_pairs}}
+
+Beim 8-Bit-Paar (165,166) lauten die drei gerundeten Produkte −1,015625; +1,015625; 1,5703125. Damit entsteht dieselbe Phase wie bei einem Gleichstand. Nach Abzug der einzigen Referenz aus (0,0) ist der Score null. Alle 40 Fehler sind solche falschen Gleichstände; Vorzeichenumkehrungen oder beschädigte echte Gleichstände treten nicht auf. Die kleinste Scoregröße über alle ungleichen 8-Bit-Paare beträgt deshalb null. Der kleinste von null verschiedene Score darf nicht als verfügbare Mindestreserve ausgegeben werden. Referenzkorrektur und Toleranzzone stellen verlorene Information nicht wieder her.
+
+Eine vorher festgelegte Stichprobe verwendet jeweils die ersten 100 Listen aus sechs vorhandenen Datensätzen. Beide Mappings werden mit der affinen Variante und den zwei Kontrollen ausgeführt: insgesamt 3.600 Sortierläufe, davon 1.200 affine. Alle Kontrollsortierungen sind korrekt und stabil. Die Tabelle zeigt die affine Variante; jede Zelle hat 100 Versuche. [D7]
+
+{{table:affine_sorts}}
+
+Alle affinen Ausgaben der Stichprobe bleiben gültige Permutationen. Falsche Gleichstände aktivieren jedoch die Originalindexregel für tatsächlich unterschiedliche Schlüssel. Eine gültige Ausgabe ist somit nicht zwangsläufig korrekt sortiert. Die Stichprobenquoten sind weder universelle Fehlerwahrscheinlichkeiten noch Hardwaremesswerte.
+
+## 7.5 Konsequenz für die Machbarkeitsstudie
+
+Die geprüfte affine Variante wird nicht als korrekter 8-Bit-Komparator übernommen. Das negative Ergebnis ist auf diese Codierung und CPU-Arithmetik begrenzt; andere Codierungen oder eine andere reale Rechenpräzision sind damit nicht ausgeschlossen. Vor weiteren Optimierungen müssen Biasdarstellung, interne Präzision, Eingangsbereiche und ein tatsächlich unterstützter Datenweg geklärt sein. Die bestehende Variante mit Host-Phasenbildung bleibt als korrekt funktionierende Kontrolle erhalten.
+
+Für P Paare betragen die logischen BF16-Puffermengen ohne Kalibrierung oder angenommenes Caching 6P + 4 Byte im direkten Pfad, 12P + 4 Byte bei Host-Phasenbildung und 14P + 6 Byte bei der affinen Variante. Letztere benötigt eine dritte Eingabespalte. Gezählt werden öffentliche Ein-/Ausgabepuffer und Gewichte, keine gemessenen PCIe-Transfers. Die Verlagerung der Arithmetik bringt im geprüften API-Pfad somit keine belegte Ressourceneinsparung.
+
+Eine nützliche interne Verbindung müsste etwa eine Zwischenkonversion vermeiden und dies bei ausreichender Genauigkeit und geringerem Gesamtaufwand belegen. Auch eine hostfreie Verarbeitung wäre noch keine unregenerierte optische Kaskade. Die öffentliche KAN-Komposition enthält ihrerseits eine explizite Phasenaddition auf der CPU zwischen Treiberaufrufen. Eine höherstufige SDK-Funktion allein weist daher keine solche Kaskade nach. [36]
+
+Die periodische Variante bleibt eine begrenzte Machbarkeitsstudie. Ihre Rolle ist nun durch einen reproduzierbaren Präzisionsbefund und konkrete Herstellerfragen eingegrenzt. Dass eine native nichtlineare Funktion existiert, beweist weder ihre Eignung für dieses Teilproblem noch einen Systemvorteil.
+
+## 7.6 Herstellerangaben und offene Gerätewerte
 
 Die öffentlich geprüfte Q.ANT-Produktseite nennt PCIe Gen4 x8, 8 GOPS und eine NPU-Leistungsangabe von 150 W sowie einen CPU-Simulationspfad. Diese Angaben beschreiben kein Sortierergebnis und keine garantierte Vergleichsrate. Die Zahl der Verarbeitungskanäle definiert keine quadratische MVM-Dimension. Die tatsächlichen Transferkosten und das kleinste zuverlässig unterscheidbare Signal müssen für den konkreten Kernel bestimmt werden. [37, Zugriff 07.10.2026]
 
@@ -629,6 +655,8 @@ Eine spätere Energiebaseline muss dieselben Ein- und Ausgaben und dieselbe Qual
 
 Die Datensätze werden einmal erzeugt und danach identisch wiederverwendet. Das Referenzmodell stellt einen kontrollierten Komparator bereit; die Sortierlogik hält Originaldatensätze und Indizes getrennt vom gestörten Signal. Ein SDK-Adapter realisiert denselben linearen Paarbaustein im offiziellen CPU-Backend. Die periodische Variante ergänzt Phase, Referenzkorrektur und optional einen Nullbereich. Qualitätsauswertung und CPU-Benchmark lesen die gespeicherten Eingaben beziehungsweise Ausgaben, ohne sie stillschweigend zu reparieren.
 
+Die separate affine CPU-Kontrolle in check_affine_periodic.py ergänzt zwei Vergleichspfade um die Phasenbildung in der MVM. Sie speichert auch fehlgeschlagene Paarentscheidungen und Sortierungen unverändert; sie ersetzt keinen vorhandenen Komparator.
+
 Das gemeinsame Rauschmodell ist ein eigener kontrollierter Komparator. Es ersetzt nicht automatisch sämtliche älteren Experimente. Seine Dateien tragen eigene Einstellungen, Provenienz und Kontrollnachweise, damit synthetische Float64-Resultate nicht mit SDK- oder Hardwareausgaben verwechselt werden.
 
 {{table:module_map}}
@@ -659,11 +687,13 @@ Der SDK-Installationshelfer bindet Version 2.3.1 an Commit:
 
 `72a2d99f10240b6df3c6d0f636dfa0e2b5d38902`
 
-Der Bericht beruht auf dem Forschungszweig research/feedback-sprint1-cpu-baseline, Codebasis fbb418d0b80c04b4fa7c38fe92f56fc7b7317bcd. Die Berichtskonsolidierung ändert dessen wissenschaftliche Algorithmen und gespeicherte Ergebnisdaten nicht. Die separate Provenienzdatei protokolliert die verwendeten Dokumente und Ergebnisdateien mit Hashes. Der zugehörige Git-Commit hält die exakte Fassung dieser Dokumentation fest.
+Die bisherigen Versuchsserien beruhen auf der Forschungs-Codebasis fbb418d0b80c04b4fa7c38fe92f56fc7b7317bcd. Die affine Machbarkeitskontrolle vom 9. Oktober 2026 ergänzt den Hauptzweigstand 61b6d74ff7bc9ad10749e073f5f3a329ca8460e7, ohne frühere wissenschaftliche Algorithmen, Eingaben oder Ergebnisse zu verändern. report_provenance.json bewahrt die bisherige Quellen- und Evidenzinventur; affine_evidence.json ergänzt die neuen Dateien mit Hashes. Der zugehörige Git-Commit hält die genaue Fassung fest.
 
 ## 14.2 Getrennte Umgebungen statt stiller Versionsmischung
 
 Die ursprüngliche Referenz, die neueren Qualitäts-/Rauschwerkzeuge, die CPU-Zeitmessung und der Bericht besitzen unterschiedliche Abhängigkeitsdateien. Für einen reproduzierbaren Lauf ist jeweils eine eigene Umgebung sinnvoll. Die historische requirements.txt enthält NumPy 2.5.3; die neueren CPU- und Kontrollauswertungen dokumentieren NumPy 2.3.5. Das ist offenzulegen und nicht durch eine rückwirkende Versionsänderung zu kaschieren.
+
+Die affine CPU-Kontrolle verwendet Python 3.12.14, NumPy 2.3.5, ml-dtypes 0.6.0, cffi 2.1.1, pycparser 3.0 und das hashgeprüfte offizielle CPU-Wheel 2.3.1. requirements-affine-control.txt und docs/PERIODIC_FEASIBILITY.md beschreiben die getrennte Einrichtung.
 
 Die CPU-Baseline benötigt requirements-cpu-baseline.txt, die gemeinsame Rauschkontrolle requirements-common-noise.txt und die Rankingauswertung requirements-ranking-quality.txt. Für die PDF-Erzeugung dient requirements-report.txt. Das SDK wird über den vorgesehenen Installationshelfer in einer kompatiblen Umgebung eingebunden. Laufzeitwerte gelten für die jeweils protokollierte Umgebung; Abweichungen auf anderen Rechnern sind zu erwarten.
 
@@ -683,6 +713,7 @@ python check_periodic_pairs.py --output-file results/periodic_reproduced/pair_ch
 Die SDK-Schritte benötigen den installierten offiziellen CPU-Pfad. Sie liefern keine Hardwaremessung. Neue periodische Ausgaben können mit run_periodic_evaluation.py erzeugt werden; Szenario und Ausgabeordner müssen zum gewünschten Versuch passen. Die anschließend ausgeführte Qualitätsanalyse benötigt die entsprechenden Originalindex-Ausgaben.
 
 ```bash
+python check_affine_periodic.py --output-dir results/affine_periodic_reproduced
 python run_common_noise_controls.py --output-dir results/common_noise_reproduced
 python run_cpu_baseline.py --output-dir results/cpu_baseline_reproduced
 python evaluate_ranking_quality.py --allow-incomplete --output-dir results/ranking_quality_reproduced
@@ -704,7 +735,7 @@ Diese Prüfungen stützen die Implementierung unter ihrem jeweiligen Modell. Sie
 
 Öffentlich belegt sind der untersuchte SDK-Vertrag, die unterschiedliche CPU-/Hardware-Anbindung und Herstellerangaben zum Produkt. Aus diesen Angaben sind aber weder die tatsächlich zulässigen Phasen- und Amplitudenbereiche noch die Komparatorauflösung, Drift, Kanalabhängigkeit, reale tcos-Kennlinie oder Sortierzeit ableitbar. Hinweise auf Systeme an Rechenzentren sind kein Nachweis eines für diese Arbeit verfügbaren externen Zugangs. [36, 37]
 
-Eine Anfragevorlage und ein Messplan liegen vor. Ein tatsächlich erfolgter Versand, eine Herstellerantwort oder ein nutzbarer NPU-Zugang sind im ausgewerteten Stand nicht dokumentiert. Daher werden keine Herstellerzusagen und keine physikalischen Messungen behauptet.
+Eine Anfragevorlage und ein Messplan liegen vor. Der Entwurf fragt zusätzlich nach einer residenten affinen MVM-/Nichtlinearitätsverbindung und danach, ob die BF16-Produktrundung des CPU-Backends der tatsächlichen Gerätepräzision entspricht. Ein tatsächlich erfolgter Versand, eine Herstellerantwort oder ein nutzbarer NPU-Zugang sind im ausgewerteten Stand nicht dokumentiert. Daher werden keine Herstellerzusagen und keine physikalischen Messungen behauptet.
 
 {{table:hardware_plan}}
 
@@ -730,7 +761,7 @@ Ohne Hardware bleibt eine belastbare Arbeit möglich: Sie kann mathematische Eig
 
 Die Recherche verbindet klassische optische Sortiernetze mit heutigen hybriden photonischen Prozessoren und einer systematischen Betrachtung von Präzision, Datenbewegung und Energie. Die fünf Architekturen sind unter einem einheitlichen real-RAM-artigen Arbeitsmaß eingeordnet. Unterschiedliche Installationsbreite, Parallelität und Regeneration werden sichtbar, ohne sie mit der Zahl skalarer Rechenoperationen gleichzusetzen.
 
-Für zwei ausgewählte Mappings liegen ausführbarer Code, gespeicherte Eingaben, mathematische Kontrollen und vollständige Sortierauswertungen vor. Der periodische Baustein ist im CPU-Backend funktionsfähig, im vorhandenen Hostablauf jedoch nicht als nützliche Beschleunigung begründet. Die gemeinsame Rauschmodellierung beseitigt einen zentralen Vergleichsfehler der früheren Szenarien: Signalabstand, Rundung und Rauschort müssen gemeinsam interpretiert werden.
+Für zwei ausgewählte Mappings liegen ausführbarer Code, gespeicherte Eingaben, mathematische Kontrollen und vollständige Sortierauswertungen vor. Der periodische Baustein mit Host-Phasenbildung ist im CPU-Backend funktionsfähig, im vorhandenen Hostablauf jedoch nicht als nützliche Beschleunigung begründet. Die untersuchte affine Alternative verliert bei 8 Bit bereits ohne Rauschen Vergleichsinformation. Sie liefert damit eine konkrete Grenze dieser Umsetzung und eine gezielte Frage an den Hersteller. Die gemeinsame Rauschmodellierung beseitigt einen zentralen Vergleichsfehler der früheren Szenarien: Signalabstand, Rundung und Rauschort müssen gemeinsam interpretiert werden.
 
 Kendall-τ, Abstandsfehler und Recall zeigen, wie stark eine strenge vollständige Korrektheitsquote von einer guten näherungsweisen Rangfolge abweichen kann. Gleichzeitig verhindern Gültigkeits- und Stabilitätsmetriken, dass Rangkonflikte oder vertauschte Duplikate verborgen bleiben. Die CPU-Baseline schafft einen real gemessenen digitalen Bezugspunkt.
 

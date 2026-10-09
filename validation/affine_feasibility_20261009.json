@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-09",
+  "base_commit": "61b6d74ff7bc9ad10749e073f5f3a329ca8460e7",
+  "scope": "CPU affine periodic feasibility; report and unsent manufacturer inquiry",
+  "sdk": {
+    "sdk_version": "2.3.1",
+    "driver_info": "cpu-backend;commit:none;"
+  },
+  "environment": {
+    "numpy": "2.3.5",
+    "ml-dtypes": "0.6.0",
+    "cffi": "2.1.1",
+    "pycparser": "3.0"
+  },
+  "unit_tests": {
+    "run": 37,
+    "passed": 37,
+    "skipped": 0,
+    "command": "python -m unittest discover -s tests -v"
+  },
+  "evidence": {
+    "pair_paths": 6,
+    "sort_configurations": 36,
+    "sort_trials": 3600,
+    "saved_arrays": 116,
+    "independently_recounted": true
+  },
+  "unchanged_historical_evidence_files": 51,
+  "unchanged_scientific_code_files": 31,
+  "pdf": {
+    "path": "reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf",
+    "pages": 53,
+    "tables": 25,
+    "figures": 2,
+    "sha256": "ea5150913e9921420ca9a20ea2f33dae492966dc475d79257953fd897dcd25c4",
+    "source_sha256": "05c8cab2a81c5e32ba19eee851f8ae52ab2f09dab8089c3608ff76cea10b3d33",
+    "unresolved_markers": 0,
+    "out_of_bounds_text": 0,
+    "internal_links_valid": true,
+    "visual_review": "All pages in overview; detailed review of new chapter 7 pages 21-23. No clipping or overlap."
+  },
+  "reports_directory_files": [
+    "Masterarbeit_Hybride_Photonische_Sortierung.pdf"
+  ],
+  "hardware_executed": false,
+  "inquiry_sent": false,
+  "limits": [
+    "Negative result is specific to this affine coding and SDK CPU arithmetic",
+    "Public API does not establish a host-free internal cascade",
+    "No new GPU, physical noise, latency or energy measurements"
+  ]
+}

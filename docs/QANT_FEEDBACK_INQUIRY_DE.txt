@@ -14,6 +14,13 @@ die periodische Funktion aufgerufen wird. Für die Entscheidung genügt dann
 bereits sign(d). Deshalb möchte ich klären, ob eine andere Ausführung der
 nativen Nichtlinearität eine sinnvolle Rolle im Gesamtablauf geben könnte.
 
+Eine affine CPU-Kontrolle bildet die Phase bereits im linearen Aufruf aus
+[a/2^w, b/2^w, 1] (w = Schlüsselbreite) mit den Gewichten [-pi/2, pi/2, pi/2]. Bei 8 Bit erzeugt
+diese konkrete Codierung 40 falsche Gleichstände unter 65.536 geordneten Paaren,
+weil das CPU-Backend einzelne Produkte auf BF16 rundet. Beispielsweise werden
+165 und 166 nicht mehr unterschieden. Ich behandle dies als CPU-Befund und
+möchte insbesondere klären, wie er zur tatsächlichen Gerätepräzision steht.
+
 Für eine technische Einschätzung wären folgende Informationen besonders hilfreich:
 
 1. Lassen sich MVM beziehungsweise eine affine Berechnung und die periodische
@@ -29,6 +36,9 @@ Für eine technische Einschätzung wären folgende Informationen besonders hilfr
 3. Liegen Messwerte oder Modelle für Rauschen und Quantisierung vor, jeweils
    mit Signalreferenz, Messbandbreite und Betriebsbedingungen? Wie werden die
    BF16-Werte der SDK-Schnittstelle auf die physischen Signalbereiche abgebildet?
+   Entspricht die Rundung jedes MVM-Produkts im CPU-Backend der Hardware oder
+   dient sie nur der Softwaremodellierung? Welche interne Präzision gilt für
+   Produkte, Akkumulation und den Übergang zur Nichtlinearität?
 
 4. Welche Kapazitäts-, Aufruf- und Transfergrenzen sind für die linearen und
    periodischen Operationen dokumentiert? Können Gewichte und Zwischenergebnisse

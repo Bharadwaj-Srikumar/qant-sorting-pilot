@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-09",
+  "base_commit": "61b6d74ff7bc9ad10749e073f5f3a329ca8460e7",
+  "scope": "Additional CPU affine feasibility evidence; historical manifest retained unchanged",
+  "repository_evidence": [
+    {
+      "path": "check_affine_periodic.py",
+      "sha256": "919ee0dd62b5317f6adfe1fd60966b1e70abd64a71ecc1924dc4ce9a62096fcd"
+    },
+    {
+      "path": "requirements-affine-control.txt",
+      "sha256": "fc69aa341d18ade6b9fa833c02d8b439c8953c94a21acf4fb7e76de3fb7d2706"
+    },
+    {
+      "path": "results/affine_periodic_20261009/outputs.npz",
+      "sha256": "43254aeface387b4dfd597b58ff54a80ab9e76d0828d40f7eb3f42767f5748cd"
+    },
+    {
+      "path": "results/affine_periodic_20261009/sdk_source_audit.json",
+      "sha256": "bc1da8fa93e02e8c60dae75954b5eab33513c8a2eb82e27510fe4b7275758cea"
+    },
+    {
+      "path": "results/affine_periodic_20261009/summary.json",
+      "sha256": "67cf9d7708f82845148fad5da4ac16f0880972ebbefb82690e68d1a3f84534c7"
+    }
+  ]
+}
