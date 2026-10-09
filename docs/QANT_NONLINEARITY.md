@@ -57,10 +57,10 @@ the sign; this behavior and all reference results remain unchanged.
 
 ## 3. Separate, executed CPU check
 
-After `python install_sdk.py`, run:
+After `python -m qant_sorting install-sdk`, run:
 
 ```bash
-python check_sdk_nonlinearity.py
+python -m qant_sorting nonlinearity
 ```
 
 Output: `results/nonlinearity_reproduced/checks.json`.

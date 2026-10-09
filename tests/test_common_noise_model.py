@@ -8,15 +8,12 @@
 from dataclasses import replace
 import unittest
 import numpy as np
-from common_noise_model import (NoiseConfig, CommonNoiseComparison, evaluate_difference,
+from qant_sorting.common_noise_model import (NoiseConfig, CommonNoiseComparison, evaluate_difference,
                                 quantize, projected_variance, receiver_current_variance,
                                 ELEMENTARY_CHARGE_C)
-from sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
 
 
-# Unit-test group: independent contracts and edge cases for this module family.
-# Each method creates its own fixtures/streams, so tests do not depend on order
-# or change the stored research corpus and reference result archives.
 class CommonNoiseTests(unittest.TestCase):
     # Enumerate every ordered 4/8-bit pair for direct and ideal-sine transfers.
     # Use unsigned inputs to expose accidental subtraction wraparound before casting.
@@ -53,7 +50,7 @@ class CommonNoiseTests(unittest.TestCase):
     # deviation, and check the same result through Jacobian variance propagation.
     def test_gain_normalization_does_not_create_free_noise_reduction(self):
         # First-order variance: raw sin gain alpha scales both signal and upstream noise.
-        from common_noise_model import ALPHA
+        from qant_sorting.common_noise_model import ALPHA
         sigma = .25 / 256
         self.assertAlmostEqual((ALPHA / 256)/(ALPHA * sigma), (1/256)/sigma)
         self.assertAlmostEqual(projected_variance([ALPHA], [[sigma**2]]), (ALPHA*sigma)**2)
@@ -119,8 +116,5 @@ class CommonNoiseTests(unittest.TestCase):
             CommonNoiseComparison(NoiseConfig(4), [0])(np.array([[16]]), np.array([[0]]))
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     unittest.main()

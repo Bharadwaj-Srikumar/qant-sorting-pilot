@@ -7,12 +7,9 @@
 
 import unittest
 import numpy as np
-from run_cpu_baseline import stable_records, validate_records
+from qant_sorting.experiments.run_cpu_baseline import stable_records, validate_records
 
 
-# Unit-test group: independent contracts and edge cases for this module family.
-# Each method creates its own fixtures/streams, so tests do not depend on order
-# or change the stored research corpus and reference result archives.
 class CpuBaselineTests(unittest.TestCase):
     # Check uint8/int64 extremes, repeated keys, all-equal rows and stable indices.
     # Also ensure the timed helper leaves its input records unchanged.
@@ -45,8 +42,5 @@ class CpuBaselineTests(unittest.TestCase):
                 np.testing.assert_array_equal(np.concatenate([r[field] for r in results]), expected[field])
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     unittest.main()

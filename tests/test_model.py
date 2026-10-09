@@ -16,15 +16,12 @@ import unittest
 
 import numpy as np
 
-from comparison import NoisyDifference, Precision
-from input_validation import validate_keys
-from metrics import reference_flags
-from sorting_schedules import bitonic_sort, compact_bitonic_layers, rank_sort
+from qant_sorting.comparison import NoisyDifference, Precision
+from qant_sorting.input_validation import validate_keys
+from qant_sorting.metrics import reference_flags
+from qant_sorting.sorting_schedules import bitonic_sort, compact_bitonic_layers, rank_sort
 
 
-# Unit-test group: independent contracts and edge cases for this module family.
-# Each method creates its own fixtures/streams, so tests do not depend on order
-# or change the stored research corpus and reference result archives.
 class ModelTests(unittest.TestCase):
     # Exhaustively prove the current matched-step model preserves all 4/8-bit signs,
     # including equal pairs, even though some large magnitudes saturate.
@@ -134,8 +131,5 @@ class ModelTests(unittest.TestCase):
         self.assertLess(abs(observed - expected), 0.002)
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     unittest.main()

@@ -10,8 +10,9 @@ overwritten. Candidate errors are research results, not repaired comparisons.
 The direct-difference and existing host-phase controls must remain correct.
 """
 
+from qant_sorting.io import file_hash, source_hashes
+
 import argparse
-import hashlib
 import importlib.metadata
 import json
 import platform
@@ -21,13 +22,12 @@ import numpy as np
 from ml_dtypes import bfloat16
 import qant_native_computing_toolkit as qant
 
-from metrics import reference_flags
-from periodic_comparison import ALPHA, U0, calibration_reference, periodic_values, require_cpu_backend
-from sdk_mapping import SdkDifference
-from sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.metrics import reference_flags
+from qant_sorting.periodic_comparison import ALPHA, U0, calibration_reference, periodic_values, require_cpu_backend
+from qant_sorting.sdk_mapping import SdkDifference
+from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
 
-ROOT = Path(__file__).resolve().parent
-INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
+from qant_sorting.paths import ROOT, INPUT_SHA256
 SDK_ARCHIVE_SHA256 = "99b4669d3256d92cc35efc1a2d6d59deef7a033d78397d71150333011eb93898"
 # Fix this small sort sample before inspecting its outcomes. It includes each
 # width's largest distinct domain plus a shared N=16 case for comparison.
@@ -35,11 +35,6 @@ DATASETS = tuple(f"b{bits}_n{n}_{family}" for bits, n in ((4, 16), (8, 16), (8, 
                  for family in ("distinct", "duplicates_allowed"))
 TRIALS = 100
 BATCH_SIZE = 10
-
-
-def sha256(path):
-    """Hash a local evidence file without changing it; files here fit in memory."""
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 class AffinePeriodicComparison:
@@ -207,7 +202,7 @@ def run(output_dir):
     if output_dir.exists():
         raise FileExistsError(f"Choose a fresh output directory: {output_dir}")
     archive = ROOT / "vendor/qant-native-computing-toolkit-wheels-cpu-backend-v2.3.1.zip"
-    if sha256(ROOT / "data/inputs.npz") != INPUT_SHA256 or sha256(archive) != SDK_ARCHIVE_SHA256:
+    if file_hash(ROOT / "data/inputs.npz") != INPUT_SHA256 or file_hash(archive) != SDK_ARCHIVE_SHA256:
         raise RuntimeError("Pinned input or SDK archive hash mismatch")
     arrays = {}
     pairs = pair_checks(arrays)
@@ -222,10 +217,8 @@ def run(output_dir):
         calibration="One same-path (0,0) evaluation per affine instance; no per-pair correction",
         sample=dict(datasets=DATASETS, first_trials=TRIALS, batch_size=BATCH_SIZE),
         input_sha256=INPUT_SHA256, sdk_archive_sha256=SDK_ARCHIVE_SHA256,
-        source_sha256={p: sha256(ROOT / p) for p in
-                       ("check_affine_periodic.py", "periodic_comparison.py", "sdk_mapping.py",
-                        "sorting_schedules.py", "metrics.py")},
-        outputs_sha256=sha256(output_dir / "outputs.npz"), pairs=pairs, sorts=sorts)
+        source_sha256=source_hashes(),
+        outputs_sha256=file_hash(output_dir / "outputs.npz"), pairs=pairs, sorts=sorts)
     (output_dir / "summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(dict(pairs=pairs, sorts=sorts), indent=2))
 

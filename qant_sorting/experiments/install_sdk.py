@@ -12,6 +12,9 @@ The vendor archive is unmodified and checksum-checked. The Gaussian sweep does
 not need it; install only to run the separate SDK integration control.
 """
 
+import argparse
+from qant_sorting.paths import ROOT
+
 import hashlib
 from pathlib import Path
 import platform
@@ -27,6 +30,10 @@ import zipfile
 # pip using the same Python interpreter, and propagate installation failures.
 # This is an environment-changing command; no installation occurs on import.
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--no-deps", action="store_true",
+                        help="Keep the environment already installed from requirements/sdk.txt")
+    args = parser.parse_args()
     if sys.version_info[:2] != (3, 12):
         raise SystemExit("Use Python 3.12 for the supplied official wheels")
     if sys.prefix == sys.base_prefix:
@@ -40,7 +47,7 @@ def main():
     tag = tags.get((platform.system(), platform.machine()))
     if tag is None:
         raise SystemExit("No bundled official wheel for this operating system/architecture")
-    archive = Path(__file__).resolve().parent / "vendor/qant-native-computing-toolkit-wheels-cpu-backend-v2.3.1.zip"
+    archive = ROOT / "vendor/qant-native-computing-toolkit-wheels-cpu-backend-v2.3.1.zip"
     expected = "99b4669d3256d92cc35efc1a2d6d59deef7a033d78397d71150333011eb93898"
     if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
         raise SystemExit("Official SDK archive checksum mismatch")
@@ -52,15 +59,12 @@ def main():
             name = next(name for name in bundle.namelist() if name.endswith(tag + ".whl"))
             wheel = Path(directory) / Path(name).name
             wheel.write_bytes(bundle.read(name))
-        subprocess.run([
-            sys.executable, "-m", "pip", "install", str(wheel),
-            "numpy==2.5.3", "ml-dtypes==0.6.0", "cffi==1.17.1", "pycparser==3.0",
-        ], check=True)
-    print("Installed the official CPU backend. Run python run_sdk_control.py")
+        dependencies = (["--no-deps"] if args.no_deps else
+                        ["numpy==2.5.3", "ml-dtypes==0.6.0", "cffi==1.17.1", "pycparser==3.0"])
+        subprocess.run([sys.executable, "-m", "pip", "install", str(wheel),
+                        *dependencies], check=True)
+    print("Installed the official CPU backend. Run python -m qant_sorting sdk")
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     main()

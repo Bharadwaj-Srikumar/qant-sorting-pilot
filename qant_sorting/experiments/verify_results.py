@@ -15,7 +15,7 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent
+from qant_sorting.paths import ROOT
 REFERENCE = ROOT / "results/reference"
 
 
@@ -55,9 +55,6 @@ def verify_results(actual_directory, reference_directory=REFERENCE):
     return {"matched_configurations": len(actual_rows), "matched_arrays": array_count}
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path, nargs="?", default=ROOT / "results/reproduced")

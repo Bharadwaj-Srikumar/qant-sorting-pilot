@@ -13,8 +13,9 @@ has a hardware-driver entry point, but this script exercises only its cosine
 CPU stand-in. No Gaussian noise or sign-only output clipping is added here.
 """
 
+from qant_sorting.io import source_hashes
+
 import argparse
-import hashlib
 import json
 from pathlib import Path
 
@@ -22,9 +23,9 @@ import numpy as np
 from ml_dtypes import bfloat16
 import qant_native_computing_toolkit as qant
 
-from sdk_mapping import SdkDifference, backend_identity
+from qant_sorting.sdk_mapping import SdkDifference, backend_identity
 
-ROOT = Path(__file__).resolve().parent
+from qant_sorting.paths import ROOT
 SDK_COMMIT = "72a2d99f10240b6df3c6d0f636dfa0e2b5d38902"
 
 
@@ -107,10 +108,7 @@ def main():
             "outputs": periodic.astype(np.float32).tolist(),
             "interpretation": "Cosine CPU stand-in, not a hardware transfer curve",
         },
-        "source_sha256": {
-            name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
-            for name in ("check_sdk_nonlinearity.py", "sdk_mapping.py")
-        },
+        "source_sha256": source_hashes(),
     }
     args.output_file.parent.mkdir(parents=True, exist_ok=True)
     args.output_file.write_text(json.dumps(checks, indent=2) + "\n")
@@ -119,8 +117,5 @@ def main():
     print(f"Saved {args.output_file}")
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     main()

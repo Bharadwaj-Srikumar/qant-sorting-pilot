@@ -1,4 +1,4 @@
-.venv/
+.venv*/
 __pycache__/
 *.pyc
 .DS_Store
@@ -10,3 +10,7 @@ results/reproduced/
 results/sdk_reproduced/
 results/hardware/
 tmp/legacy_reports/
+
+# New runs and local checks are separate from committed research evidence.
+tmp/
+results/*_reproduced/

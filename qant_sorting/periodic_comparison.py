@@ -20,8 +20,8 @@ import numpy as np
 from ml_dtypes import bfloat16
 import qant_native_computing_toolkit as qant
 
-from comparison import Precision
-from sdk_mapping import SdkDifference, backend_identity
+from qant_sorting.comparison import Precision
+from qant_sorting.sdk_mapping import SdkDifference, backend_identity
 
 U0 = np.pi / 2
 ALPHA = np.pi / 2

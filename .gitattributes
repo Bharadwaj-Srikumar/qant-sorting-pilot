@@ -1,0 +1,4 @@
+# Generated research artifacts are binary; never apply text diffs or newline conversion.
+*.pdf binary
+*.npz binary
+*.zip binary

@@ -14,13 +14,10 @@ import unittest
 import zipfile
 
 import numpy as np
-from ranking_quality import prepare_keys, score_saved_order
-from saved_output_reader import SavedOutputs, recover_members
+from qant_sorting.ranking_quality import prepare_keys, score_saved_order
+from qant_sorting.saved_output_reader import SavedOutputs, recover_members
 
 
-# Unit-test group: independent contracts and edge cases for this module family.
-# Each method creates its own fixtures/streams, so tests do not depend on order
-# or change the stored research corpus and reference result archives.
 class RankingQualityTests(unittest.TestCase):
     # Use hand-countable strict orders to verify inversion count, tau-b, exact gap
     # histogram and top-k recall. A full reversal provides the tau=-1 endpoint.
@@ -174,8 +171,5 @@ class EvidenceReaderTests(unittest.TestCase):
                 recover_members(path)
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     unittest.main()

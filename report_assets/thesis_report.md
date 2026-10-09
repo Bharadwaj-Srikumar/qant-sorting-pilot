@@ -653,6 +653,8 @@ Eine spätere Energiebaseline muss dieselben Ein- und Ausgaben und dieselbe Qual
 
 ## 13.1 Die aktuelle Ausführungskette
 
+Die aktuelle Implementierung liegt im Paket qant_sorting. Wiederverwendbare Modelle, Sortierabläufe und Qualitätsmetriken stehen auf dessen erster Ebene; ausführbare Versuche liegen unter experiments. Der zentrale Einstieg lautet python -m qant_sorting COMMAND. COMMAND --help zeigt die jeweiligen Optionen. Die folgenden Dateinamen beziehen sich auf diese Paketstruktur; ältere Metadaten behalten ihre ursprünglichen Pfade und Quellhashes.
+
 Die Datensätze werden einmal erzeugt und danach identisch wiederverwendet. Das Referenzmodell stellt einen kontrollierten Komparator bereit; die Sortierlogik hält Originaldatensätze und Indizes getrennt vom gestörten Signal. Ein SDK-Adapter realisiert denselben linearen Paarbaustein im offiziellen CPU-Backend. Die periodische Variante ergänzt Phase, Referenzkorrektur und optional einen Nullbereich. Qualitätsauswertung und CPU-Benchmark lesen die gespeicherten Eingaben beziehungsweise Ausgaben, ohne sie stillschweigend zu reparieren.
 
 Die separate affine CPU-Kontrolle in check_affine_periodic.py ergänzt zwei Vergleichspfade um die Phasenbildung in der MVM. Sie speichert auch fehlgeschlagene Paarentscheidungen und Sortierungen unverändert; sie ersetzt keinen vorhandenen Komparator.
@@ -663,17 +665,17 @@ Das gemeinsame Rauschmodell ist ein eigener kontrollierter Komparator. Es ersetz
 
 ## 13.2 Datenverträge und Fehlerbehandlung
 
-Eine Liste wird durch Schlüssel und eindeutige Originalindizes beschrieben. Zulässige Breiten, Wertebereiche und für Bitonic benötigte Zweierpotenzen werden geprüft. Vergleichsrückgaben unterscheiden negative Differenz, Gleichstand und positive Differenz; bei Gleichstand entscheidet der Originalindex. Das erfolgreiche Ergebnis enthält eine vollständige Permutation, geordnete Originalschlüssel und eine getrennte Stabilitätsbewertung.
+Listen bestehen aus Schlüsseln und eindeutigen Originalindizes. Die Eingabeprüfung kontrolliert Wertebereiche und Formen; Bitonic benötigt Zweierpotenzen. Bei gemessenem Gleichstand entscheidet der Originalindex. Die Ausgabeprüfung trennt gültige Datensatzpermutation, Schlüsselordnung und Stabilität. Widersprüchliche Rangentscheidungen bleiben als ungültige Ausgabe mit −1-Markern sichtbar; es gibt keine digitale Reparatur.
 
-Rangsortierung prüft vor dem Einsammeln, ob jede Position genau einmal belegt ist. Unter inkonsistenten verrauschten Vergleichen können mehrere Elemente denselben Rang erhalten oder Positionen frei bleiben. Dieser Zustand ist ein ungültiges Ergebnis. Ein nachgeschaltetes digitales Sortieren würde den eigentlichen Fehler verdecken und einen anderen Algorithmus darstellen; es gehört nicht zur ausgewerteten Implementierung.
-
-Zufallsseeds, Konfigurationen und Eingabehashes werden mitgeschrieben. Die Qualitätswerkzeuge prüfen Ausgabedimensionen, Indexbereiche und Permutationen. Unvollständige historische Archive benötigen eine ausdrücklich gewählte eingeschränkte Auswertung; die dadurch fehlenden Konfigurationen erscheinen im Abdeckungsbericht. Hardwaremodus wird nicht durch eine automatische CPU-Ausweichlösung als Hardwareerfolg ausgegeben.
+Metadaten enthalten Seeds, Konfigurationen und Quell-/Eingabehashes. Unvollständige historische Archive erfordern eine ausdrückliche Teilauswertung mit ausgewiesenen Lücken. Ein fehlgeschlagener Hardwarepfad wird nicht still durch eine CPU-Ausführung als Hardwareerfolg ersetzt.
 
 ## 13.3 Aktueller Code und historische Dateien
 
-Das Repository enthält auch das erste Präzisionsprotokoll mit gröberem Ausgaberaster. Diese Dateien erklären die Entstehung früherer Ergebnisse, sind aber keine austauschbare Quelle für das aktuelle Referenzmodell. Der historische Berichtsgenerator ist entsprechend gekennzeichnet und schreibt nur noch in einen temporären Archivordner. Der aktive Befehl build_reports.py erzeugt ausschließlich den vorliegenden Gesamtbericht aus seinem editierbaren Text und den gespeicherten aktuellen Ergebnissen.
+paths.py definiert Repository-Stamm und Eingabeidentität. io.py bündelt CSV-Ausgabe, gestreamte SHA-256-Berechnung und Quellinventar. Gemeinsame Versuchsparameter liegen in experiments/settings.py. Die Komparatoren bleiben wegen ihrer unterschiedlichen wissenschaftlichen Annahmen getrennt. Importe aktueller Module starten keine Versuche oder Dateiausgaben.
 
-Im Ordner reports liegt nur diese aktuelle PDF. Frühere Berichte, die frühere Präsentationskopie und lose Diagrammdateien bleiben über die Git-Historie wiederherstellbar. Unverzichtbare Rohdaten, Auswertungen, methodische Dokumente und Code werden durch die Bereinigung nicht gelöscht.
+legacy enthält die unverändert verschobenen Prototypen und den früheren Berichtsgenerator. requirements enthält die Umgebungen; die identischen Abhängigkeiten von Qualitätsanalyse und gemeinsamem Rauschmodell stehen in analysis.txt. docs/source_layout.json dokumentiert die Pfadzuordnung. Historische Metadaten behalten ihre ursprünglichen Quellhashes.
+
+python -m qant_sorting report erzeugt aus Text, Literatur und gespeicherten Ergebnissen die einzige aktuelle PDF in reports. Frühere Berichte bleiben in der Git-Historie erhalten. Der historische Generator schreibt ausschließlich nach tmp/legacy_reports.
 
 # 14. Reproduzierbarkeit und Prüfung
 
@@ -687,38 +689,38 @@ Der SDK-Installationshelfer bindet Version 2.3.1 an Commit:
 
 `72a2d99f10240b6df3c6d0f636dfa0e2b5d38902`
 
-Die bisherigen Versuchsserien beruhen auf der Forschungs-Codebasis fbb418d0b80c04b4fa7c38fe92f56fc7b7317bcd. Die affine Machbarkeitskontrolle vom 9. Oktober 2026 ergänzt den Hauptzweigstand 61b6d74ff7bc9ad10749e073f5f3a329ca8460e7, ohne frühere wissenschaftliche Algorithmen, Eingaben oder Ergebnisse zu verändern. report_provenance.json bewahrt die bisherige Quellen- und Evidenzinventur; affine_evidence.json ergänzt die neuen Dateien mit Hashes. Der zugehörige Git-Commit hält die genaue Fassung fest.
+Die bisherigen Versuchsserien beruhen auf der Forschungs-Codebasis fbb418d0b80c04b4fa7c38fe92f56fc7b7317bcd. Die affine Machbarkeitskontrolle vom 9. Oktober 2026 ergänzt den Hauptzweigstand 61b6d74ff7bc9ad10749e073f5f3a329ca8460e7, ohne frühere wissenschaftliche Algorithmen, Eingaben oder Ergebnisse zu verändern. report_provenance.json bewahrt die bisherige Quellen- und Evidenzinventur; affine_evidence.json ergänzt die affinen Ergebnisdateien mit Hashes. Die nachfolgende Paketorganisation basiert auf Commit a750d88b217b0dd6ae732a4e1e5dcb27ade2e75f. Ursprüngliche Quellhashes bleiben als historischer Snapshot erhalten; die PDF-Erzeugung prüft weiterhin die tatsächlich verwendeten Ergebnisdateien. Der zugehörige Git-Commit hält die genaue Fassung fest.
 
 ## 14.2 Getrennte Umgebungen statt stiller Versionsmischung
 
-Die ursprüngliche Referenz, die neueren Qualitäts-/Rauschwerkzeuge, die CPU-Zeitmessung und der Bericht besitzen unterschiedliche Abhängigkeitsdateien. Für einen reproduzierbaren Lauf ist jeweils eine eigene Umgebung sinnvoll. Die historische requirements.txt enthält NumPy 2.5.3; die neueren CPU- und Kontrollauswertungen dokumentieren NumPy 2.3.5. Das ist offenzulegen und nicht durch eine rückwirkende Versionsänderung zu kaschieren.
+Die ursprüngliche Referenz, die neueren Qualitäts-/Rauschwerkzeuge, die CPU-Zeitmessung und der Bericht besitzen unterschiedliche Abhängigkeitsdateien. Für einen reproduzierbaren Lauf ist jeweils eine eigene Umgebung sinnvoll. Die historische requirements/reference.txt enthält NumPy 2.5.3; die neueren CPU- und Kontrollauswertungen dokumentieren NumPy 2.3.5. Das ist offenzulegen und nicht durch eine rückwirkende Versionsänderung zu kaschieren.
 
-Die affine CPU-Kontrolle verwendet Python 3.12.14, NumPy 2.3.5, ml-dtypes 0.6.0, cffi 2.1.1, pycparser 3.0 und das hashgeprüfte offizielle CPU-Wheel 2.3.1. requirements-affine-control.txt und docs/PERIODIC_FEASIBILITY.md beschreiben die getrennte Einrichtung.
+Die affine CPU-Kontrolle verwendet Python 3.12.14, NumPy 2.3.5, ml-dtypes 0.6.0, cffi 2.1.1, pycparser 3.0 und das hashgeprüfte offizielle CPU-Wheel 2.3.1. requirements/sdk.txt und docs/PERIODIC_FEASIBILITY.md beschreiben die getrennte Einrichtung.
 
-Die CPU-Baseline benötigt requirements-cpu-baseline.txt, die gemeinsame Rauschkontrolle requirements-common-noise.txt und die Rankingauswertung requirements-ranking-quality.txt. Für die PDF-Erzeugung dient requirements-report.txt. Das SDK wird über den vorgesehenen Installationshelfer in einer kompatiblen Umgebung eingebunden. Laufzeitwerte gelten für die jeweils protokollierte Umgebung; Abweichungen auf anderen Rechnern sind zu erwarten.
+Die CPU-Baseline benötigt requirements/cpu.txt, die gemeinsame Rauschkontrolle requirements/analysis.txt und die Rankingauswertung requirements/analysis.txt. Für die PDF-Erzeugung dient requirements/report.txt. Das SDK wird über den vorgesehenen Installationshelfer in einer kompatiblen Umgebung eingebunden. Laufzeitwerte gelten für die jeweils protokollierte Umgebung; Abweichungen auf anderen Rechnern sind zu erwarten.
 
 ## 14.3 Reproduktionsbefehle
 
 Die Befehle werden im Repository-Stamm ausgeführt. Neue Ausgaben erhalten eigene Verzeichnisse, damit gespeicherte Referenzen nicht überschrieben werden. Zunächst wird die passende Umgebung eingerichtet; danach können die gewünschten Teilschritte getrennt ausgeführt werden.
 
 ```bash
-python run_noise_sweep.py --output-dir results/reproduced
-python verify_results.py results/reproduced
-python install_sdk.py
-python run_sdk_control.py
-python check_sdk_nonlinearity.py
-python check_periodic_pairs.py --output-file results/periodic_reproduced/pair_checks.json
+python -m qant_sorting noise --output-dir results/reproduced
+python -m qant_sorting verify results/reproduced
+python -m qant_sorting install-sdk
+python -m qant_sorting sdk
+python -m qant_sorting nonlinearity
+python -m qant_sorting periodic-pairs --output-file results/periodic_reproduced/pair_checks.json
 ```
 
 Die SDK-Schritte benötigen den installierten offiziellen CPU-Pfad. Sie liefern keine Hardwaremessung. Neue periodische Ausgaben können mit run_periodic_evaluation.py erzeugt werden; Szenario und Ausgabeordner müssen zum gewünschten Versuch passen. Die anschließend ausgeführte Qualitätsanalyse benötigt die entsprechenden Originalindex-Ausgaben.
 
 ```bash
-python check_affine_periodic.py --output-dir results/affine_periodic_reproduced
-python run_common_noise_controls.py --output-dir results/common_noise_reproduced
-python run_cpu_baseline.py --output-dir results/cpu_baseline_reproduced
-python evaluate_ranking_quality.py --allow-incomplete --output-dir results/ranking_quality_reproduced
+python -m qant_sorting affine --output-dir results/affine_periodic_reproduced
+python -m qant_sorting common-noise --output-dir results/common_noise_reproduced
+python -m qant_sorting cpu --output-dir results/cpu_baseline_reproduced
+python -m qant_sorting quality --allow-incomplete --output-dir results/ranking_quality_reproduced
 python -m unittest discover -s tests -v
-python build_reports.py
+python -m qant_sorting report
 ```
 
 Der Qualitätsbefehl reproduziert die historischen periodischen Kennzahlen nur, wenn auch die dazugehörigen älteren Roharchive verfügbar sind. --allow-incomplete erlaubt dokumentierte Teilauswertung, beschafft aber keine fehlenden Dateien und füllt keine Lücken. Ein frischer Git-Klon enthält bereits die abgeleiteten historischen Qualitätstabellen. Die PDF-Erzeugung verwendet diese gespeicherten Tabellen und führt keine Sortier- oder Zeitmessung neu aus.
@@ -727,7 +729,7 @@ Der Qualitätsbefehl reproduziert die historischen periodischen Kennzahlen nur, 
 
 Die mathematischen Tests betreffen Signentscheidung, Bindungsregeln, Bitonic-Stufen, Rangbelegung, Quantisierung und die kontrollierten Rauschfälle. Die Rankingmetriken wurden zusätzlich anhand gezielter kleiner Beispiele und 40 SciPy-Vergleiche geprüft. Ergebnisvalidierungen gleichen Eingabehashes, Konfigurationsabdeckung, Zählungen, Kontrollen und End-to-End-Ausgaben ab.
 
-Diese Prüfungen stützen die Implementierung unter ihrem jeweiligen Modell. Sie ersetzen weder einen physikalischen Kennliniennachweis noch die externe Reproduktion der CPU-Zeitmessungen. Die Berichtsprüfung kontrolliert zusätzlich Quellenzuordnung, die unveränderten wissenschaftlichen Daten, Tabellenwerte, lesbare PDF-Seiten und das Vorhandensein genau einer aktuellen Datei im Ordner reports.
+Diese Prüfungen stützen die Implementierung unter ihrem jeweiligen Modell. Sie ersetzen weder einen physikalischen Kennliniennachweis noch die externe Reproduktion der CPU-Zeitmessungen. Die Berichtsprüfung kontrolliert zusätzlich Quellenzuordnung, die unveränderten wissenschaftlichen Daten, Tabellenwerte, lesbare PDF-Seiten und das Vorhandensein genau einer aktuellen Datei im Ordner reports. Für die Paketorganisation wurden die vollständige Referenz mit 288.000 Sortierungen, der lineare CPU-Kontrolllauf mit 48.000 Sortierungen, die gemeinsame Rauschkontrolle und die affine Kontrolle separat reproduziert. Das Prüfprotokoll validation/structure_cleanup_20261009.json dokumentiert den Ergebnisabgleich und die Strukturtests.
 
 # 15. Hardwarefragen und noch ausstehende Arbeit
 

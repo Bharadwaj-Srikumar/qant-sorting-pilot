@@ -181,9 +181,9 @@ Sprint wurde keiner ausgeführt.
 - Hashes sämtlicher Quelldateien blieben vor und nach der Auswertung gleich.
 
 ```bash
-python -m pip install -r requirements-ranking-quality.txt
+python -m pip install -r requirements/analysis.txt
 python -m unittest discover -s tests -p test_ranking_quality.py -v
-python evaluate_ranking_quality.py --allow-incomplete --output-dir results/ranking_quality_reproduced
+python -m qant_sorting quality --allow-incomplete --output-dir results/ranking_quality_reproduced
 ```
 
 Der Runner benötigt den bisherigen Korpus und die gespeicherten Dateien

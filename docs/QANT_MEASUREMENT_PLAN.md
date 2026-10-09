@@ -63,7 +63,7 @@ cannot characterize physical noise or drift. Evidence: results/periodic_curve_cp
 
 Example CPU reproduction:
 ```bash
-python measure_periodic_curve.py --mode cpu --phase-min 0 --phase-max 3.141592653589793 --points 257 --repeats 20 --output-dir results/periodic_curve_cpu
+python -m qant_sorting curve --mode cpu --phase-min 0 --phase-max 3.141592653589793 --points 257 --repeats 20 --output-dir results/periodic_curve_cpu
 ```
 
 For actual hardware, replace the SDK/driver with the supported hardware

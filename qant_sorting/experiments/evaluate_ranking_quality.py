@@ -10,11 +10,12 @@
 
 """Audit and score saved outputs. Does not import or run the SDK or sorters."""
 
+from qant_sorting.io import file_hash, source_hashes, write_csv
+
 import argparse
 import csv
 from datetime import datetime, timezone
 import gzip
-import hashlib
 import io
 import json
 from pathlib import Path
@@ -22,30 +23,11 @@ import platform
 import time
 
 import numpy as np
-from ranking_quality import prepare_keys, score_saved_order
-from saved_output_reader import SavedOutputs
+from qant_sorting.ranking_quality import prepare_keys, score_saved_order
+from qant_sorting.saved_output_reader import SavedOutputs
 
-ROOT = Path(__file__).resolve().parent
-INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
+from qant_sorting.paths import ROOT, INPUT_SHA256
 SOURCES = ("reference", "periodic", "periodic_deadband")
-
-
-# Hash the exact bytes at a Path with SHA256 and return the hexadecimal string.
-# Do not normalize line endings or reserialize archives before hashing: provenance
-# identifies the actual stored artifact, including its original container bytes.
-def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-# Write nonempty, same-schema dictionaries to a CSV with a header.
-# Column order follows the first row; values are serialized without statistical
-# reinterpretation. Opening in write mode replaces the target file.
-# The caller creates the parent directory and controls preservation of old results.
-def write_csv(path, rows):
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
 
 
 # Discard nonfinite entries and summarize the remaining defined observations.
@@ -74,7 +56,7 @@ def run(args):
     source_paths = [root/"data/inputs.npz"]
     for source in SOURCES:
         source_paths += [root/"results"/source/name for name in ("trial_outcomes.npz", "accuracy.csv", "metadata.json")]
-    hashes = {str(path.relative_to(root)): digest(path) for path in source_paths}
+    hashes = {str(path.relative_to(root)): file_hash(path) for path in source_paths}
     if hashes["data/inputs.npz"] != INPUT_SHA256:
         raise ValueError("Unexpected input corpus")
     for source in SOURCES:
@@ -189,7 +171,7 @@ def run(args):
     if duplicate_checks != 288:
         raise AssertionError("Expected all 288 direct/upstream identity checks")
     for path in source_paths:
-        if digest(path) != hashes[str(path.relative_to(root))]:
+        if file_hash(path) != hashes[str(path.relative_to(root))]:
             raise AssertionError("Source evidence changed during evaluation")
     write_csv(output/"summary.csv", summaries)
     write_csv(output/"recall.csv", recalls)
@@ -206,8 +188,7 @@ def run(args):
     metadata = dict(
         created_at_utc=datetime.now(timezone.utc).isoformat(), python=platform.python_version(), numpy=np.__version__,
         elapsed_seconds=time.perf_counter()-start, source_sha256=hashes,
-        evaluation_code_sha256={name: digest(ROOT/name) for name in
-                               ("ranking_quality.py", "saved_output_reader.py", "evaluate_ranking_quality.py")},
+        evaluation_code_sha256=source_hashes(),
         archive_audit=archive_audit, allow_incomplete=args.allow_incomplete,
         new_sorter_executions=0, sdk_loaded=False, hardware_executed=False,
         kendall="tau_b(true key of each record, output position of that record); no ties in output positions",
@@ -230,9 +211,6 @@ def run(args):
     print(f"Scored {validation['evaluated_outputs']} existing outputs; {len(missing)} cases unavailable. No new sorts.")
 
 
-# Direct execution starts this file's command-line/test entry point.
-# Importing helpers does not run THIS block; the module reading guide
-# identifies any other top-level file loading or writing separately.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-dir", type=Path, default=ROOT)

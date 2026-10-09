@@ -287,9 +287,9 @@ bleiben getrennt (Definitionen in [RANKING_QUALITY.md](RANKING_QUALITY.md)).
 ## 7. Reproduktion und nächster Evidenzschritt
 
 ```bash
-python -m pip install -r requirements-common-noise.txt
+python -m pip install -r requirements/analysis.txt
 python -m unittest discover -s tests -p 'test_common_noise_model.py' -v
-python run_common_noise_controls.py --output-dir results/common_noise_reproduced
+python -m qant_sorting common-noise --output-dir results/common_noise_reproduced
 ```
 
 Die Ausgabe muss in ein leeres Verzeichnis erfolgen. Metadaten enthalten

@@ -1,3 +1,20 @@
+# 9 October 2026: repository structure cleanup
+
+- Moved the 28 root Python files into a current `qant_sorting` package and an
+  isolated `legacy` folder. Added `python -m qant_sorting COMMAND` as the common
+  entry point; old root script commands and imports use the documented new paths.
+- Centralized CSV serialization, streamed file hashing, repository paths and
+  current source inventory. Sweep settings no longer require importing a runner.
+- Made periodic-summary imports passive and its output explicit. Pair and
+  periodic reproductions default to separate output paths. SDK installation
+  exposes help and can preserve a separately installed dependency environment.
+- Shortened README and code guide, grouped environment files under requirements,
+  and merged identical analysis dependencies. Preserved mathematical comments,
+  scientific kernels, seeds and stored results. Updated the current report.
+- Historical metadata and source hashes remain historical; the source-layout
+  inventory records moved paths. Numerical reproductions and structural checks
+  are recorded in `validation/structure_cleanup_20261009.json`.
+
 # 9 October 2026: affine periodic feasibility control
 
 - Audited the pinned SDK's public MVM/periodic boundary and CPU product rounding.
