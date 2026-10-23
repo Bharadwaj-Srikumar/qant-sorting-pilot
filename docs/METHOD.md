@@ -11,27 +11,27 @@ before any comparison, with its position and required range.
 
 The earlier declared-range normalization was
 
-\[
+```math
 u(x)=\frac{x}{2^{b_{key}}-1}\left(1-2^{-b_{in}}\right).
-\]
+```
 
 For matched widths it simplifies exactly to `u(x) = x/L`. Input rounding gives
 
-\[
+```math
 \widehat{x}=\Delta_{in}\operatorname{round}_{even}
 \left(\frac{u(x)}{\Delta_{in}}\right)=\frac{x}{L}.
-\]
+```
 
 Every permitted integer is represented exactly in these two cases. The scale
 depends on the declared key range, not the minimum/maximum of a particular array.
 
 ## 2. Calculate one difference
 
-\[
+```math
 d=\widehat{a}-\widehat{b}
 =\begin{bmatrix}1&-1\end{bmatrix}
 \begin{bmatrix}\widehat{a}\\\widehat{b}\end{bmatrix}.
-\]
+```
 
 This two-input dot product is the arithmetic operation proposed for a photonic
 linear kernel. A full compare/exchange is nonlinear and is not just this MVM.
@@ -41,9 +41,9 @@ control uses `linear_fprop(X,W)` with pair rows in `X` and `W = [[1,-1]]`.
 
 ## 3. Add noise in output-step units
 
-\[
+```math
 \epsilon\sim\mathcal{N}(0,(\eta\Delta_{out})^2),\qquad d_n=d+\epsilon.
-\]
+```
 
 `eta=0.25` means a standard deviation of one quarter of an output step.
 It does **not** mean every comparison receives an offset of `+0.25`.
@@ -55,10 +55,10 @@ position; bitonic may compare different records after an earlier decision change
 
 ## 4. Round and saturate the output
 
-\[
+```math
 c=\operatorname{round}_{even}(d_n/\Delta_{out}),\qquad
 \widetilde{d}=\Delta_{out}\min(L/2-1,\max(-L/2,c)).
-\]
+```
 
 With `delta_in = delta_out = 1/L`, the signed output range is
 `[-1/2, 1/2-delta]`. Large differences saturate. Without noise, their sign stays

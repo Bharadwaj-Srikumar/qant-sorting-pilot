@@ -1,3 +1,10 @@
+# 23 October 2026: GitHub equation rendering
+
+- Converted 20 display equations in the method, hardware, common-noise and
+  ranking-quality guides to GitHub-supported fenced math blocks.
+- Added the documentation formatting convention to the code guide.
+- Preserved equation contents, scientific code and saved experimental results.
+
 # 9 October 2026: repository structure cleanup
 
 - Moved the 28 root Python files into a current `qant_sorting` package and an
