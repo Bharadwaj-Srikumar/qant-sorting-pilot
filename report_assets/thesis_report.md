@@ -316,7 +316,7 @@ Die Originalindexfolge am Ende lautet [3,1,2,0]. Selbst bei fehlerhaften Entsche
 
 Der nullbasierte Rang rᵢ ist die Zahl der Datensätze, die vor Datensatz i liegen müssen. Ohne Fehler gilt:
 
-$$r_i=\sum_{j\ne i}\mathbf{1}\{x_j<x_i\ \mathrm{oder}\ (x_j=x_i\ \mathrm{und}\ j<i)\}$$
+$$r_i=\sum_{j\ne i}\mathbf{1}\lbrace x_j<x_i\ \mathrm{oder}\ (x_j=x_i\ \mathrm{und}\ j<i)\rbrace$$
 
 Im Modell ersetzt das gemessene Differenzsignal die Kenntnis von xⱼ < xᵢ. Für jedes Paar i < j wird nur eine Entscheidung erzeugt: Positives Signal erhöht rᵢ; negatives oder null erhöht rⱼ. Null begünstigt also den früheren Originalindex. Die Gegenseite wird komplementär behandelt. Dies spart doppelte Auswertung, garantiert unter Rauschen aber keine Transitivität.
 

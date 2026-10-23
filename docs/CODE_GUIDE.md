@@ -98,3 +98,6 @@ installation accepts it. Check the rendered GitHub preview as well as local
 syntax validation when changing equations; local rendering alone does not
 establish GitHub compatibility. Keep the report source compatible with the
 Matplotlib mathtext renderer used by the PDF builder, too.
+In the report's dollar-delimited equations, use `\lbrace` and `\rbrace` for
+visible braces; GitHub's Markdown processing can consume `\{` and `\}` before
+the equation reaches the math renderer.
