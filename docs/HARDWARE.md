@@ -32,10 +32,10 @@ mathematics, the executed CPU check and the limits of the public driver boundary
 
 With pair-submission cap `c`, the number of calls is
 
-\[
+```math
 q_B=K\left\lceil\frac{N/2}{c}\right\rceil,\qquad
 q_R=\left\lceil\frac{N(N-1)/2}{c}\right\rceil.
-\]
+```
 
 The cap is an application setting; it is not a claimed physical matrix size.
 BF16 features require four bytes per pair and results require two. Reloading
@@ -56,9 +56,9 @@ more data. Neither count alone selects the faster or more efficient algorithm.
 
 For serialized transfers and execution, write
 
-\[
+```math
 t_A=q_A\ell+C_A t_{arith}+U_A/B_{up}+V_A/B_{down}+h_A.
-\]
+```
 
 Here `ell` is per-call overhead, `t_arith` is an effective per-pair arithmetic
 time, `U,V` are logical bytes and `h` is electronic control work. Shared per-pair
@@ -69,9 +69,9 @@ The script sweeps every integer pair cap from 1 through `N(N-1)/2`. With weights
 reloaded, define `a=ell+4/B_up` and `tau=t_arith+4/B_up+2/B_down`. Rank is faster
 within this model only if
 
-\[
+```math
 (q_B-q_R)a>(C_R-C_B)\tau+h_R-h_B.
-\]
+```
 
 The CSV threshold omits/equates host work solely to isolate that conditional
 comparison. Bandwidth has domain `0 < B_eff <= B_peak`; there is no empirically

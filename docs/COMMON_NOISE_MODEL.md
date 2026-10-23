@@ -26,10 +26,10 @@ unverändert; die folgenden Größen sind Signal- und Evaluierungsgrößen.
 
 Für ganzzahlige Schlüssel a,b im Bereich 0 bis 2^b−1 gilt
 
-\[
+```math
 \Delta=2^{-b},\qquad x_a=a\Delta,\quad x_b=b\Delta,
 \qquad d=x_a-x_b=(a-b)\Delta.
-\]
+```
 
 `bits` bezeichnet im Code die Schlüsselbreite. Die verwendeten Eingaben liegen
 bereits exakt auf diesem Raster. Eine Eingangsrundung auf Δ verändert sie nicht.
@@ -37,14 +37,15 @@ Für andere Eingabewerte wäre sie ausdrücklich zu modellieren.
 
 Der gemeinsame Ablauf lautet:
 
-\[
+```math
 z=\operatorname{clip}_{[-1,1]}
   Q_{q_{\rm pre}}(d+b_{\rm in}+\sigma_{\rm in} Z_{\rm in}),
-\]
-\[
+```
+
+```math
 y=\operatorname{clip}_{[-1,1]}Q_{q_{\rm out}}
   \big((1+\epsilon_g)g(z)+b_{\rm out}+\sigma_{\rm out}Z_{\rm out}\big).
-\]
+```
 
 Die Elektronik entscheidet anhand `sign(y)` und behandelt y=0 mit der bisherigen
 Regel nach Originalindex. Originalschlüssel bleiben unverändert; fehlerhafte
@@ -74,11 +75,11 @@ Begrenzung [−1/2,1/2−Δ] bleibt nur in den alten Experimenten bestehen.
 
 Es werden zwei Funktionen verglichen:
 
-\[
+```math
 g_{\rm direkt}(d)=d,\qquad
 g_{\rm periodisch}(d)=\frac{\sin(\alpha d)}{\alpha},
 \qquad \alpha=\pi/2.
-\]
+```
 
 Beide haben am Vergleichspunkt d=0 die Steigung 1. Die Division durch α ist
 eine Wahl der **Ausgangseinheit**. Damit dieselbe Zahl σ_out vergleichbar ist,
@@ -101,10 +102,10 @@ Für die Vergleichsentscheidung ist insbesondere der Abstand von ±Δ zu 0 relev
 Eine Nichtlinearität verstärkt auch bereits vorhandenes Eingangsrauschen.
 Für kleine Störungen ohne wirksame Quantisierung/Begrenzung gilt näherungsweise
 
-\[
+```math
 \operatorname{Var}(y\mid d)\approx
  (1+\epsilon_g)^2[g'(d)]^2\sigma_{\rm in}^2+\sigma_{\rm out}^2,
-\]
+```
 
 sofern die beiden Störungen unabhängig sind. Das unnormierte sin(αd) hat nahe
 null ungefähr α-fachen Signalabstand **und** α-faches Eingangsrauschen.
@@ -114,9 +115,9 @@ dafür müssen reale Verstärkung, Bereich, Rauschposition und Kosten bekannt se
 
 ## 3. Quantisierung ist eine Entscheidungsregel
 
-\[
+```math
 Q_q(v)=q\,\operatorname{roundToEven}(v/q),\qquad Q_0(v)=v.
-\]
+```
 
 Bei q_out=Δ gehört [−Δ/2,+Δ/2] zum Nullcode. Exakte Halbwerte gehen zum geraden
 Code; insbesondere werden ±Δ/2 null. Ein positiver Nachbarschlüssel d=Δ hat
@@ -145,13 +146,14 @@ Asymmetrie, Übersteuerung und Wandlung müssen separat belegt werden.
 
 Für den alten direkten/upstream-Pfad, d=Δ und σ=0,25Δ:
 
-\[
+```math
 P(\text{falscher Gleichstand})=
 \Phi(-2)-\Phi(-6)\approx 2{,}275\%,
-\]
-\[
+```
+
+```math
 P(\text{Vorzeichenumkehr})=\Phi(-6)\approx9{,}87\cdot10^{-10}.
-\]
+```
 
 Für echte Gleichstände beträgt die Wahrscheinlichkeit des Aufbrechens nach
 dieser Rundung 2Φ(−2)≈4,550 %. Ein falscher Gleichstand ist noch nicht in jedem
@@ -210,10 +212,10 @@ scheinbar gerätespezifische Rauschzahl.
 Für eine einzelne Photodiode und weiße, einseitige spektrale Dichten lautet
 eine passende Parametrisierung:
 
-\[
+```math
 \operatorname{Var}(\delta I)=B_{\rm eq}
  \left(S_{I,\rm th}+2q_e I+10^{\mathrm{RIN}_{\rm dB/Hz}/10} I^2\right).
-\]
+```
 
 I: Ampere; B_eq: äquivalente Rauschbandbreite in Hz; S_I,th: A²/Hz;
 10^(RIN/10): 1/Hz; q_e: Elementarladung. Ergebnis: A².

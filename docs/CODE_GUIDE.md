@@ -84,3 +84,10 @@ No caching, precision change or altered RNG schedule is introduced by this reorg
 
 The superseded prototypes and their instructions are isolated in [legacy/](../legacy/README.md).
 They are unnecessary for current reference, quality, noise, CPU and affine work.
+
+## Formatting equations on GitHub
+
+Use fenced `math` blocks for standalone equations in these guides, with a blank
+line before and after each block. Use dollar delimiters for inline mathematics;
+keep Python expressions, variable names and commands in code spans or code blocks.
+See [GitHub's supported math syntax](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions).

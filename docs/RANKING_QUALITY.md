@@ -64,25 +64,25 @@ Position in der ausgegebenen Reihenfolge verglichen. Dies entspricht
 Seien I die Zahl falsch geordneter ungleicher Schlüsselpaare, M die Zahl aller
 ungleichen Schlüsselpaare und C=N(N−1)/2 die Zahl sämtlicher Paare. Dann gilt:
 
-\[
+```math
 \tau_b = \frac{M-2I}{\sqrt{CM}}.
-\]
+```
 
 Ohne gleiche Schlüssel ist M=C und die Formel wird zu 1−2I/C. Bei gleichen
 Schlüsseln hat die wahre Ordnung Gleichstände, die ausgegebene Permutation
 jedoch eindeutige Positionen. Deshalb liegt selbst für eine korrekte Ausgabe
 die erreichbare Obergrenze bei:
 
-\[
+```math
 \tau_{b,\max}=\sqrt{M/C}.
-\]
+```
 
 Diese Obergrenze wird mitberichtet. Zusätzlich steht eine ausdrücklich getrennt
 bezeichnete, auf die Schlüsselordnung normierte Variante zur Verfügung:
 
-\[
+```math
 \tau_{\mathrm{key,norm}}=\tau_b/\tau_{b,\max}=1-2I/M.
-\]
+```
 
 Sie erreicht bei korrekter Schlüsselreihenfolge 1 und behandelt unterschiedliche
 Anordnungen gleicher Schlüssel gleich. Sie wird **nicht als Standard-τ-b**
