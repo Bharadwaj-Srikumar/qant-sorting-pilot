@@ -1,5 +1,9 @@
 # 23 October 2026: GitHub equation rendering
 
+- Replaced 13 uses of GitHub-blocked `\operatorname` with `\mathrm` in
+  the method guide, common-noise guide and report source. The earlier delimiter
+  fix passed full MathJax validation but missed this GitHub-specific restriction.
+- Documented the macro restriction and the need to check GitHub's rendered preview.
 - Converted 20 display equations in the method, hardware, common-noise and
   ranking-quality guides to GitHub-supported fenced math blocks.
 - Added the documentation formatting convention to the code guide.

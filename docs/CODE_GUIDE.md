@@ -91,3 +91,10 @@ Use fenced `math` blocks for standalone equations in these guides, with a blank
 line before and after each block. Use dollar delimiters for inline mathematics;
 keep Python expressions, variable names and commands in code spans or code blocks.
 See [GitHub's supported math syntax](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions).
+
+For named functions in equations, use `\mathrm{round}`, `\mathrm{clip}` and
+`\mathrm{Var}`. GitHub rejects `\operatorname` even though a full MathJax
+installation accepts it. Check the rendered GitHub preview as well as local
+syntax validation when changing equations; local rendering alone does not
+establish GitHub compatibility. Keep the report source compatible with the
+Matplotlib mathtext renderer used by the PDF builder, too.

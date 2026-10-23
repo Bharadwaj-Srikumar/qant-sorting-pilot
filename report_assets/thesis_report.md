@@ -433,7 +433,7 @@ $$M=2^{b_{\mathrm{key}}}-1,\qquad L_{\mathrm{in}}=2^{b_{\mathrm{in}}}$$
 
 Die deklarierte Skalierung lautet:
 
-$$u(x)=\frac{x}{M}\left(1-\frac{1}{L_{\mathrm{in}}}\right),\quad \widehat{x}=\Delta_{\mathrm{in}}\,\operatorname{roundEven}\left(\frac{u(x)}{\Delta_{\mathrm{in}}}\right)$$
+$$u(x)=\frac{x}{M}\left(1-\frac{1}{L_{\mathrm{in}}}\right),\quad \widehat{x}=\Delta_{\mathrm{in}}\,\mathrm{roundEven}\left(\frac{u(x)}{\Delta_{\mathrm{in}}}\right)$$
 
 Mit Δ_in = 1/L_in gilt bei gleichen Schlüssel- und Eingabebreiten exakt x̂ = x/2ᵇ. Die Skalierung richtet sich nach dem vollständigen deklarierten Bereich, nicht nach Minimum und Maximum einer einzelnen Liste. Dadurch bleiben Signalabstände zwischen Listen vergleichbar.
 
@@ -441,7 +441,7 @@ Mit Δ_in = 1/L_in gilt bei gleichen Schlüssel- und Eingabebreiten exakt x̂ = 
 
 Es gilt Δ_in = Δ_out = Δ = 2⁻ᵇ. Der Komparator bildet die Differenz d = â − b̂, addiert ε aus einer Gaußverteilung mit Standardabweichung σ = ηΔ, rundet zum nächsten geraden Integercode und sättigt auf den b-Bit-Codebereich:
 
-$$c=\operatorname{roundEven}\left(\frac{d+\varepsilon}{\Delta}\right),\quad c_{\mathrm{lim}}=\operatorname{clip}\left(c,-2^{b-1},2^{b-1}-1\right),\quad \widehat d=c_{\mathrm{lim}}\Delta$$
+$$c=\mathrm{roundEven}\left(\frac{d+\varepsilon}{\Delta}\right),\quad c_{\mathrm{lim}}=\mathrm{clip}\left(c,-2^{b-1},2^{b-1}-1\right),\quad \widehat d=c_{\mathrm{lim}}\Delta$$
 
 Die sechs η-Werte sind 0; 0,05; 0,10; 0,15; 0,20 und 0,25. Sie sind synthetische Sensitivitätswerte in Einheiten des Differenzrasters. Sie sind weder gemessene Q.ANT-Störungen noch Fehlerwahrscheinlichkeiten oder Prozentwerte einer optischen Leistung.
 
@@ -473,9 +473,9 @@ Bei Gaußrauschen beträgt die Wahrscheinlichkeit eines falschen Nullcodes für 
 
 Das neue Kontrollmodell verwendet normierte Differenzeinheiten und eine explizite Reihenfolge. β_in und β_out sind feste Restoffsets, ε_g ist ein relativer Verstärkungsfehler. Z_in und Z_out sind unabhängige standardnormalverteilte Zufallsgrößen je Vergleich. Q_q rundet mit Schritt q zum nächsten geraden Code; Q₀ ist die Identität.
 
-$$z=\operatorname{clip}_{[-1,1]}\!\left(Q_{q_{\mathrm{pre}}}(d+\beta_{\mathrm{in}}+\sigma_{\mathrm{in}}Z_{\mathrm{in}})\right)$$
+$$z=\mathrm{clip}_{[-1,1]}\!\left(Q_{q_{\mathrm{pre}}}(d+\beta_{\mathrm{in}}+\sigma_{\mathrm{in}}Z_{\mathrm{in}})\right)$$
 
-$$y=\operatorname{clip}_{[-1,1]}\!\left(Q_{q_{\mathrm{out}}}((1+\varepsilon_g)g(z)+\beta_{\mathrm{out}}+\sigma_{\mathrm{out}}Z_{\mathrm{out}})\right)$$
+$$y=\mathrm{clip}_{[-1,1]}\!\left(Q_{q_{\mathrm{out}}}((1+\varepsilon_g)g(z)+\beta_{\mathrm{out}}+\sigma_{\mathrm{out}}Z_{\mathrm{out}})\right)$$
 
 Die beiden idealen Übertragungen sind:
 
@@ -501,7 +501,7 @@ I ist dabei der positive Photostrom eines Detektorzweigs, nicht einfach eine vor
 
 Für die vereinfachte skalare Kennlinie ergibt sich lokal bei unabhängigen Eingangs- und Ausgangsstörungen:
 
-$$\operatorname{Var}(y\mid d)\approx(1+\varepsilon_g)^2[g'(d)]^2\sigma_{\mathrm{in}}^2+\sigma_{\mathrm{out}}^2$$
+$$\mathrm{Var}(y\mid d)\approx(1+\varepsilon_g)^2[g'(d)]^2\sigma_{\mathrm{in}}^2+\sigma_{\mathrm{out}}^2$$
 
 Quantisierung, Clipping und Nichtlinearität können diese linearisierte Näherung begrenzen. Bei Referenzsubtraktion muss zusätzlich Var(y − y_ref) = Var(y) + Var(y_ref) − 2 Cov(y,y_ref) berücksichtigt werden. Ein einmal gemessener Referenzfehler ist über viele Vergleiche gemeinsam wirksam. Ihn unabhängig pro Vergleich neu zu ziehen würde eine andere Hardwareannahme erzeugen.
 

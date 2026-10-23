@@ -38,12 +38,12 @@ Für andere Eingabewerte wäre sie ausdrücklich zu modellieren.
 Der gemeinsame Ablauf lautet:
 
 ```math
-z=\operatorname{clip}_{[-1,1]}
+z=\mathrm{clip}_{[-1,1]}
   Q_{q_{\rm pre}}(d+b_{\rm in}+\sigma_{\rm in} Z_{\rm in}),
 ```
 
 ```math
-y=\operatorname{clip}_{[-1,1]}Q_{q_{\rm out}}
+y=\mathrm{clip}_{[-1,1]}Q_{q_{\rm out}}
   \big((1+\epsilon_g)g(z)+b_{\rm out}+\sigma_{\rm out}Z_{\rm out}\big).
 ```
 
@@ -103,7 +103,7 @@ Eine Nichtlinearität verstärkt auch bereits vorhandenes Eingangsrauschen.
 Für kleine Störungen ohne wirksame Quantisierung/Begrenzung gilt näherungsweise
 
 ```math
-\operatorname{Var}(y\mid d)\approx
+\mathrm{Var}(y\mid d)\approx
  (1+\epsilon_g)^2[g'(d)]^2\sigma_{\rm in}^2+\sigma_{\rm out}^2,
 ```
 
@@ -116,7 +116,7 @@ dafür müssen reale Verstärkung, Bereich, Rauschposition und Kosten bekannt se
 ## 3. Quantisierung ist eine Entscheidungsregel
 
 ```math
-Q_q(v)=q\,\operatorname{roundToEven}(v/q),\qquad Q_0(v)=v.
+Q_q(v)=q\,\mathrm{roundToEven}(v/q),\qquad Q_0(v)=v.
 ```
 
 Bei q_out=Δ gehört [−Δ/2,+Δ/2] zum Nullcode. Exakte Halbwerte gehen zum geraden
@@ -213,7 +213,7 @@ Für eine einzelne Photodiode und weiße, einseitige spektrale Dichten lautet
 eine passende Parametrisierung:
 
 ```math
-\operatorname{Var}(\delta I)=B_{\rm eq}
+\mathrm{Var}(\delta I)=B_{\rm eq}
  \left(S_{I,\rm th}+2q_e I+10^{\mathrm{RIN}_{\rm dB/Hz}/10} I^2\right).
 ```
 

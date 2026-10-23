@@ -18,7 +18,7 @@ u(x)=\frac{x}{2^{b_{key}}-1}\left(1-2^{-b_{in}}\right).
 For matched widths it simplifies exactly to `u(x) = x/L`. Input rounding gives
 
 ```math
-\widehat{x}=\Delta_{in}\operatorname{round}_{even}
+\widehat{x}=\Delta_{in}\mathrm{round}_{even}
 \left(\frac{u(x)}{\Delta_{in}}\right)=\frac{x}{L}.
 ```
 
@@ -56,7 +56,7 @@ position; bitonic may compare different records after an earlier decision change
 ## 4. Round and saturate the output
 
 ```math
-c=\operatorname{round}_{even}(d_n/\Delta_{out}),\qquad
+c=\mathrm{round}_{even}(d_n/\Delta_{out}),\qquad
 \widetilde{d}=\Delta_{out}\min(L/2-1,\max(-L/2,c)).
 ```
 
