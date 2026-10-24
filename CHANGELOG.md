@@ -1,5 +1,9 @@
 # 24 October 2026 — one canonical rank architecture
 
+- Moved shared rank validation and placement (`place_ranks`) beside `rank_sort`
+  in `sorting_schedules.py`, so the operational sorter can be read in one file.
+  The equation-level reference imports that helper and retains its own
+  `quantize_difference`; numerical algorithms and saved results are unchanged.
 - Adopted Louri's full N×N matrix as the sole thesis rank implementation, including
   separately evaluated directions, measured diagonal, normalized unit bias,
   threshold, column ranks and validated electronic placement.

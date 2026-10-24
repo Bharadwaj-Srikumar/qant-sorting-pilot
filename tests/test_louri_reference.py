@@ -5,9 +5,9 @@ import numpy as np
 
 from qant_sorting.comparison import NoisyDifference, Precision
 from qant_sorting.louri_reference import (
-    louri_matrix_rank, place_ranks, quantize_difference,
+    louri_matrix_rank, quantize_difference,
 )
-from qant_sorting.sorting_schedules import rank_sort
+from qant_sorting.sorting_schedules import place_ranks, rank_sort
 
 
 class LouriReferenceTests(unittest.TestCase):

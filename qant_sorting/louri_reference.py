@@ -19,6 +19,7 @@ import numpy as np
 
 from qant_sorting.comparison import Precision
 from qant_sorting.input_validation import validate_keys
+from qant_sorting.sorting_schedules import place_ranks
 
 
 def quantize_difference(values, bits, quantization):
@@ -38,31 +39,6 @@ def quantize_difference(values, bits, quantization):
     half = 2 ** (bits - 1)
     codes = np.rint(values / precision.delta_out)
     return np.clip(codes, -half, half - 1) * precision.delta_out
-
-
-def place_ranks(keys, zero_based_ranks):
-    """Route original records only if all ranks uniquely occupy 0..N-1.
-
-    A noisy diagonal can yield rank -1 after conversion from one-based ranks.
-    Reject out-of-range ranks before indexing; reject collisions as well.
-    Invalid trials retain -1 values AND indices, without digital re-sorting.
-    """
-    keys = np.asarray(keys)
-    ranks = np.asarray(zero_based_ranks)
-    if ranks.shape != keys.shape or ranks.dtype.kind not in "iu" or keys.ndim != 2:
-        raise ValueError("ranks must be a 2-D integer array matching keys")
-    trials, n = keys.shape
-    in_range = np.all((ranks >= 0) & (ranks < n), axis=1)
-    rows = np.flatnonzero(in_range)
-    occupied = np.zeros((trials, n), dtype=np.int64)
-    np.add.at(occupied, (rows[:, None], ranks[rows]), 1)
-    valid = in_range & np.all(occupied == 1, axis=1)
-    values = np.full(keys.shape, -1, dtype=np.int64)
-    indices = np.full(keys.shape, -1, dtype=np.int64)
-    rows = np.flatnonzero(valid)
-    values[rows[:, None], ranks[rows]] = keys[rows]
-    indices[rows[:, None], ranks[rows]] = np.arange(n)
-    return values, indices, valid
 
 
 @dataclass

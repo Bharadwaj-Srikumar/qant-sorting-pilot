@@ -5,7 +5,8 @@ Start with one workload at a time:
 1. `input_validation.py`: valid integer keys, shapes and unsigned-key ranges.
 2. `comparison.py`: normalization, Gaussian noise, nearest-even rounding and clipping.
 3. `sorting_schedules.py`: read `rank_sort` with the [Louri worked example](LOURI_REFERENCE.md),
-   then read Bitonic's layers and record exchanges.
+   then `place_ranks` immediately below it to follow validation and record placement.
+   Read Bitonic's layers and record exchanges in the same file.
 4. `metrics.py`: separate validity, sorted keys and stable record order.
 5. `ranking_quality.py`: inversions, Kendall-τ-b and Recall@k on valid outputs.
 6. `sdk_mapping.py`: pack every requested pair into the official linear API.
@@ -14,6 +15,13 @@ The inspectable matrices in `louri_reference.py` are a reference for the same
 full-matrix algorithm, not a competing rank adaptation. In particular, `rank_sort`
 submits **N² entries**, keeps both directions separate, and does not restore noisy
 diagonals. `bias_step` is required explicitly and must match the difference units.
+
+Both `rank_sort` and the equation-level reference use `place_ranks` from
+`sorting_schedules.py`. The operational sorter therefore has no dependency on
+`louri_reference.py`. The reference's `quantize_difference` stays alongside its
+matrix equations: it selects no quantization or the matched quantizer. In the
+operational sorter, the supplied `difference` callable owns quantization;
+`rank_sort` does not apply a second quantizer.
 
 ## Commands
 

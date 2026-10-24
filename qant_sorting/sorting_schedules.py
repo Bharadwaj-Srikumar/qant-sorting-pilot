@@ -97,7 +97,6 @@ def rank_sort(keys, difference, *, bias_step):
     ranks start at 1 because noiseless self-comparisons contribute one.
     Invalid/out-of-range ranks retain -1 records; no digital repair is performed.
     """
-    from qant_sorting.louri_reference import place_ranks
     if not np.isfinite(bias_step) or bias_step <= 0:
         raise ValueError("bias_step must be finite and positive")
     keys = np.asarray(keys)
@@ -113,3 +112,28 @@ def rank_sort(keys, difference, *, bias_step):
     biased = measured.reshape(shape) - bias_step * np.tril(np.ones((n, n)), k=-1)
     ranks = np.sum(biased >= 0, axis=1, dtype=np.int64) - 1
     return place_ranks(keys, ranks)
+
+
+def place_ranks(keys, zero_based_ranks):
+    """Route original records only if all ranks uniquely occupy 0..N-1.
+
+    A noisy diagonal can yield rank -1 after conversion from one-based ranks.
+    Reject out-of-range ranks before indexing; reject collisions as well.
+    Invalid trials retain -1 values AND indices, without digital re-sorting.
+    """
+    keys = np.asarray(keys)
+    ranks = np.asarray(zero_based_ranks)
+    if ranks.shape != keys.shape or ranks.dtype.kind not in "iu" or keys.ndim != 2:
+        raise ValueError("ranks must be a 2-D integer array matching keys")
+    trials, n = keys.shape
+    in_range = np.all((ranks >= 0) & (ranks < n), axis=1)
+    rows = np.flatnonzero(in_range)
+    occupied = np.zeros((trials, n), dtype=np.int64)
+    np.add.at(occupied, (rows[:, None], ranks[rows]), 1)
+    valid = in_range & np.all(occupied == 1, axis=1)
+    values = np.full(keys.shape, -1, dtype=np.int64)
+    indices = np.full(keys.shape, -1, dtype=np.int64)
+    rows = np.flatnonzero(valid)
+    values[rows[:, None], ranks[rows]] = keys[rows]
+    indices[rows[:, None], ranks[rows]] = np.arange(n)
+    return values, indices, valid
