@@ -17,6 +17,7 @@ so a false zero can still produce an incorrect sort.
 | Module | Question and boundary |
 |---|---|
 | `comparison.py` | Matched input/output steps, six synthetic Gaussian noise levels |
+| `louri_reference.py` | Full source matrix/bias/threshold/ranks; explicit noise-correlation controls, not physical reproduction |
 | `common_noise_model.py` | Explicit noise locations, normalized ideal sine and quantizers; Float64 sensitivity model |
 | `sdk_mapping.py` | Official BF16 linear CPU integration; logical buffer accounting |
 | `periodic_comparison.py` | Historical host-phase CPU mapping; upstream/output scenarios have different scales |
@@ -39,6 +40,7 @@ SDK commands require the optional SDK environment. Top-level help needs only Pyt
 | `noise` | `run_noise_sweep.py` | Reproduce all matched-step reference results |
 | `verify` | `verify_results.py` | Compare saved output with the reference |
 | `common-noise` | `run_common_noise_controls.py` | Shared signal/noise controls |
+| `louri` | `run_louri_reference.py` | Verify source-equation agreement and compare declared noise/quantization assumptions |
 | `quality` | `evaluate_ranking_quality.py` | Analyze saved indices; original archives required |
 | `cpu` | `run_cpu_baseline.py` | Digital CPU timing with stable record outputs |
 | `resources` | `hardware_conditions.py` | Conditional operation and buffer counts |
@@ -84,6 +86,10 @@ No caching, precision change or altered RNG schedule is introduced by this reorg
 
 The superseded prototypes and their instructions are isolated in [legacy/](../legacy/README.md).
 They are unnecessary for current reference, quality, noise, CPU and affine work.
+
+After reading `rank_sort`, use [the Louri reference guide](LOURI_REFERENCE.md)
+to follow the original full matrix, its one-based ranks, and the conditions under
+which the unordered-pair reduction remains equivalent under noise.
 
 ## Formatting equations on GitHub
 

@@ -92,6 +92,21 @@ def evidence_tables():
         """Register a named table; the renderer handles wrapping and pagination."""
         tables[key] = dict(title=title, rows=rows, widths=widths, note=note)
 
+    louri = read_rows("results/louri_reference_20261024/summary.csv")
+    louri_rows = [["Rechenweg / Rauschen", "Quantisierung", "Gültig", "Korrekt", "Stabil"]]
+    for row in louri:
+        if (row["dataset"] != "b4_n16_duplicates_allowed" or float(row["eta"]) != .25
+                or (row["algorithm"] == "louri_matrix" and row["diagonal"] != "exact")):
+            continue
+        label = ("Ungeordnete Paare" if row["algorithm"] == "unordered" else
+                 "Matrix: gekoppelt" if row["coupling"] == "antisymmetric" else "Matrix: unabhängig")
+        louri_rows.append([label, "keine" if row["quantization"] == "none" else "vor Bias"] +
+                          [row[key] + "/" + row["trials"] for key in ("valid", "correct", "stable")])
+    add("louri_comparison", "Louri-Referenz und Adaption unter erklärten Rauschannahmen", louri_rows,
+        [2.0, 1.1, .8, .8, .8],
+        "D8: Erste 100 gespeicherte 4-Bit-Listen, N = 16, Duplikate erlaubt; σ = 0,25Δ. "
+        "Matrixdiagonale hier exakt. Gekoppelt: Eji = −Eij. Keine Hardwaremessung.")
+
     add("evidence_overview", "Erreichter Stand und Aussagegrenzen", [
         ["Bereich", "Vorhandene Evidenz", "Offen"],
         ["Literatur und Modell", "Fünf Architekturen; C = (T,S,H,D); hergeleitete Schranken", "Keine universelle neue Komplexitätstheorie"],
@@ -252,6 +267,7 @@ def evidence_tables():
         ["D6: results/cpu_baseline_20261007", "Einzelzeiten, Aggregation, Umgebung und Validierung", "Gemessene CPU-Baseline"],
         ["data/inputs.npz", "24 Datensätze mit je 1.000 Eingaben", "Gemeinsamer Korpus mit festem Datei-Hash"],
         ["D7: results/affine_periodic_20261009", "Alle Paarscores, 3.600 Sortierausgaben, Zählungen und SDK-Quellprüfung", "Neue CPU-Kontrolle; keine Hardwaremessung"],
+        ["D8: results/louri_reference_20261024", "Quellengleichungen, rauschfreie Übereinstimmung, 36.000 Sensitivitätsläufe", "Ausgaben, Ränge, Qualitätsmaße, Annahmen und Hashes gespeichert"],
         ["validation; docs", "Prüfprotokolle, Methoden und Hardwaregrenzen", "Versionsabhängige Belege; Zeitstempel beachten"],
     ], [1.55, 1.6, 1.65])
     add("glossary", "Zentrale Begriffe", [
@@ -282,8 +298,10 @@ def check_provenance():
     initially reviewed source edition. Scientific inputs must match that edition.
     """
     manifest = json.loads((ASSETS / "report_provenance.json").read_text())
-    additions = json.loads((ASSETS / "affine_evidence.json").read_text())
-    for item in manifest["repository_evidence"] + additions["repository_evidence"]:
+    evidence = list(manifest["repository_evidence"])
+    for name in ("affine_evidence.json", "louri_evidence.json"):
+        evidence.extend(json.loads((ASSETS / name).read_text())["repository_evidence"])
+    for item in evidence:
         path = ROOT / item["path"]
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         if digest != item["sha256"]:
@@ -440,7 +458,7 @@ def build(output):
         """Track headings for bookmarks, the table of contents and running headers."""
         def __init__(self, filename):
             """Create one printable A4 text frame with consistent page furniture."""
-            super().__init__(str(filename), pagesize=(PAGE_W,PAGE_H), leftMargin=LEFT, rightMargin=RIGHT, topMargin=TOP, bottomMargin=BOTTOM, title="Hybride photonische Sortierung – Gesamtdokumentation der Masterarbeit", author="Bharadwaj Srikumar", subject="Recherche, Modelle, Code und Evaluierung; Stand 9. Oktober 2026")
+            super().__init__(str(filename), pagesize=(PAGE_W,PAGE_H), leftMargin=LEFT, rightMargin=RIGHT, topMargin=TOP, bottomMargin=BOTTOM, title="Hybride photonische Sortierung – Gesamtdokumentation der Masterarbeit", author="Bharadwaj Srikumar", subject="Recherche, Modelle, Code und Evaluierung; Stand 24. Oktober 2026")
             self.chapter = "Gesamtdokumentation der Masterarbeit"
             frame = Frame(LEFT,BOTTOM,CONTENT_W,PAGE_H-TOP-BOTTOM,leftPadding=0,rightPadding=0,topPadding=0,bottomPadding=0)
             self.addPageTemplates(PageTemplate(id="report", frames=frame, onPage=self.decorate))
@@ -457,7 +475,7 @@ def build(output):
                 canvas.line(LEFT,PAGE_H-40,PAGE_W-RIGHT,PAGE_H-40)
                 canvas.setFont("Report",7); canvas.setFillColor(colors.HexColor(MUTED))
                 canvas.drawString(LEFT,PAGE_H-31,"HYBRIDE PHOTONISCHE SORTIERUNG")
-                canvas.drawRightString(PAGE_W-RIGHT,PAGE_H-31,"Forschungsstand · 09.10.2026")
+                canvas.drawRightString(PAGE_W-RIGHT,PAGE_H-31,"Forschungsstand · 24.10.2026")
                 canvas.drawString(LEFT,30,"Bharadwaj Srikumar · Masterarbeit")
                 canvas.drawRightString(PAGE_W-RIGHT,30,str(doc.page))
             canvas.restoreState()
@@ -476,7 +494,7 @@ def build(output):
     # The cover is typeset explicitly; its authored metadata remains in Markdown.
     title_style = ParagraphStyle("cover_title", fontName="ReportBold", fontSize=29, leading=35, textColor=colors.HexColor(INK), spaceAfter=20)
     sub_style = ParagraphStyle("cover_sub", fontName="Report", fontSize=15, leading=21, textColor=colors.HexColor(ACCENT), spaceAfter=15)
-    story = [Spacer(1,72), para("MASTERARBEIT · FORSCHUNGS- UND IMPLEMENTIERUNGSSTAND", "note"), Spacer(1,16), Paragraph("Hybride photonische<br/>Sortierung",title_style), Paragraph("Gesamtdokumentation der Masterarbeit",sub_style), para("Recherche, mathematische Modelle, Implementierung und Evaluierung"), Spacer(1,30), para("**Bharadwaj Srikumar**"), para("Master Informatik · Hochschule Bochum<br/>".replace("<br/>", "")), para("Betreuung: Prof. Dr. Henrik Blunck"), para("Stand: 9. Oktober 2026"), Spacer(1,25), para("**Arbeitstitel**"), para("Mapping Hybrid Optoelectronic Sorting Architectures onto Modern Photonic Accelerators: A Hardware-Aware Evaluation and Simulation"), Spacer(1,20), para("Diese Dokumentation beschreibt den erreichten Stand der Masterarbeit. Sie verbindet Literatur, mathematische Herleitung, ausführbaren Code und gespeicherte Ergebnisse. Reale Hardwarevalidierung, photonische Laufzeitvorteile und Energieeffizienz sind noch offen.","note"), PageBreak(), para("Inhaltsverzeichnis","h1")]
+    story = [Spacer(1,72), para("MASTERARBEIT · FORSCHUNGS- UND IMPLEMENTIERUNGSSTAND", "note"), Spacer(1,16), Paragraph("Hybride photonische<br/>Sortierung",title_style), Paragraph("Gesamtdokumentation der Masterarbeit",sub_style), para("Recherche, mathematische Modelle, Implementierung und Evaluierung"), Spacer(1,30), para("**Bharadwaj Srikumar**"), para("Master Informatik · Hochschule Bochum<br/>".replace("<br/>", "")), para("Betreuung: Prof. Dr. Henrik Blunck"), para("Stand: 24. Oktober 2026"), Spacer(1,25), para("**Arbeitstitel**"), para("Mapping Hybrid Optoelectronic Sorting Architectures onto Modern Photonic Accelerators: A Hardware-Aware Evaluation and Simulation"), Spacer(1,20), para("Diese Dokumentation beschreibt den erreichten Stand der Masterarbeit. Sie verbindet Literatur, mathematische Herleitung, ausführbaren Code und gespeicherte Ergebnisse. Reale Hardwarevalidierung, photonische Laufzeitvorteile und Energieeffizienz sind noch offen.","note"), PageBreak(), para("Inhaltsverzeichnis","h1")]
     toc = TableOfContents()
     toc.levelStyles = [ParagraphStyle("toc", fontName="Report", fontSize=9.3, leading=13.5, leftIndent=0, firstLineIndent=0, spaceBefore=6, textColor=colors.HexColor(INK))]
     story += [toc]

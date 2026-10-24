@@ -13,6 +13,7 @@ COMMANDS = {
     "noise": ("run_noise_sweep", "Reproduce the matched-step reference"),
     "verify": ("verify_results", "Compare a run with the saved reference"),
     "common-noise": ("run_common_noise_controls", "Run shared signal/noise controls"),
+    "louri": ("run_louri_reference", "Verify Louri's full matrix and compare noise assumptions"),
     "quality": ("evaluate_ranking_quality", "Score saved outputs; requires original archives"),
     "cpu": ("run_cpu_baseline", "Measure the digital CPU baseline"),
     "resources": ("hardware_conditions", "Count logical calls and buffers"),

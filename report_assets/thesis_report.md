@@ -341,6 +341,30 @@ Der Bitonic-Plan wird auf disjunkte Paarabdeckung je Stufe und passende Gesamtza
 
 Diese Prüfungen validieren Funktion und Operationsstruktur. Sie bestimmen weder physische MVM-Kapazität noch optische Fan-out-Verluste, Taktgrenzen oder Energiewerte. Nichtlokale optische Verbindungen werden im Funktionsmapping durch elektronische Indizierung ersetzt.
 
+## 6.6 Vollständige Louri-Matrix als Gleichungsreferenz
+
+Die separate Implementierung louri_reference.py bildet die Matrizen der Quelle direkt ab. Zeile i bezeichnet den konkurrierenden Datensatz, Spalte j den Datensatz, dessen Rang bestimmt wird. Mit Δ = 2⁻ᵇ werden sowohl die ganzzahligen Schlüssel als auch der Einheitsbias normiert:
+
+$$D_{ij}=\Delta(x_j-x_i),\qquad U_{ij}=\mathbf{1}[i>j],\qquad D'_{ij}=D_{ij}-\Delta U_{ij}$$
+
+$$R'_{ij}=\mathbf{1}[D'_{ij}\geq0],\qquad r_j^{(1)}=\sum_i R'_{ij},\qquad r_j^{(0)}=r_j^{(1)}-1$$
+
+Die Diagonale liefert jeweils eine Eins; deshalb beginnt der Quellenrang bei 1. Das veröffentlichte Beispiel [7,8,2,8,5] ergibt [3,4,1,5,2] und eine stabile Reihenfolge der beiden Achten. Zwei Textstellen auf Seite 3089 beschreiben die Gleichstandsrichtung beziehungsweise die betroffene Dreieckshälfte widersprüchlich. Die Referenz folgt den dargestellten Gleichungen und Beispielmatrizen. [10, Gleichungen 3-7]
+
+Ohne Rauschen stimmen die rohe Matrix, die Matrix mit Quantisierung und die bestehende Paaradaption mit stabiler digitaler Sortierung überein: 256 geordnete 4-Bit-Paare, 65.536 geordnete 8-Bit-Paare, sämtliche 65.536 Viererlisten über 4-Bit-Schlüsseln und alle 24.000 gespeicherten Listen. Das sind 155.328 geprüfte Eingaben; überlappende Kontrollmengen sind keine unabhängigen Stichproben. [D8]
+
+## 6.7 Was der Rauschvergleich tatsächlich prüft
+
+Die Sensitivitätsserie addiert angenommene gaußsche Fehler zu D, vor Bias und Schwelle. Die Standardabweichung beträgt σ = ηΔ, mit η aus {0; 0,05; 0,10; 0,15; 0,20; 0,25}. Untersucht werden unabhängige gerichtete Fehler sowie gekoppelte Fehler Eⱼᵢ = −Eᵢⱼ. Die Diagonale ist entweder bekannt und exakt oder separat verrauscht. Quantisierung ist entweder ausgeschaltet, einschließlich Clipping, oder verwendet das bisherige vorzeichenbehaftete Raster vor dem Bias. Bias, Schwelle, Rangsummen und Platzierung bleiben exakt.
+
+Bei gekoppelten Fehlern, exakter Diagonale und diesem Raster stimmen alle gerichteten Entscheidungen mit der Paaradaption überein, auch wenn fehlerhafte Vergleiche Rangkonflikte erzeugen. Dies wurde in 3.600 gepaarten Läufen geprüft. Bei unabhängigen Fehlern können beide Richtungen dagegen gleichzeitig null oder eins liefern. Eine vollständige Matrix ist deshalb ohne Rauschen äquivalent, unter beliebigen Rauschannahmen aber nicht automatisch äquivalent.
+
+Das rohe Quellenmodell besitzt zudem Nullabstände zur Schwelle: Bei [1,0] beträgt D₁₀ = Δ und nach Bias D′₁₀ = 0. Ein beliebig kleiner darstellbarer negativer Fehler kippt diesen Beitrag. Vorherige Rundung erzeugt hier eine Reserve von einer halben Rasterstufe. Acht Kontrollen mit je 100.000 Paaren bestätigen die zugehörigen gaußschen Wahrscheinlichkeiten innerhalb der festgelegten Stichprobentoleranz. Die vollständige Sensitivitätsserie umfasst 36.000 Auswertungen in 360 Konfigurationen auf den ersten 100 Listen von sechs gespeicherten Datensätzen. [D8]
+
+{{table:louri_comparison}}
+
+Gültigkeit, vollständige Korrektheit und Stabilität werden getrennt ausgewertet. Kendall-τ, Recall@10 und Inversionen nach Schlüsselabstand sind nur bei gültigen Ausgaben definiert; eine zusätzliche Recall-Zahl setzt ungültige Ausgaben ausdrücklich auf null. Die schlechten rohen Matrixwerte beschreiben die gewählte Schwellen- und Rauschannahme, nicht die Zuverlässigkeit eines realen Louri- oder Q.ANT-Geräts. Photodetektoren, optische Summierung, Biasabweichungen, Drift und reale Fehlerkorrelationen sind weiterhin nicht physikalisch charakterisiert.
+
 # 7. Q.ANT-SDK und periodischer Vergleich
 
 ## 7.1 Überprüfter Softwarestand

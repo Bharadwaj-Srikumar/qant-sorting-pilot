@@ -71,6 +71,10 @@ Historical metadata retain their original paths and hashes. The
 
 ## Current findings and limits
 
+The [full Louri matrix reference](docs/LOURI_REFERENCE.md) agrees with the rank
+adaptation on 155,328 noiseless arrays. Paired noise controls separate quantization,
+directed-error correlation and self-comparisons; run `python -m qant_sorting louri`.
+
 The [affine CPU feasibility check](docs/PERIODIC_FEASIBILITY.md) finds 40 false
 8-bit ties; the direct-difference and host-phase controls remain correct.
 [Common-noise controls](docs/COMMON_NOISE_MODEL.md),
