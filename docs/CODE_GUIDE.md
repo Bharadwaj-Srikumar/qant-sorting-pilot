@@ -1,109 +1,61 @@
-# Reading and running the code
+# Reading the thesis code
 
-Start with four files; the experiment scripts can wait:
+Start with one workload at a time:
 
-1. [input_validation.py](../qant_sorting/input_validation.py) checks and copies integer keys.
-2. [comparison.py](../qant_sorting/comparison.py) defines the matched-step noisy comparison.
-3. [sorting_schedules.py](../qant_sorting/sorting_schedules.py) uses its sign in bitonic or rank sorting.
-4. [metrics.py](../qant_sorting/metrics.py) checks record preservation, order and stability.
+1. `input_validation.py`: valid integer keys, shapes and unsigned-key ranges.
+2. `comparison.py`: normalization, Gaussian noise, nearest-even rounding and clipping.
+3. `sorting_schedules.py`: read `rank_sort` with the [Louri worked example](LOURI_REFERENCE.md),
+   then read Bitonic's layers and record exchanges.
+4. `metrics.py`: separate validity, sorted keys and stable record order.
+5. `ranking_quality.py`: inversions, Kendall-τ-b and Recall@k on valid outputs.
+6. `sdk_mapping.py`: pack every requested pair into the official linear API.
 
-A comparator returns negative, zero or positive scores for equally shaped pair
-arrays. Original keys and indices stay electronic. The sorter never reconstructs
-keys from analog magnitudes. A measured zero uses the original-index tie rule,
-so a false zero can still produce an incorrect sort.
+The inspectable matrices in `louri_reference.py` are a reference for the same
+full-matrix algorithm, not a competing rank adaptation. In particular, `rank_sort`
+submits **N² entries**, keeps both directions separate, and does not restore noisy
+diagonals. `bias_step` is required explicitly and must match the difference units.
 
-## Choose the model deliberately
-
-| Module | Question and boundary |
-|---|---|
-| `comparison.py` | Matched input/output steps, six synthetic Gaussian noise levels |
-| `louri_reference.py` | Full source matrix/bias/threshold/ranks; explicit noise-correlation controls, not physical reproduction |
-| `common_noise_model.py` | Explicit noise locations, normalized ideal sine and quantizers; Float64 sensitivity model |
-| `sdk_mapping.py` | Official BF16 linear CPU integration; logical buffer accounting |
-| `periodic_comparison.py` | Historical host-phase CPU mapping; upstream/output scenarios have different scales |
-| `experiments/check_affine_periodic.py` | Phase inside the MVM; known 8-bit false ties preserved as a negative result |
-| `ranking_quality.py` | Kendall-τ-b, inversions by key distance and Recall@k |
-| `saved_output_reader.py` | Complete or explicitly audited incomplete output archives |
-
-All paths in this table are under `qant_sorting/`. These models are separate
-because their assumptions differ. They are not interchangeable implementations
-of one physical device. BF16 is an interface format, not measured analog ENOB.
-
-## One command entry point
+## Commands
 
 Run `python -m qant_sorting COMMAND --help` from the repository root.
-Arguments pass through to the selected runner; no experiment runs on import.
-SDK commands require the optional SDK environment. Top-level help needs only Python.
+Implementations are under `qant_sorting/experiments/` except `report`.
 
-| COMMAND | Implementation in `qant_sorting/experiments/` | Purpose |
-|---|---|---|
-| `noise` | `run_noise_sweep.py` | Reproduce all matched-step reference results |
-| `verify` | `verify_results.py` | Compare saved output with the reference |
-| `common-noise` | `run_common_noise_controls.py` | Shared signal/noise controls |
-| `louri` | `run_louri_reference.py` | Verify source-equation agreement and compare declared noise/quantization assumptions |
-| `quality` | `evaluate_ranking_quality.py` | Analyze saved indices; original archives required |
-| `cpu` | `run_cpu_baseline.py` | Digital CPU timing with stable record outputs |
-| `resources` | `hardware_conditions.py` | Conditional operation and buffer counts |
-| `sdk` | `run_sdk_control.py` | Official linear CPU control |
-| `periodic-pairs` | `check_periodic_pairs.py` | Exhaustive existing host-phase comparator |
-| `affine` | `check_affine_periodic.py` | Affine CPU feasibility control |
-| `nonlinearity` | `check_sdk_nonlinearity.py` | ReLU/min-max CPU identity |
-| `periodic` | `run_periodic_evaluation.py` | Historical periodic scenarios |
-| `periodic-summary` | `summarize_periodic_results.py` | Historical CSVs required; use `--project-dir` for external evidence |
-| `curve` | `measure_periodic_curve.py` | Repeated API samples; explicit backend choice |
-| `install-sdk` | `install_sdk.py` | Install the checksum-verified CPU wheel |
-| `report` | `../report.py` | Build the sole current PDF from saved evidence |
+| Command | Purpose |
+|---|---|
+| `noise` / `verify` | Reproduce / verify the complete current Bitonic–Louri reference |
+| `louri` | Verify source matrices, noiseless ranks and analytic threshold controls |
+| `quality` | Independently score the complete saved reference outputs |
+| `common-noise` | Compare declared signal stages and quantization assumptions |
+| `sdk` | Official CPU integration of both complete sorters |
+| `resources` | Count N² rank cells, calls and logical BF16 buffers |
+| `cpu` | Measure a stable digital CPU baseline |
+| `periodic-pairs` / `affine` | Separate nonlinear comparison feasibility studies |
+| `nonlinearity` | CPU ReLU/min-max identities and source boundaries |
+| `curve` | Acquire repeated API samples with explicit backend selection |
+| `install-sdk` | Install the checksum-verified vendor CPU wheel |
+| `report` | Build the sole current PDF from hash-checked evidence |
 
-For example, `python run_noise_sweep.py --batch-size 32` becomes
-`python -m qant_sorting noise --batch-size 32`. Python imports now use the package:
-`from qant_sorting.sorting_schedules import bitonic_sort`.
-The complete old-to-new file map is [source_layout.json](source_layout.json).
+## Contracts
 
-## Shared plumbing and reproducibility
+- Keys have shape `(trials,N)`; matrix pair inputs have shape `(trials,N*N)`.
+- Flags are `[valid,correct,stable]`; invalid rank records have `-1` indices/values.
+- No digital re-sort, rank clipping or silent fallback repairs invalid outputs.
+- Conditional tau/recall require valid permutations; report the denominator.
+- Recall means the largest k keys. Stable-ID and tie-neutral variants are distinct.
+- Absolute trial IDs determine RNG streams, regardless of memory batching.
+- `common_noise_model.py` is a Float64 sensitivity model. `sdk_mapping.py` executes
+  official BF16 CPU arithmetic. Neither is measured physical analog precision.
+- A periodic score is not in difference units and cannot be passed unchanged to
+  the full-matrix rank implementation. Current nonlinear controls are pair-only.
 
-`paths.py` defines the repository root and input identity. `io.py` provides
-streamed SHA-256, CSV writing and source inventory. `experiments/settings.py`
-holds the existing sweep constants. These helpers do not decide scientific assumptions.
+## Equations and saved evidence
 
-New provenance includes package paths and shared helpers. Historical result
-metadata remain unchanged and identify the code that originally produced them.
-The report checks saved evidence hashes; original source hashes remain in its
-historical provenance record. Regenerated outputs use separate destinations.
+Use fenced `math` blocks for display equations in guides, with blank lines around
+them. Use `\mathrm`, not GitHub-blocked `\operatorname`. The PDF source uses its
+supported single-line dollar-delimited math and `\lbrace` / `\rbrace` for visible
+braces. Check rendered output when changing formulas.
 
-The existing function explanations retain units, shapes, ties, seeds and
-hardware boundaries. Repeated command-entry boilerplate has been removed.
-No caching, precision change or altered RNG schedule is introduced by this reorganization.
-
-## Contracts that matter
-
-- Inputs are `(trials,N)`; comparator arrays are usually `(trials,pairs)`.
-- Current flags are `[valid,correct,stable]`; the legacy archive has another order.
-- Invalid rank outputs retain `-1` markers and count as failures. No digital repair.
-- Invalid outputs have undefined conditional ranking metrics; report their count.
-- Recall selects the largest k keys. Stable-ID and tie-neutral recall differ at ties.
-- Preserve absolute trial IDs when batching. Batch size does not change random streams.
-- C=(T,S,H,D) is unchanged; T counts real-RAM-like scalar work, not physical seconds.
-
-The superseded prototypes and their instructions are isolated in [legacy/](../legacy/README.md).
-They are unnecessary for current reference, quality, noise, CPU and affine work.
-
-After reading `rank_sort`, use [the Louri reference guide](LOURI_REFERENCE.md)
-to follow the original full matrix, its one-based ranks, and the conditions under
-which the unordered-pair reduction remains equivalent under noise.
-
-## Formatting equations on GitHub
-
-Use fenced `math` blocks for standalone equations in these guides, with a blank
-line before and after each block. Use dollar delimiters for inline mathematics;
-keep Python expressions, variable names and commands in code spans or code blocks.
-See [GitHub's supported math syntax](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions).
-
-For named functions in equations, use `\mathrm{round}`, `\mathrm{clip}` and
-`\mathrm{Var}`. GitHub rejects `\operatorname` even though a full MathJax
-installation accepts it. Check the rendered GitHub preview as well as local
-syntax validation when changing equations; local rendering alone does not
-establish GitHub compatibility. Keep the report source compatible with the
-Matplotlib mathtext renderer used by the PDF builder, too.
-In the report's dollar-delimited equations, use `\lbrace` and `\rbrace` for
-visible braces; GitHub's Markdown processing can consume `\{` and `\}` before
-the equation reaches the math renderer.
+`paths.py` pins the corpus. `io.py` hashes files and writes CSV. Per-run metadata
+identify code as it existed during execution; subsequent documentation edits do
+not retroactively rewrite those snapshots. The current report checks all evidence
+against `report_assets/evidence.json`.

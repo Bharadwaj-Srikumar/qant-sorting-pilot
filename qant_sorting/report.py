@@ -4,7 +4,7 @@ Reading guide
 -------------
 The authored narrative lives in report_assets/thesis_report.md. Dynamic table
 markers select existing CSV/JSON evidence; they never run a sorting experiment.
-references.json and report_provenance.json document literature and provenance.
+references.json, sources.json and evidence.json document literature and evidence.
 Missing or ambiguous result rows raise an error rather than being interpolated.
 
 The parser deliberately supports only the small Markdown subset used here:
@@ -13,7 +13,7 @@ explicit report markers. This keeps the source editable without an HTML engine.
 ReportLab lays out text and tables; Matplotlib renders exact math and charts.
 All intermediate images are held in memory. Only the final PDF is published to
 reports/, using a temporary sibling and atomic replacement after a successful
-build. Historical report generation lives in tools/build_legacy_reports.py.
+build.
 Importing this module does not read evidence, write reports or run experiments.
 """
 
@@ -79,33 +79,18 @@ def evidence_tables():
     and a source note. Assertions protect the documented evidence inventory.
     """
     reference = read_rows("results/reference/accuracy.csv")
-    quality = read_rows("results/ranking_quality_20261007/summary.csv")
-    recall = read_rows("results/ranking_quality_20261007/recall.csv")
-    common = read_rows("results/common_noise_20261007/sort_quality.csv")
+    quality = read_rows("results/ranking_quality/summary.csv")
+    recall = read_rows("results/ranking_quality/recall.csv")
+    common = read_rows("results/common_noise/sort_quality.csv")
     cpu = read_rows("results/cpu_baseline_20261007/summary.csv")
     pairs = json.loads((ROOT / "results/periodic/pair_checks.json").read_text())
-    assert (len(reference), len(quality), len(recall), len(common), len(cpu)) == (288, 1147, 3911, 144, 192)
-    assert sum(int(r["trials"]) for r in quality) == 1147000
+    assert (len(reference), len(quality), len(common), len(cpu)) == (288, 288, 108, 192)
+    assert sum(int(r["trials"]) for r in quality) == 288000
     tables = {}
 
     def add(key, title, rows, widths=None, note=""):
         """Register a named table; the renderer handles wrapping and pagination."""
         tables[key] = dict(title=title, rows=rows, widths=widths, note=note)
-
-    louri = read_rows("results/louri_reference_20261024/summary.csv")
-    louri_rows = [["Rechenweg / Rauschen", "Quantisierung", "Gültig", "Korrekt", "Stabil"]]
-    for row in louri:
-        if (row["dataset"] != "b4_n16_duplicates_allowed" or float(row["eta"]) != .25
-                or (row["algorithm"] == "louri_matrix" and row["diagonal"] != "exact")):
-            continue
-        label = ("Ungeordnete Paare" if row["algorithm"] == "unordered" else
-                 "Matrix: gekoppelt" if row["coupling"] == "antisymmetric" else "Matrix: unabhängig")
-        louri_rows.append([label, "keine" if row["quantization"] == "none" else "vor Bias"] +
-                          [row[key] + "/" + row["trials"] for key in ("valid", "correct", "stable")])
-    add("louri_comparison", "Louri-Referenz und Adaption unter erklärten Rauschannahmen", louri_rows,
-        [2.0, 1.1, .8, .8, .8],
-        "D8: Erste 100 gespeicherte 4-Bit-Listen, N = 16, Duplikate erlaubt; σ = 0,25Δ. "
-        "Matrixdiagonale hier exakt. Gekoppelt: Eji = −Eij. Keine Hardwaremessung.")
 
     add("evidence_overview", "Erreichter Stand und Aussagegrenzen", [
         ["Bereich", "Vorhandene Evidenz", "Offen"],
@@ -115,7 +100,7 @@ def evidence_tables():
         ["Leistung", "Stabile digitale CPU-Baseline", "GPU, vollständige NPU-Zeit und Energie"],
     ], [1, 2.0, 1.6])
     # New CPU feasibility evidence remains separate from historical pair results.
-    affine = json.loads((ROOT / "results/affine_periodic_20261009/summary.json").read_text())
+    affine = json.loads((ROOT / "results/affine/summary.json").read_text())
     pair_rows = [["Breite", "Paare je Pfad", "Direkt: Fehler", "Host-Phase: Fehler", "Affin: Fehler"]]
     for bits in (4, 8):
         chosen = {r["path"]: r for r in affine["pairs"] if r["bits"] == bits}
@@ -124,15 +109,6 @@ def evidence_tables():
                           ("direct_difference", "host_phase", "affine_phase")])
     add("affine_pairs", "Affine CPU-Phase im Vergleich zu zwei Kontrollen", pair_rows,
         [.7, 1.1, 1.1, 1.2, 1.0], "Quelle D7: summary.json; alle geordneten Paare, einschließlich Gleichständen. SDK 2.3.1, kein Zusatzrauschen.")
-    sort_rows = [["Affine Variante", "Bitonic korrekt / stabil", "Rang korrekt / stabil"]]
-    for dataset in affine["sample"]["datasets"]:
-        bits, size, family = dataset.split("_", 2)
-        label = f"{bits[1:]} Bit, N={size[1:]}, " + ("verschieden" if family == "distinct" else "Duplikate erlaubt")
-        selected = [select_one(affine["sorts"], dataset=dataset, mapping=mapping, path="affine_phase")
-                    for mapping in ("bitonic", "rank")]
-        sort_rows.append([label] + [f"{r['correct']} / {r['stable']}" for r in selected])
-    add("affine_sorts", "Vollständige Sortierkontrolle der affinen Variante", sort_rows,
-        [2.0, 1.2, 1.2], "Quelle D7: je Zelle 100 gespeicherte Listen. Alle Ausgaben gültig. Beide Kontrollpfade: jeweils 100 korrekt und stabil in jeder Zelle.")
     for label, symbol, description in [("lower", "Ω", "Untere"), ("tight", "Θ", "Enge"), ("upper", "O", "Obere")]:
         def bound(expr):
             """Apply a bound symbol to the same architecture-specific scaling expression."""
@@ -167,18 +143,18 @@ def evidence_tables():
         ["β_in; ε_g", "0; 0", "Unterstützte Effekte hier deaktiviert"],
         ["Kennlinie und Bereich", "d bzw. sin(πd/2)/(π/2); [−1,1]", "Ideale Float64-Funktionen, kein tcos-Fit"],
         ["Rauschverteilung", "Unabhängiges Gaußrauschen", "Schwere Tails und Korrelationen noch offen"],
-    ], [1.1, 1.45, 1.8], "Quelle: results/common_noise_20261007/metadata.json und docs/COMMON_NOISE_MODEL.md. Nicht jede Kombination wird als vollständige Sortierung getestet.")
-    add("experiment_inventory", "Vorhandene Versuchsserien", [
-        ["Serie", "Umfang", "Prüfzweck / Status"],
-        ["Referenz, sechs η", "288 Konfigurationen; 288.000 Sortierungen", "Gespeicherte vollständige Ausgaben"],
-        ["Lineares CPU-SDK", "48.000 rauschfreie Sortierungen", "Softwareintegration, kein Timing"],
-        ["Periodische Paare", "256 + 65.536 geordnete Paare", "Vollständige endliche Domänenprüfung"],
-        ["Affine CPU-Phase", "3 × (256 + 65.536) Paare; 3.600 Sortierungen", "Begrenzte Machbarkeitskontrolle mit zwei Kontrollpfaden"],
-        ["Periodische Szenarien", "864 Konfigurationen; nominell 864.000 Sortierungen", "Historische Serie; Roharchive fehlen im Git-Stand"],
-        ["Zusätzliche Rankingmetriken", "1.147 / 1.152 Konfigurationen; 1.147.000 Ausgaben", "Referenz + historische Szenarien; 5 Lücken"],
-        ["Gemeinsames Rauschmodell", "28 Mio. Paarentscheidungen; 14.400 Sortierungen", "Synthetische Kontrollen, eigenes Protokoll"],
-        ["CPU-Baseline", "192 Konfigurationen; 1.728 Zeitwiederholungen", "24.000 Eingaben; Batch- und Typvarianten"],
-    ], [1.25, 1.9, 1.8])
+    ], [1.1, 1.45, 1.8], "Quelle: results/common_noise/metadata.json und docs/COMMON_NOISE_MODEL.md. Nicht jede Kombination wird als vollständige Sortierung getestet.")
+    add("experiment_inventory", "Aktuelle Versuchsserien", [
+        ["Serie", "Umfang", "Prüfzweck"],
+        ["Bitonic / volle Rangmatrix", "288 Konfigurationen; 288.000 Sortierungen", "Alle Ausgaben gespeichert"],
+        ["Lineares CPU-SDK", "48.000 rauschfreie Sortierungen", "N² Rangzellen über die offizielle API"],
+        ["Louri-Quellengleichungen", "155.328 Eingaben; 400.000 Grenzfall-Paare", "Stabile Ränge und analytische Rauschkontrollen"],
+        ["Periodische Paare", "256 + 65.536 Paare", "Endliche CPU-Domänenprüfung"],
+        ["Affine CPU-Phase", "3 × (256 + 65.536) Paare", "Präzisionsgrenze gegenüber zwei Kontrollen"],
+        ["Rankingmetriken", "288.000 vorhandene Ausgaben", "Vollständige Abdeckung; kein neuer Sortierlauf"],
+        ["Gemeinsames Modell", "28 Mio. Paarentscheidungen; 10.800 Sortierungen", "Definierte Störorte, Skalen und Quantisierung"],
+        ["Digitale CPU-Baseline", "192 Konfigurationen; 1.728 Wiederholungen", "Stabile Referenz mit Batch-/Typvarianten"],
+    ], [1.3, 1.9, 1.7])
     refrows = [["Breite / N", "Eingaben", "η", "Bitonic korrekt", "Rang korrekt"]]
     for bits, n in [(4, 16), (8, 256)]:
         for family in ("distinct", "duplicates_allowed"):
@@ -190,7 +166,7 @@ def evidence_tables():
     add("reference_maxn", "Vollständige Korrektheit bei maximaler getesteter Listengröße", refrows, [1.1, 1.4, .55, 1.1, 1.0], "Quelle: results/reference/accuracy.csv; je Zelle 1.000 Versuche. Ungültige Ausgaben zählen als Fehler.")
     qrows, crows = [], []
     for mapping in ("bitonic", "rank"):
-        criteria = dict(source="reference", scenario="direct", dataset="b8_n256_distinct", eta=.25, mapping=mapping)
+        criteria = dict(dataset="b8_n256_distinct", eta=.25, mapping=mapping)
         qrows.append(select_one(quality, **criteria))
         crows.append(select_one(recall, **criteria, k=10))
     add("quality_case", "8 Bit, N = 256, verschiedene Schlüssel, η = 0,25", [
@@ -201,16 +177,13 @@ def evidence_tables():
         ["Mittlere Inversionen, gültige Ausgaben", *[number(r["inversions_valid_mean"], 3) for r in qrows]],
         ["Recall@10, gültige Ausgaben", *[percent(r["tie_neutral_mean_valid"], 3) for r in crows]],
         ["Recall@10, ungültige Ausgaben = 0", *[percent(r["tie_neutral_mean_all_invalid_zero"], 3) for r in crows]],
-    ], [2.1, 1, 1], "Quellen: results/ranking_quality_20261007/summary.csv und recall.csv. Bei verschiedenen Schlüsseln stimmen die beiden Recall-Varianten überein.")
+    ], [2.1, 1, 1], "Quellen: results/ranking_quality/summary.csv und recall.csv. Bei verschiedenen Schlüsseln stimmen die beiden Recall-Varianten überein.")
     commonrows = [["Einstellung", "Mapping", "Gültig / 100", "Korrekt / 100", "τ_b gültig", "Recall@10 alle"]]
     for setting, label in [("prequantized_control", "Gemeinsame Zwischenrundung"), ("combined", "Ein- und Ausgangsrauschen"), ("coarse_output", "Grobes Ausgaberaster 2Δ")]:
         for mapping in ("bitonic", "rank"):
             r = select_one(common, dataset="b8_n256_distinct", setting=setting, transfer="direct", mapping=mapping)
-            other = select_one(common, dataset="b8_n256_distinct", setting=setting, transfer="ideal_sine", mapping=mapping)
-            for key in ("valid", "correct", "tau_b_mean_valid", "recall_tie_neutral_mean_all_invalid_zero"):
-                assert r[key] == other[key], (setting, mapping, key)
             commonrows.append([label, "Bitonic" if mapping == "bitonic" else "Rang", r["valid"], r["correct"], number(r["tau_b_mean_valid"], 6), percent(r["recall_tie_neutral_mean_all_invalid_zero"], 1)])
-    add("common_noise_cases", "Gemeinsames Modell: ausgewählte vollständige Sortierungen", commonrows, [1.65, .75, .75, .85, 1.0, 1.0], "Quelle: results/common_noise_20261007/sort_quality.csv. 8 Bit, N = 256, verschiedene Schlüssel. Direkte und ideal-periodische Funktion stimmen in diesen ausgewählten Kennzahlen überein. „Alle“ zählt ungültige Ausgaben mit null.")
+    add("common_noise_cases", "Gemeinsames Modell: ausgewählte vollständige Sortierungen", commonrows, [1.65, .75, .75, .85, 1.0, 1.0], "Quelle: results/common_noise/sort_quality.csv. 8 Bit, N = 256, verschiedene Schlüssel. Gezeigt wird der direkte Differenzkanal; die Rangvariante verwendet die vollständige Matrix einschließlich Diagonale. „Alle“ zählt ungültige Ausgaben mit null.")
     cpur = [["Typ", "Listen je Batch", "Batchzeit [µs]", "Amortisiert [µs/Liste]", "Rel. IQR"]]
     for dtype in ("int64", "uint8"):
         for batch in (1, 1000):
@@ -220,28 +193,20 @@ def evidence_tables():
     resources = [["N", "Mapping", "Vergleiche", "Lineare Aufrufe", "Logische Bytes"]]
     for n in (16, 64, 256):
         m = int(math.log2(n)); stages = m * (m+1)//2
-        for label, count, calls in [("Bitonic", n*stages//2, stages), ("Rang", n*(n-1)//2, 1)]:
+        for label, count, calls in [("Bitonic", n*stages//2, stages), ("Louri", n*n, 1)]:
             resources.append([str(n), label, number(count), number(calls), number(6*count+4*calls)])
     add("resource_counts", "Direktes lineares Mapping bei vollständig passenden Chargen", resources, [.55, .9, 1.2, 1.25, 1.2], "Eigene Zählung: 4 Eingabebytes + 2 Ausgabebytes je BF16-Paar; 4 Gewichtsbytes je Aufruf. Keine gemessenen Treiber- oder PCIe-Bytes.")
     add("module_map", "Codeübersicht nach Aufgabe", [
-        ["Dateien", "Funktion und Grenze"],
-        ["input_validation.py", "Schlüsseltypen, Wertebereiche und Eingabeformen prüfen"],
-        ["comparison.py; sorting_schedules.py; metrics.py", "Gleichschrittiger Komparator, aktive Bitonic-Stufen, Ränge, Gültigkeit, Ordnung und Stabilität"],
-        ["run_noise_sweep.py; verify_results.py", "Referenzläufe, Seeds, gespeicherte Ausgaben und exakter Reproduktionsvergleich"],
-        ["sdk_mapping.py; run_sdk_control.py; install_sdk.py", "Gepinnte CPU-SDK-Installation, BF16-Differenz und rauschfreie Integration"],
-        ["periodic_comparison.py; run_periodic_evaluation.py", "Phasencodierung, Referenzkorrektur, historische Szenarien und Nullbereich"],
-        ["check_periodic_pairs.py; check_sdk_nonlinearity.py", "Endliche Paarprüfung und getrennte ReLU-/Min-Max-Kontrolle"],
-        ["check_affine_periodic.py", "Affine CPU-Phasenbildung, erschöpfende Paare und begrenzte vollständige Sortierkontrolle"],
-        ["measure_periodic_curve.py", "Wiederholte API-Ausgaben, Codes und Zeiten; explizite Backendprüfung"],
-        ["ranking_quality.py; evaluate_ranking_quality.py; saved_output_reader.py", "τ, Inversionen, Recall und CRC-geprüfte eingeschränkte Archivlesung"],
-        ["common_noise_model.py; run_common_noise_controls.py", "Gemeinsame Einheiten, explizite Störstellen und analytische / Monte-Carlo-Kontrollen"],
-        ["run_cpu_baseline.py", "Stabile digitale Sortierung, Kalibrierung, Batchzeit und Metadaten"],
-        ["hardware_conditions.py; summarize_periodic_results.py", "Logische Ressourcen und historische Zusammenfassungen; keine physische Zeitmessung"],
-        ["legacy/: model.py; sorting.py; evaluate.py; validate.py", "Historisches gröberes Ausgangsmodell und zugehörige Validierung"],
-        ["qant_sorting/report.py; report_assets/thesis_report.md", "Aktueller Gesamtbericht aus Text, Quellen und gespeicherten Tabellen"],
-        ["legacy/build_reports.py; report_assets/report_template.html", "Historischer Generator; Ausgabe nach tmp/legacy_reports"],
-        ["tests/: Modell-, Metrik-, SDK- und Strukturtests", "Gezielte Modell-, Qualitäts-, Backend- und Benchmark-Vertragsprüfungen (alle unter tests/)"],
-    ], [2, 2.6])
+        ["Dateien unter qant_sorting/", "Funktion und Grenze"],
+        ["input_validation.py; comparison.py", "Integerdomäne und normierter Differenzkanal"],
+        ["sorting_schedules.py; louri_reference.py", "Bitonic und vollständige Louri-Matrix; einsehbare Quellengleichungen"],
+        ["metrics.py; ranking_quality.py", "Gültigkeit, Korrektheit, Stabilität, τ, Recall und Abstandsfehler"],
+        ["sdk_mapping.py; periodic_comparison.py", "Lineare SDK-Integration und getrennte periodische Paarfunktion"],
+        ["common_noise_model.py", "Erklärte Signalstufen, Quantisierung und Störparameter"],
+        ["experiments/", "Explizite Versuchs-, Verifikations-, Ressourcen- und Messbefehle"],
+        ["report.py; report_assets/thesis_report.md", "Aktueller Gesamtbericht aus Quellen und hashgeprüfter Evidenz"],
+        ["tests/", "Unabhängige mathematische, API- und Reproduktionsprüfungen"],
+    ], [2,2.6])
     add("hardware_plan", "Benötigte Herstellerinformationen und Messungen", [
         ["Frage", "Konkrete Erhebung", "Nutzen für das Mapping"],
         ["Zulässige u-/v-Bereiche", "Versionierter Treibervertrag, Einheiten und Kanalnormierung", "Legale Phasen und Amplituden"],
@@ -252,24 +217,24 @@ def evidence_tables():
         ["Kapazität und Kaskade", "Bestätigte Dimensionen, Pufferspeicherung und Datenpfad", "Aufrufzahl und vermiedene Hostschritte"],
         ["Zeit und Energie", "Cold-/Warm-Läufe, Transfers, vollständige Leistungsspuren", "Gleiche Aufgabe gegen CPU/GPU"],
     ], [1.05, 1.75, 1.55], "Grundlage: docs/QANT_MEASUREMENT_PLAN.md. Anfragevorlage vorhanden; kein dokumentierter Messzugang.")
-    provenance = json.loads((ASSETS / "report_provenance.json").read_text())
+    provenance = json.loads((ASSETS / "sources.json").read_text())
     add("source_inventory", "Ausgewertete bereitgestellte Dateien", [
         ["ID", "Dokument", "Seiten"],
         *[[s["id"], s["title"], str(s["pages"])] for s in provenance["supplied_sources"]],
-    ], [.55, 4.0, .55], "Kennungen 01–25 entsprechen den bereitgestellten Recherchedateien; P1/P2 den Präsentationen, B1 dem ausführlichen Bericht. Dateinamen und vollständige Hashes stehen in report_provenance.json.")
-    add("data_inventory", "Ergebnisdateien und Verfügbarkeit", [
-        ["ID / Verzeichnis", "Inhalt", "Verfügbarkeit im Git-Stand"],
-        ["D1: results/reference", "Sechs η; Accuracy, Ausgaben, Fehler und Metadaten", "Vollständige Referenzdateien"],
-        ["D2: results/sdk_reference", "Rauschfreie lineare SDK-Ausgaben", "Ergebnisse und Metadaten"],
-        ["D3: results/periodic/pair_checks.json", "Alle 4-/8-Bit-Paare nach Referenzkorrektur", "Paarprüfung vorhanden; ältere Sortier-Roharchive fehlen"],
-        ["D4: results/ranking_quality_20261007", "summary, recall, distance, coverage, Prüfungen", "Abgeleitete Daten; fünf historische Ausgabelücken"],
-        ["D5: results/common_noise_20261007", "Paarfälle, Skalen, Sortierausgaben und Qualität", "Vollständige gespeicherte Kontrollserie"],
-        ["D6: results/cpu_baseline_20261007", "Einzelzeiten, Aggregation, Umgebung und Validierung", "Gemessene CPU-Baseline"],
-        ["data/inputs.npz", "24 Datensätze mit je 1.000 Eingaben", "Gemeinsamer Korpus mit festem Datei-Hash"],
-        ["D7: results/affine_periodic_20261009", "Alle Paarscores, 3.600 Sortierausgaben, Zählungen und SDK-Quellprüfung", "Neue CPU-Kontrolle; keine Hardwaremessung"],
-        ["D8: results/louri_reference_20261024", "Quellengleichungen, rauschfreie Übereinstimmung, 36.000 Sensitivitätsläufe", "Ausgaben, Ränge, Qualitätsmaße, Annahmen und Hashes gespeichert"],
-        ["validation; docs", "Prüfprotokolle, Methoden und Hardwaregrenzen", "Versionsabhängige Belege; Zeitstempel beachten"],
-    ], [1.55, 1.6, 1.65])
+    ], [.55, 4.0, .55], "Kennungen 01–25 entsprechen den bereitgestellten Recherchedateien. Dateinamen und Hashes stehen in sources.json.")
+    add("data_inventory", "Verwendete aktuelle Ergebnisbestände", [
+        ["ID / Verzeichnis", "Inhalt", "Aussagegrenze"],
+        ["D1: results/reference", "Alle Bitonic-/Louri-Ausgaben, Accuracy, Seeds", "Angenommenes unabhängiges Zellrauschen"],
+        ["D2: results/sdk", "Alle rauschfreien SDK-Ausgaben und Paarzählungen", "Offizielles CPU-Backend, keine Hardwaremessung"],
+        ["D3: results/periodic", "Erschöpfende periodische Paarprüfung", "Vergleichsfunktion, kein Matrixsortierer"],
+        ["D4: results/ranking_quality", "τ, Recall, Inversionen nach Schlüsselabstand", "Nur gültige Ausgaben haben bedingte Rangqualität"],
+        ["D5: results/common_noise", "Paar- und Sortierkontrollen mit gemeinsamen Einheiten", "Synthetische Float64-Modelle"],
+        ["D6: results/cpu_baseline_20261007", "Gemessene CPU-Zeiten und Umgebung", "Messplattform vom 7. Oktober 2026"],
+        ["D7: results/affine", "Alle Scores und Fehler der affinen Paarfunktion", "Kein hostfreier Datenweg nachgewiesen"],
+        ["D8: results/louri", "Quellengleichungen und Schwellenkontrollen", "Isolierte Paarfälle halten Diagonale exakt"],
+        ["results/resources", "Analytische Aufrufe und logische Puffer; SDK-Zählkontrolle", "Keine gemessenen Gerätekapazitäten"],
+        ["data/inputs.npz", "24 Datensätze mit jeweils 1.000 Listen", "Unveränderter gemeinsamer Eingabekorpus"],
+    ], [1.6,1.8,1.6])
     add("glossary", "Zentrale Begriffe", [
         ["Begriff", "Bedeutung in diesem Bericht"],
         ["APC / Anbit", "Analog Programmable-Photonic Computation / zweikomponentige klassische optische Informationseinheit"],
@@ -297,15 +262,12 @@ def check_provenance():
     in the build validation, while the consolidation manifest records the
     initially reviewed source edition. Scientific inputs must match that edition.
     """
-    manifest = json.loads((ASSETS / "report_provenance.json").read_text())
-    evidence = list(manifest["repository_evidence"])
-    for name in ("affine_evidence.json", "louri_evidence.json"):
-        evidence.extend(json.loads((ASSETS / name).read_text())["repository_evidence"])
+    evidence = json.loads((ASSETS / "evidence.json").read_text())["repository_evidence"]
     for item in evidence:
         path = ROOT / item["path"]
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         if digest != item["sha256"]:
-            raise ValueError(f"Evidence changed since report consolidation: {item['path']}")
+            raise ValueError(f"Current evidence hash mismatch: {item['path']}")
 
 
 def build(output):
@@ -445,9 +407,9 @@ def build(output):
         elif key == "mappings":
             spec = dict(title="Dieselbe Vergleichsfunktion in zwei vollständigen Abläufen", rows=[
                 ["Phase", "Bitonic", "Rangsortierung"],
-                ["Paare vorbereiten", "N/2 Paare der aktuellen Stufe", "Alle N(N−1)/2 ungeordneten Paare"],
-                ["Differenz und Entscheidung", "Parallel innerhalb einer Stufe", "Unabhängige breite Paarphase"],
-                ["Elektronisch weiterarbeiten", "Originaldatensätze tauschen", "Ränge summieren, Belegung prüfen"],
+                ["Paare vorbereiten", "N/2 Paare der aktuellen Stufe", "Alle N² Matrixeinträge inklusive Diagonale"],
+                ["Differenz und Entscheidung", "Parallel innerhalb einer Stufe", "Separate Entscheidung jeder gerichteten Zelle"],
+                ["Elektronisch weiterarbeiten", "Originaldatensätze tauschen", "Unteren Bias abziehen, schwellen, Spalten summieren"],
                 ["Nächster Schritt", "Nächste abhängige Stufe bis K", "Einmalige Ausgabe aus gültigen Rängen"],
             ], widths=[1.2, 1.75, 1.75], note="Die Unterschiede betreffen Abhängigkeiten, Ressourcen und Datenbewegung; beide Mappings verwenden denselben stabilen Ausgabevertrag.")
         else:

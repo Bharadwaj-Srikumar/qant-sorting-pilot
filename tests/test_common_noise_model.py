@@ -88,8 +88,9 @@ class CommonNoiseTests(unittest.TestCase):
         # The existing rank schedule uses signed -1 markers for invalid outputs.
         keys = np.array([[255, 0, 255, 1], [3, 3, 3, 3]], dtype=np.int64)
         for sorter in (bitonic_sort, rank_sort):
-            for kind in ("direct", "ideal_sine"):
-                _, indices, valid = sorter(keys, CommonNoiseComparison(NoiseConfig(8, kind), range(2)))
+            for kind in (("direct",) if sorter is rank_sort else ("direct", "ideal_sine")):
+                _, indices, valid = sorter(keys, CommonNoiseComparison(NoiseConfig(8, kind), range(2)),
+                                           **({"bias_step": 1/256} if sorter is rank_sort else {}))
                 self.assertTrue(valid.all())
                 np.testing.assert_array_equal(indices, np.argsort(keys, axis=1, kind="stable"))
 

@@ -2,8 +2,6 @@
 # Inputs are original key rows plus a sorter's (values, indices, validity) tuple.
 # The digital reference is used after sorting, never to guide a noisy decision.
 # Flag column order is [valid, correct, stable]; all later CSV counts rely on it.
-# The legacy evaluate.py archive uses another flag order, so do not interchange
-# those archives solely because both contain three boolean columns.
 
 """Score completed outputs; the digital reference never guides a sorter."""
 

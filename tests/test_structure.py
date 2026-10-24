@@ -36,19 +36,6 @@ class StructureTests(unittest.TestCase):
         self.assertEqual(observed[0][:2], ("qant_sorting.experiments.run_noise_sweep", "__main__"))
         self.assertEqual(observed[0][2][1:], ["--output-dir", "folder with spaces", "--batch-size", "32"])
 
-    def test_summary_import_does_not_create_or_write_evidence(self):
-        """The historical summary used to create its output directory on import."""
-        code = """
-from pathlib import Path
-from unittest.mock import patch
-with patch.object(Path, 'mkdir', side_effect=AssertionError('import created directory')), \\
-     patch.object(Path, 'open', side_effect=AssertionError('import opened evidence')):
-    import qant_sorting.experiments.summarize_periodic_results
-"""
-        result = subprocess.run([sys.executable, "-c", code], cwd=ROOT,
-                                capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-
     def test_shared_csv_and_hash_preserve_field_order_and_content(self):
         """Preserve serialized evidence semantics, including Unicode and empties."""
         with tempfile.TemporaryDirectory() as directory:

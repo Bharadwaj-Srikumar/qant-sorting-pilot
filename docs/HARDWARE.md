@@ -34,7 +34,7 @@ With pair-submission cap `c`, the number of calls is
 
 ```math
 q_B=K\left\lceil\frac{N/2}{c}\right\rceil,\qquad
-q_R=\left\lceil\frac{N(N-1)/2}{c}\right\rceil.
+q_R=\left\lceil\frac{N^2}{c}\right\rceil.
 ```
 
 The cap is an application setting; it is not a claimed physical matrix size.
@@ -47,7 +47,7 @@ For N=256, with enough rows per call:
 | Mapping | Pair differences | Calls | Logical bytes, weights reloaded |
 |---|---:|---:|---:|
 | Bitonic | 4,608 | 36 | 27,792 |
-| Rank | 32,640 | 1 | 195,844 |
+| Louri full matrix | 65,536 | 1 | 393,220 |
 
 Rank can save submissions while doing more pair arithmetic and transferring
 more data. Neither count alone selects the faster or more efficient algorithm.
@@ -65,7 +65,8 @@ time, `U,V` are logical bytes and `h` is electronic control work. Shared per-pai
 time is a conditional model assumption; different kernel shapes may behave
 differently. None of the unknown times is replaced with an invented measurement.
 
-The script sweeps every integer pair cap from 1 through `N(N-1)/2`. With weights
+The script evaluates declared capacity controls from 1 to N², including the
+N/2 layer size and representative caps 8, 128 and 1024 where applicable. With weights
 reloaded, define `a=ell+4/B_up` and `tau=t_arith+4/B_up+2/B_down`. Rank is faster
 within this model only if
 

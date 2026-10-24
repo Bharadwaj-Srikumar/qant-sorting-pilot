@@ -15,7 +15,6 @@ import zipfile
 
 import numpy as np
 from qant_sorting.ranking_quality import prepare_keys, score_saved_order
-from qant_sorting.saved_output_reader import SavedOutputs, recover_members
 
 
 class RankingQualityTests(unittest.TestCase):
@@ -126,50 +125,5 @@ class RankingQualityTests(unittest.TestCase):
 # Archive-format controls, independent of actual experimental data files.
 # Small temporary NPZ examples establish what can be recovered and what must fail.
 # The test never modifies a stored trial_outcomes.npz from the research corpus.
-class EvidenceReaderTests(unittest.TestCase):
-    # Remove the central directory of a temporary archive while retaining complete
-    # local members, then verify explicit recovery and source-byte preservation.
-    # Truncate the second header separately to prove a missing indices array is
-    # reported as missing rather than reconstructed from a partially readable file.
-    def test_missing_directory_preserves_complete_crc_checked_members(self):
-        memory = io.BytesIO()
-        np.savez_compressed(memory, flags=np.array([[True, False, False]]), indices=np.array([[1, 0]]))
-        payload = memory.getvalue()
-        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
-            directory = archive.start_dir
-            second = archive.infolist()[1].header_offset
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp)/"incomplete.npz"
-            path.write_bytes(payload[:directory])
-            with self.assertRaises(ValueError):
-                SavedOutputs(path)
-            reader = SavedOutputs(path, allow_incomplete=True)
-            self.assertIn("flags", reader)
-            np.testing.assert_array_equal(reader["indices"], [[1, 0]])
-            self.assertFalse(reader.audit["complete_archive"])
-            self.assertEqual(path.read_bytes(), payload[:directory])
-            # An incomplete second header cannot produce an invented indices array.
-            path.write_bytes(payload[:second+10])
-            arrays, audit = recover_members(path)
-            self.assertEqual(set(arrays), {"flags"})
-            self.assertEqual(audit["complete_members"], 1)
-
-    # Flip one payload byte in an uncompressed temporary array member.
-    # The local-header reader must reject the CRC mismatch even though header sizes
-    # and an apparently readable NumPy array still exist.
-    def test_corrupted_member_is_rejected(self):
-        memory = io.BytesIO()
-        np.savez(memory, x=np.arange(10))  # uncompressed member for controlled corruption
-        payload = bytearray(memory.getvalue())
-        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
-            directory = archive.start_dir
-        payload[directory-1] ^= 1
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp)/"corrupt.npz"
-            path.write_bytes(payload[:directory])
-            with self.assertRaisesRegex(ValueError, "CRC"):
-                recover_members(path)
-
-
 if __name__ == "__main__":
     unittest.main()

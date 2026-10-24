@@ -1,3 +1,0 @@
-# Only dependency for the agreed numerical sweep and its mathematical tests.
-# Pinned to the version used for the saved reference experiment.
-numpy==2.5.3

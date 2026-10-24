@@ -1,6 +1,6 @@
 # Reading guide: explicit installer, not a module required by all experiments.
 # The entry point checks Python, virtual environment, platform and archive hash
-# before extracting one official wheel and invoking pip with historical pins.
+# before extracting one official wheel and invoking pip with the documented SDK pins.
 # Those pins reproduce the SDK setup; the separate CPU-baseline/common-model
 # requirements files document their own environments. Do not conflate the pins.
 # Running this script modifies the ACTIVE virtual environment and may require
@@ -60,7 +60,7 @@ def main():
             wheel = Path(directory) / Path(name).name
             wheel.write_bytes(bundle.read(name))
         dependencies = (["--no-deps"] if args.no_deps else
-                        ["numpy==2.5.3", "ml-dtypes==0.6.0", "cffi==1.17.1", "pycparser==3.0"])
+                        ["-r", str(ROOT / "requirements/sdk.txt")])
         subprocess.run([sys.executable, "-m", "pip", "install", str(wheel),
                         *dependencies], check=True)
     print("Installed the official CPU backend. Run python -m qant_sorting sdk")

@@ -19,6 +19,7 @@ from qant_sorting.io import write_csv
 
 import argparse
 import json
+from pathlib import Path
 
 import numpy as np
 
@@ -44,7 +45,7 @@ def counts(n, cap):
     m = n.bit_length() - 1
     layers = m * (m + 1) // 2
     bitonic_pairs = n * layers // 2
-    rank_pairs = n * (n - 1) // 2
+    rank_pairs = n * n
     # Each dependent bitonic layer must complete before the next starts.
     # Rank comparisons can be submitted together or split into chunks.
     bitonic_calls = layers * ((n // 2 + cap - 1) // cap)
@@ -68,7 +69,7 @@ def verify_sdk_chunks():
     for n in (16, 256):
         bits = 4 if n == 16 else 8
         data = np.arange(n)[::-1][None, :]
-        maximum = n * (n - 1) // 2
+        maximum = n * n
         for cap in sorted({1, min(8, maximum), min(128, maximum), min(1024, maximum), maximum}):
             _, cb, cr, qb, qr = counts(n, cap)
             for name, sorter, pairs, calls in (
@@ -88,7 +89,8 @@ def verify_sdk_chunks():
                     ]
                     return np.concatenate(pieces).reshape(a.shape)
 
-                values, _, valid = sorter(data, chunked_difference)
+                values, _, valid = (rank_sort(data, chunked_difference, bias_step=2.**(-bits))
+                                    if sorter is rank_sort else sorter(data, chunked_difference))
                 c = base.counts
                 if not valid.all() or not np.array_equal(values, np.sort(data, axis=1)):
                     raise AssertionError("Chunked SDK sorting control failed")
@@ -99,18 +101,20 @@ def verify_sdk_chunks():
     return checks
 
 
-# Generate per-sort logical resource rows and a complete integer cap sweep.
+# Generate per-sort logical resource rows and a compact set of declared capacity controls.
 # Bandwidth floors exclude protocol/software overhead; full-duplex and serialized
 # cases explicitly differ in whether upload/download can overlap.
 # Only compute the call-overhead break-even ratio when rank saves calls; leave
 # the field blank otherwise instead of dividing by zero or reversing its meaning.
 # Write CSV/JSON under results/hardware, optionally adding CPU chunk checks.
-def main(verify_sdk=False):
-    output = ROOT / "results/hardware"
+def main(verify_sdk=False, output=None):
+    output = (output or ROOT / "results/resources_reproduced").resolve()
     output.mkdir(parents=True, exist_ok=True)
+    if any(output.iterdir()):
+        raise ValueError("Use an empty resource output directory")
     resources, sensitivity = [], []
     for n in (2, 4, 8, 16, 32, 64, 128, 256):
-        _, cb, cr, qb, qr = counts(n, n * (n - 1) // 2)
+        _, cb, cr, qb, qr = counts(n, n * n)
         for name, pairs, calls in (("Bitonic", cb, qb), ("Rank", cr, qr)):
             # BF16: two inputs (4 bytes) and one output (2 bytes) per pair.
             # W=[1,-1] is another 4 bytes if reloaded for every submission.
@@ -122,7 +126,7 @@ def main(verify_sdk=False):
                 full_duplex_payload_floor_us=max(up, down) / B_PEAK * 1e6,
                 serialized_payload_floor_us=(up + down) / B_PEAK * 1e6,
             ))
-        for cap in range(1, cr + 1):
+        for cap in sorted({1, min(8, cr), n//2, min(128, cr), min(1024, cr), cr}):
             _, _, _, qb, qr = counts(n, cap)
             saved_calls = qb - qr
             sensitivity.append(dict(
@@ -135,7 +139,7 @@ def main(verify_sdk=False):
     write_csv(output / "batch_sensitivity.csv", sensitivity)
     metadata = dict(
         hardware_executed=False, peak_link_bytes_per_second=B_PEAK,
-        cap_domain="Every integer 1 through N(N-1)/2; application submissions, not device tiles.",
+        cap_domain="Predeclared caps {1, min(8,N*N), N/2, min(128,N*N), min(1024,N*N), N*N}; application submissions, not device tiles.",
         bandwidth_domain="0 < B_eff <= B_peak. No measured link utilization assumed.",
         model="t_A = q_A*ell + C_A*t_arithmetic + U_A/B_up + V_A/B_down + h_A",
         threshold="a=ell+4/B_up; tau=t_arithmetic+4/B_up+2/B_down. Rank wins if (q_B-q_R)*a > (C_R-C_B)*tau + h_R-h_B.",
@@ -149,5 +153,6 @@ def main(verify_sdk=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify-sdk", action="store_true", help="Also check chunked submissions on the CPU SDK")
+    parser.add_argument("--output-dir", type=Path, default=ROOT/"results/resources_reproduced")
     args = parser.parse_args()
-    main(args.verify_sdk)
+    main(args.verify_sdk, args.output_dir)

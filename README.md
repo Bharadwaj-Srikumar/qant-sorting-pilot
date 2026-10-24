@@ -1,88 +1,77 @@
-# Q.ANT sorting pilot
+# Hybrid photonic sorting — master's thesis
 
-Reproducible research on stable bitonic and rank sorting, finite precision,
-noise and hybrid photonic mappings. CPU simulation does not establish a
-photonic speed or energy advantage.
+The thesis compares **Bitonic** with **Louri's full N×N rank matrix** on a
+hybrid linear-computing path. Every directed rank comparison and self-comparison
+is evaluated separately. The lower-triangular bias, threshold, column sums and
+record placement are electronic. CPU verification is not evidence of a photonic
+speed or energy advantage.
 
 ## Start here
 
-- **Research:** [current complete thesis report, in German](reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf).
-- **Code:** [reading guide and command map](docs/CODE_GUIDE.md).
-- **Method:** [how a key comparison becomes a sort](docs/METHOD.md).
-
-Only the current PDF is kept in `reports/`. Source text, bibliography and
-provenance are in `report_assets/`; earlier reports remain in Git history.
+- [Thesis scope and decisions](docs/THESIS_SCOPE.md)
+- [Current complete thesis report, German](reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf)
+- [Read the code one step at a time](docs/CODE_GUIDE.md)
+- [Comparison model](docs/METHOD.md) and [Louri's equations](docs/LOURI_REFERENCE.md)
+- [Current results](docs/RESULTS.md), [ranking quality](docs/RANKING_QUALITY.md),
+  [noise assumptions](docs/COMMON_NOISE_MODEL.md), and [resource accounting](docs/HARDWARE.md)
 
 ## Run from the repository root
 
-Use Python **3.12** and a virtual environment:
+Use Python 3.12 and a virtual environment:
 
 ```bash
 python -m venv .venv
 # Linux/macOS: source .venv/bin/activate
 # PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements/analysis.txt
-python -m qant_sorting --help
 python -m unittest discover -s tests -v
 python -m qant_sorting noise
+python -m qant_sorting louri
+python -m qant_sorting quality
 ```
 
-The reference sweep checks all **288 configurations and 576 saved arrays**
-against `results/reference/`. It writes to `results/reproduced/`.
-`requirements/reference.txt` preserves the original NumPy pin; `analysis.txt`
-is the separate NumPy/SciPy environment used for the newer analyses. Select the
-recorded environment when reproducing a dated experiment.
+`noise` reproduces all **288 current configurations / 288,000 sorts** and compares
+outputs with `results/reference/`. The source-equation check covers **155,328
+noiseless arrays**. Absolute trial IDs preserve the experiment across batch sizes.
+New runs write to separate reproduction directories; existing evidence is protected.
 
-Optional SDK checks need the bundled official CPU backend:
+For the official CPU SDK:
 
 ```bash
 python -m pip install -r requirements/sdk.txt
 python -m qant_sorting install-sdk --no-deps
+python -m qant_sorting sdk
 python -m qant_sorting affine
 ```
 
-`--no-deps` preserves the explicitly installed SDK environment. Without it, the
-installer uses the historical SDK dependency pins. SDK tests skip explicitly
-when the optional backend is absent. No command silently substitutes CPU for hardware.
+The full-matrix/Bitonic integration checks **48,000 complete sorts**. The affine
+periodic candidate is a separate pair feasibility study: it has 40 false 8-bit
+ties and is not the thesis rank implementation. SDK tests skip explicitly if the
+optional dependency is absent; no hardware backend is silently substituted.
 
-To rebuild the report from saved evidence:
+To rebuild the report:
 
 ```bash
 python -m pip install -r requirements/report.txt
 python -m qant_sorting report
 ```
 
-## Where things belong
+## Repository contents
 
-| Location | Purpose |
+| Directory | Purpose |
 |---|---|
-| `qant_sorting/` | Reusable algorithms, comparison models and quality metrics |
-| `qant_sorting/experiments/` | Explicit experiment and verification commands |
-| `qant_sorting/report.py` | Current report generation |
-| `legacy/` | Superseded prototype and historical report builder |
-| `data/`, `results/`, `validation/` | Saved inputs, evidence and checks |
-| `docs/`, `report_assets/` | Methods, focused guides and editable report sources |
-| `requirements/`, `vendor/`, `tests/` | Environments, official SDK and tests |
+| `qant_sorting/` | Current algorithms, comparison models, quality metrics and report builder |
+| `qant_sorting/experiments/` | Reproducible commands; run `python -m qant_sorting --help` |
+| `data/` | One immutable input corpus |
+| `results/` | Current evidence, including output indices required for independent rescoring |
+| `docs/`, `report_assets/` | Explanations, literature, source audits and report text |
+| `reports/` | One current complete PDF |
+| `tests/`, `validation/` | Mathematical/API tests and current validation evidence |
+| `requirements/`, `vendor/` | Environments and licensed, pinned official CPU SDK |
 
-The old root-level `python script.py` commands now use
-`python -m qant_sorting COMMAND`; see the [command map](docs/CODE_GUIDE.md).
-Historical metadata retain their original paths and hashes. The
-[path inventory](docs/source_layout.json) maps old locations to current files.
+Superseded prototypes, reduced-rank outputs and earlier reports are absent from
+the current tree. Git history preserves version comparisons. Stored NPZ outputs
+and the SDK ZIP are necessary reproducibility data/dependencies, not old reports.
 
-## Current findings and limits
-
-The [full Louri matrix reference](docs/LOURI_REFERENCE.md) agrees with the rank
-adaptation on 155,328 noiseless arrays. Paired noise controls separate quantization,
-directed-error correlation and self-comparisons; run `python -m qant_sorting louri`.
-
-The [affine CPU feasibility check](docs/PERIODIC_FEASIBILITY.md) finds 40 false
-8-bit ties; the direct-difference and host-phase controls remain correct.
-[Common-noise controls](docs/COMMON_NOISE_MODEL.md),
-[ranking quality](docs/RANKING_QUALITY.md) and the
-[CPU baseline](docs/CPU_BASELINE.md) are separate evaluations with stated assumptions.
-
-Historical periodic raw archives are missing from this Git tree; derived
-quality tables remain available, with five documented output gaps. Full
-historical quality reanalysis requires those original archives. GPU timing,
-physical Q.ANT noise, NPU performance and energy remain open.
-See the [work plan](docs/FEEDBACK_SPRINTS.md) and [changes](CHANGELOG.md).
+GPU timing, calibrated physical noise, a confirmed useful internal cascade,
+complete NPU timing and energy measurements remain open.

@@ -105,4 +105,4 @@ ersetzen nicht die Definition von T als sequenzielle real-RAM-Schrittzahl.
 Methodische Dokumentation: [NumPy argsort](https://numpy.org/doc/2.3/reference/generated/numpy.argsort.html)
 und [take_along_axis](https://numpy.org/doc/2.3/reference/generated/numpy.take_along_axis.html).
 
-Weitere Arbeit: siehe [Feedback-Sprints](FEEDBACK_SPRINTS.md).
+Weitere Arbeit: siehe [Forschungsumfang und nächste Schritte](THESIS_SCOPE.md).

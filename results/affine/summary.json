@@ -1,0 +1,233 @@
+{
+  "sdk": {
+    "sdk_version": "2.3.1",
+    "driver_info": "cpu-backend;commit:none;"
+  },
+  "python": "3.12.14",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "packages": {
+    "numpy": "2.3.5",
+    "ml-dtypes": "0.6.0",
+    "cffi": "2.1.1",
+    "pycparser": "3.0"
+  },
+  "hardware_executed": false,
+  "added_noise": false,
+  "extra_quantizer": false,
+  "deadband": 0,
+  "phase_constants": {
+    "u0": 1.5707963267948966,
+    "alpha": 1.5707963267948966
+  },
+  "calibration": "One same-path (0,0) evaluation per affine instance; no per-pair correction",
+  "scope": "Comparator feasibility only; periodic scores do not implement the canonical full-matrix rank bias",
+  "input_sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+  "sdk_archive_sha256": "99b4669d3256d92cc35efc1a2d6d59deef7a033d78397d71150333011eb93898",
+  "source_sha256": {
+    "qant_sorting/__init__.py": "352f2d50772960b959880fe5020047efba6caa1fe3ffd606f129dff223844b71",
+    "qant_sorting/__main__.py": "26c19ae837531ad6a6feb3a1a58e089b1a58d482ece7eb47062e5da1f708a810",
+    "qant_sorting/common_noise_model.py": "5d457896e3ea8fffabd187fd209c1b6ab17b9e46d834d7c8ae1f5cda0dc4e13d",
+    "qant_sorting/comparison.py": "88758c3cafb1b30f219c2506bf46878e0d5254d218c502801b57c12a4feb5748",
+    "qant_sorting/experiments/__init__.py": "238598838c3ab5977a703b5f730b5e89380af0cbb6b963ff2fdc0ee9b34ef6ba",
+    "qant_sorting/experiments/check_affine_periodic.py": "68d1c433216a3245a51df60570534758ce7b9b4b7d59c639563519504801c83c",
+    "qant_sorting/experiments/check_periodic_pairs.py": "356bcd5c1553565a7c760e87a984c98529df4d27c33510c186dadf8349515363",
+    "qant_sorting/experiments/check_sdk_nonlinearity.py": "0a2e958cc728c28e1bddcbf4ed0413bcd8b2d65ae65b3f5580b1d550942f456c",
+    "qant_sorting/experiments/evaluate_ranking_quality.py": "f795cbc52d7075eea3afb59286c19621a219df1267512c211adc9d39bd599ed2",
+    "qant_sorting/experiments/hardware_conditions.py": "fff951b12b03dc721a86e18a8a728c6096d3284d6cbc6faaddf991e3ef6512c5",
+    "qant_sorting/experiments/install_sdk.py": "7b289dc702607afd125a7c3980efb201e92cc5d99c2e109f24bb8daa132db10b",
+    "qant_sorting/experiments/measure_periodic_curve.py": "dd7cf51a81b045d4b7b7d144a9407a83f237f3cf0812dc8a46c4e512055a6651",
+    "qant_sorting/experiments/run_common_noise_controls.py": "d2ce358d126dab9f8f9bddd20be2c6ccd94711f029fb0c1a073d7a2ac93e055d",
+    "qant_sorting/experiments/run_cpu_baseline.py": "908a167ed8f12a6560eca883db8ef1fa2de82ce0f8e93ce5e8c83deac19b35b0",
+    "qant_sorting/experiments/run_louri_reference.py": "7a73d54d6c9f18b520a65b9e9b50541c1cef4cc3b2c9c17f3bd0ad9755cabe45",
+    "qant_sorting/experiments/run_noise_sweep.py": "10f5bcf57d7f489b51d205d6f57ea854df1360c9b46bfa591eb98b626d52f3d7",
+    "qant_sorting/experiments/run_sdk_control.py": "b256fef8d95769744acdb12b9298123edf1e80968976664fc00e7f05fdd68c78",
+    "qant_sorting/experiments/settings.py": "4f5f66dc520e9252338015c5ca83b0881e73ff8bc51adac1d6608f24905f98fc",
+    "qant_sorting/experiments/verify_results.py": "d96d7015c6e4e966ab9aa6c2a9f13febd562cd3c825cb035f56251fbbc12486a",
+    "qant_sorting/input_validation.py": "87628a30a9b236d57da015f459a00f01fc9fff311283603dcc078650e9970066",
+    "qant_sorting/io.py": "117f4d81dac76075ba0eeebe08254fff613f463a71945d0e36da064e46bdb28b",
+    "qant_sorting/louri_reference.py": "7abff2ed9c635efd25424632f97e781ed25bdf7b05508db9a2b050d8cf46cb12",
+    "qant_sorting/metrics.py": "ff5a82e91c00f394378e4b7c0f14e2162cedf923c0017534755afb26234f0fe3",
+    "qant_sorting/paths.py": "b21effc63e4edca00af685828908aad7253d1591f2ca070477abe912eab5c946",
+    "qant_sorting/periodic_comparison.py": "5cbd8504af564fb25db1627a996272f1f34a9b5b0204de0ded3eb9c0a02ff22b",
+    "qant_sorting/ranking_quality.py": "0e97b306ffc6dbf440adea73eba588d18a138c9fb26b57d314a35ea35089f732",
+    "qant_sorting/report.py": "ca353f06a4caf7d72de4ebf482f015839f72c68735e01e4ead46d9d4b0a8be89",
+    "qant_sorting/sdk_mapping.py": "03946a1cb09dde38b5e0f2dadfbf1cadb53f1f42aa793250b4d2d7f1c4e9a5c5",
+    "qant_sorting/sorting_schedules.py": "c7007c9daf185b77c81f7905a0dc36c0fd5fd0d817ec47d105fe59c9e6cb9128"
+  },
+  "outputs_sha256": "1f4a1728e4e34ee35ab76f9596daad7fa00de883bf97288c9cc605cba6e2f615",
+  "pairs": [
+    {
+      "bits": 4,
+      "path": "direct_difference",
+      "ordered_pairs": 256,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.0625,
+      "minimum_nonzero_unequal_magnitude": 0.0625
+    },
+    {
+      "bits": 4,
+      "path": "host_phase",
+      "ordered_pairs": 256,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.10155868530273438,
+      "minimum_nonzero_unequal_magnitude": 0.10155868530273438
+    },
+    {
+      "bits": 4,
+      "path": "affine_phase",
+      "ordered_pairs": 256,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.09374618530273438,
+      "minimum_nonzero_unequal_magnitude": 0.09374618530273438,
+      "reference": 0.000484466552734375,
+      "encoded_weights": [
+        [
+          -1.5703125,
+          1.5703125,
+          1.5703125
+        ]
+      ],
+      "first_failures": []
+    },
+    {
+      "bits": 8,
+      "path": "direct_difference",
+      "ordered_pairs": 65536,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.00390625,
+      "minimum_nonzero_unequal_magnitude": 0.00390625
+    },
+    {
+      "bits": 8,
+      "path": "host_phase",
+      "ordered_pairs": 65536,
+      "errors": 0,
+      "false_ties": 0,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.007808685302734375,
+      "minimum_nonzero_unequal_magnitude": 0.007808685302734375
+    },
+    {
+      "bits": 8,
+      "path": "affine_phase",
+      "ordered_pairs": 65536,
+      "errors": 40,
+      "false_ties": 40,
+      "sign_reversals": 0,
+      "broken_true_ties": 0,
+      "minimum_unequal_magnitude": 0.0,
+      "minimum_nonzero_unequal_magnitude": 0.007808685302734375,
+      "reference": 0.000484466552734375,
+      "encoded_weights": [
+        [
+          -1.5703125,
+          1.5703125,
+          1.5703125
+        ]
+      ],
+      "first_failures": [
+        {
+          "a": 165,
+          "b": 166,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.015625,
+            1.015625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 166,
+          "b": 165,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.015625,
+            1.015625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 169,
+          "b": 170,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0390625,
+            1.0390625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 170,
+          "b": 169,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0390625,
+            1.0390625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 174,
+          "b": 175,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0703125,
+            1.0703125,
+            1.5703125
+          ]
+        },
+        {
+          "a": 175,
+          "b": 174,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.0703125,
+            1.0703125,
+            1.5703125
+          ]
+        },
+        {
+          "a": 179,
+          "b": 180,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.1015625,
+            1.1015625,
+            1.5703125
+          ]
+        },
+        {
+          "a": 180,
+          "b": 179,
+          "phase": 1.5703125,
+          "score": 0.0,
+          "products_bf16": [
+            -1.1015625,
+            1.1015625,
+            1.5703125
+          ]
+        }
+      ]
+    }
+  ]
+}

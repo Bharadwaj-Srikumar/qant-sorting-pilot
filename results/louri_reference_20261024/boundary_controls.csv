@@ -1,9 +1,0 @@
-bits,eta,coupling,quantization,diagonal,input_keys,samples,valid,correct,analytic_correct,analytic_valid,within_six_standard_errors
-4,0.25,antisymmetric,none,exact,"[1,0]",100000,49919,49918,0.5,0.5000316712418331,True
-4,0.25,antisymmetric,matched,exact,"[1,0]",100000,100000,97732,0.9772498680518208,1.0,True
-4,0.25,independent,none,exact,"[1,0]",100000,50123,50123,0.49998416437908344,0.5,True
-4,0.25,independent,matched,exact,"[1,0]",100000,95486,95429,0.9550173046073012,0.9555348731109607,True
-8,0.25,antisymmetric,none,exact,"[1,0]",100000,49792,49792,0.5,0.5000316712418331,True
-8,0.25,antisymmetric,matched,exact,"[1,0]",100000,100000,97673,0.9772498680518208,1.0,True
-8,0.25,independent,none,exact,"[1,0]",100000,50055,50055,0.49998416437908344,0.5,True
-8,0.25,independent,matched,exact,"[1,0]",100000,95462,95422,0.9550173046073012,0.9555348731109607,True

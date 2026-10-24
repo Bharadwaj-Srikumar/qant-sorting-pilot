@@ -8,7 +8,7 @@ Bharadwaj Srikumar · Master Informatik · Hochschule Bochum
 
 Betreuung: Prof. Dr. Henrik Blunck
 
-Forschungs- und Implementierungsstand: 9. Oktober 2026
+Forschungs- und Implementierungsstand: 24. Oktober 2026
 
 Arbeitstitel: Mapping Hybrid Optoelectronic Sorting Architectures onto Modern Photonic Accelerators: A Hardware-Aware Evaluation and Simulation
 
@@ -28,7 +28,7 @@ Eine separate affine Phasenbildung innerhalb der MVM ist mathematisch äquivalen
 
 Zusätzliche Qualitätsmetriken zeigen den Unterschied zwischen vollständiger Ordnung und brauchbarer Rangfolge: Bei 8 Bit, N = 256, verschiedenen Schlüsseln und η = 0,25 sind im Referenzmodell nur 5,9 % der Bitonic-Ausgaben vollständig korrekt, aber das mittlere Kendall-τ-b beträgt 0,999826 und Recall@10 99,88 %. Die Fehler betreffen überwiegend benachbarte Schlüssel.
 
-Das gemeinsame Rauschmodell macht Signalabstand, Quantisierung und Störort vergleichbar. Seine Parameter sind Sensitivitätsannahmen, keine Q.ANT-Kalibrierung. Eine digitale CPU-Baseline ist vorhanden; GPU-, NPU- und Energiemessungen stehen aus. Der Bericht dokumentiert diese Grenzen ebenso wie die Ergebnisse und die fünf fehlenden historischen Ausgabekonfigurationen.
+Das gemeinsame Rauschmodell macht Signalabstand, Quantisierung und Störort vergleichbar. Seine Parameter sind Sensitivitätsannahmen, keine Q.ANT-Kalibrierung. Eine digitale CPU-Baseline ist vorhanden; GPU-, NPU- und Energiemessungen stehen aus. Alle 288 aktuellen Ausgabekonfigurationen liegen vollständig vor und werden unabhängig nachbewertet. Die Rangsortierung verwendet durchgehend die vollständige Louri-Matrix mit N² separat ausgewerteten Einträgen.
 
 {{table:evidence_overview}}
 
@@ -312,58 +312,51 @@ Das vollständige Beispiel [10,3,9,1] mit 8-Bit-Normierung:
 
 Die Originalindexfolge am Ende lautet [3,1,2,0]. Selbst bei fehlerhaften Entscheidungen bleibt das Ergebnis durch elektronische Vertauschungen eine Permutation. Es kann trotzdem falsch geordnet oder instabil sein.
 
-## 6.4 Rangsortierung: zählen, prüfen, platzieren
+## 6.4 Rangsortierung nach Louri: vollständige Matrix
 
-Der nullbasierte Rang rᵢ ist die Zahl der Datensätze, die vor Datensatz i liegen müssen. Ohne Fehler gilt:
+Die Arbeit verwendet Louri als maßgebliche Rangarchitektur. Alle N² Einträge einschließlich beider Vergleichsrichtungen und der Diagonale werden separat ausgewertet. Bei N = 4 sind dies 16 Vergleichspositionen: zwölf gerichtete Vergleiche verschiedener Datensätze und vier Selbstvergleiche. Es wird kein Gegenwert aus einer bereits getroffenen Entscheidung abgeleitet.
 
-$$r_i=\sum_{j\ne i}\mathbf{1}\lbrace x_j<x_i\ \mathrm{oder}\ (x_j=x_i\ \mathrm{und}\ j<i)\rbrace$$
-
-Im Modell ersetzt das gemessene Differenzsignal die Kenntnis von xⱼ < xᵢ. Für jedes Paar i < j wird nur eine Entscheidung erzeugt: Positives Signal erhöht rᵢ; negatives oder null erhöht rⱼ. Null begünstigt also den früheren Originalindex. Die Gegenseite wird komplementär behandelt. Dies spart doppelte Auswertung, garantiert unter Rauschen aber keine Transitivität.
-
-Für [10,3,9,1] ergeben die sechs Paare nacheinander:
-
-| Paar | Schlüssel | Erhöhter Rang | Ränge nach dem Schritt |
-| --- | --- | --- | --- |
-| (0,1) | 10,3 | r₀ | [1,0,0,0] |
-| (0,2) | 10,9 | r₀ | [2,0,0,0] |
-| (0,3) | 10,1 | r₀ | [3,0,0,0] |
-| (1,2) | 3,9 | r₂ | [3,0,1,0] |
-| (1,3) | 3,1 | r₁ | [3,1,1,0] |
-| (2,3) | 9,1 | r₂ | [3,1,2,0] |
-
-Die sequentielle Tabelle dient der Erklärung. Die sechs Unterschiede sind unabhängig und können gemeinsam berechnet werden; die Rangsummen und Platzierung erfolgen danach. out[rᵢ] = xᵢ ergibt [1,3,9,10]. Für [3₀,1₁,3₂,1₃] lauten die Ränge [2,0,3,1], sodass [1₁,1₃,3₀,3₂] entsteht.
-
-Unter Rauschen kann beispielsweise a > b, b > c und c > a entschieden werden. Dann kollidieren die Ränge. Der Code prüft, ob jede Position 0 bis N−1 genau einmal belegt ist, und markiert unzulässige Ergebnisse. Diese Prüfung nutzt Belegungszähler; sie sortiert die Ränge nicht nachträglich. Ungültige Rangfälle werden nicht durch einen digitalen Ersatzsorter repariert.
-
-## 6.5 Strukturprüfung und Reichweite
-
-Der Bitonic-Plan wird auf disjunkte Paarabdeckung je Stufe und passende Gesamtzahl geprüft. Kleine binäre Eingaben bei N = 2, 4 und 8 sowie gespeicherte Ganzzahlkorpora prüfen Ordnung und Stabilität. Die Rangadaption wird anhand von Handbeispielen, Gleichständen und widersprüchlichen Entscheidungen geprüft. Die Quelle von Louri und die Implementierung verwenden teils unterschiedliche Matrixorientierungen und eins- beziehungsweise nullbasierte Ränge; übereinstimmen muss die resultierende Ordnung.
-
-Diese Prüfungen validieren Funktion und Operationsstruktur. Sie bestimmen weder physische MVM-Kapazität noch optische Fan-out-Verluste, Taktgrenzen oder Energiewerte. Nichtlokale optische Verbindungen werden im Funktionsmapping durch elektronische Indizierung ersetzt.
-
-## 6.6 Vollständige Louri-Matrix als Gleichungsreferenz
-
-Die separate Implementierung louri_reference.py bildet die Matrizen der Quelle direkt ab. Zeile i bezeichnet den konkurrierenden Datensatz, Spalte j den Datensatz, dessen Rang bestimmt wird. Mit Δ = 2⁻ᵇ werden sowohl die ganzzahligen Schlüssel als auch der Einheitsbias normiert:
+Zeile i bezeichnet den konkurrierenden Datensatz, Spalte j den Datensatz, dessen Rang bestimmt wird. Für ganzzahlige Schlüssel mit Raster Δ = 2⁻ᵇ gilt:
 
 $$D_{ij}=\Delta(x_j-x_i),\qquad U_{ij}=\mathbf{1}[i>j],\qquad D'_{ij}=D_{ij}-\Delta U_{ij}$$
 
 $$R'_{ij}=\mathbf{1}[D'_{ij}\geq0],\qquad r_j^{(1)}=\sum_i R'_{ij},\qquad r_j^{(0)}=r_j^{(1)}-1$$
 
-Die Diagonale liefert jeweils eine Eins; deshalb beginnt der Quellenrang bei 1. Das veröffentlichte Beispiel [7,8,2,8,5] ergibt [3,4,1,5,2] und eine stabile Reihenfolge der beiden Achten. Zwei Textstellen auf Seite 3089 beschreiben die Gleichstandsrichtung beziehungsweise die betroffene Dreieckshälfte widersprüchlich. Die Referenz folgt den dargestellten Gleichungen und Beispielmatrizen. [10, Gleichungen 3-7]
+Die Hilfsmatrix U enthält unterhalb der Diagonale Einsen und sonst Nullen. Ihr Bias wird im gleichen Raster wie die Schlüssel skaliert. Bei Gleichheit nimmt er dem späteren Konkurrenten einen Beitrag zum Rang des früheren Datensatzes. Positive ganzzahlige Unterschiede bleiben nach Abzug einer Rasterstufe nichtnegativ. Die Gleichstandsregel ist deshalb stabil.
 
-Ohne Rauschen stimmen die rohe Matrix, die Matrix mit Quantisierung und die bestehende Paaradaption mit stabiler digitaler Sortierung überein: 256 geordnete 4-Bit-Paare, 65.536 geordnete 8-Bit-Paare, sämtliche 65.536 Viererlisten über 4-Bit-Schlüsseln und alle 24.000 gespeicherten Listen. Das sind 155.328 geprüfte Eingaben; überlappende Kontrollmengen sind keine unabhängigen Stichproben. [D8]
+Die Diagonale liefert ohne Fehler jeweils eine Eins; daher beginnt der Quellenrang bei 1. Für [3,1,3,0] ergibt die Schwellenmatrix:
 
-## 6.7 Was der Rauschvergleich tatsächlich prüft
+| Konkurrent i / Schlüssel | Spalte 0: 3 | Spalte 1: 1 | Spalte 2: 3 | Spalte 3: 0 |
+| --- | --- | --- | --- | --- |
+| 0 / 3 | 1 | 0 | 1 | 0 |
+| 1 / 1 | 1 | 1 | 1 | 0 |
+| 2 / 3 | 0 | 0 | 1 | 0 |
+| 3 / 0 | 1 | 1 | 1 | 1 |
+| Spaltensumme / Quellenrang | 3 | 2 | 4 | 1 |
 
-Die Sensitivitätsserie addiert angenommene gaußsche Fehler zu D, vor Bias und Schwelle. Die Standardabweichung beträgt σ = ηΔ, mit η aus {0; 0,05; 0,10; 0,15; 0,20; 0,25}. Untersucht werden unabhängige gerichtete Fehler sowie gekoppelte Fehler Eⱼᵢ = −Eᵢⱼ. Die Diagonale ist entweder bekannt und exakt oder separat verrauscht. Quantisierung ist entweder ausgeschaltet, einschließlich Clipping, oder verwendet das bisherige vorzeichenbehaftete Raster vor dem Bias. Bias, Schwelle, Rangsummen und Platzierung bleiben exakt.
+Die nullbasierten Positionen [2,1,3,0] ergeben die Ausgabe [0,1,3_erstes,3_zweites]. Summiert werden die binären Schwellenentscheidungen, nicht die rohen Differenzen. Alle Originalschlüssel und Datensatzidentitäten bleiben elektronisch erhalten. Doppelte oder außerhalb von 0 bis N−1 liegende Positionen machen eine Ausgabe ungültig; sie werden weder abgeschnitten noch durch digitales Nachsortieren repariert.
 
-Bei gekoppelten Fehlern, exakter Diagonale und diesem Raster stimmen alle gerichteten Entscheidungen mit der Paaradaption überein, auch wenn fehlerhafte Vergleiche Rangkonflikte erzeugen. Dies wurde in 3.600 gepaarten Läufen geprüft. Bei unabhängigen Fehlern können beide Richtungen dagegen gleichzeitig null oder eins liefern. Eine vollständige Matrix ist deshalb ohne Rauschen äquivalent, unter beliebigen Rauschannahmen aber nicht automatisch äquivalent.
+## 6.5 Quellentreue und unabhängige Prüfung
 
-Das rohe Quellenmodell besitzt zudem Nullabstände zur Schwelle: Bei [1,0] beträgt D₁₀ = Δ und nach Bias D′₁₀ = 0. Ein beliebig kleiner darstellbarer negativer Fehler kippt diesen Beitrag. Vorherige Rundung erzeugt hier eine Reserve von einer halben Rasterstufe. Acht Kontrollen mit je 100.000 Paaren bestätigen die zugehörigen gaußschen Wahrscheinlichkeiten innerhalb der festgelegten Stichprobentoleranz. Die vollständige Sensitivitätsserie umfasst 36.000 Auswertungen in 360 Konfigurationen auf den ersten 100 Listen von sechs gespeicherten Datensätzen. [D8]
+Das veröffentlichte Beispiel [7,8,2,8,5] ergibt die einsbasierten Ränge [3,4,1,5,2]. Zwei Textstellen auf Seite 3089 widersprechen der dargestellten Gleichstandsrichtung beziehungsweise Dreieckshälfte. Die Implementierung folgt den Gleichungen und Beispielmatrizen. [10, Gleichungen 1-7]
 
-{{table:louri_comparison}}
+Die direkte Gleichungsreferenz und der verwendete Sortierer werden unabhängig gegen stabile digitale Sortierung geprüft: sämtliche 256 geordneten 4-Bit-Paare, 65.536 geordneten 8-Bit-Paare, 65.536 Viererlisten über 4-Bit-Schlüsseln sowie alle 24.000 gespeicherten Listen. Alle 155.328 Eingaben stimmen ohne Rauschen überein, mit und ohne den zusätzlichen Modellquantisierer. Diese überlappenden Kontrollmengen sind keine unabhängigen Stichproben. [D8]
 
-Gültigkeit, vollständige Korrektheit und Stabilität werden getrennt ausgewertet. Kendall-τ, Recall@10 und Inversionen nach Schlüsselabstand sind nur bei gültigen Ausgaben definiert; eine zusätzliche Recall-Zahl setzt ungültige Ausgaben ausdrücklich auf null. Die schlechten rohen Matrixwerte beschreiben die gewählte Schwellen- und Rauschannahme, nicht die Zuverlässigkeit eines realen Louri- oder Q.ANT-Geräts. Photodetektoren, optische Summierung, Biasabweichungen, Drift und reale Fehlerkorrelationen sind weiterhin nicht physikalisch charakterisiert.
+## 6.6 Umsetzung über lineare Paaroperationen
+
+rank_sort bereitet die volle Matrix zeilenweise als N² Paarzeilen vor. Für Zelle (i,j) werden xⱼ und xᵢ übergeben. Die Gewichte [1,−1] ergeben die normierte Differenz. Danach subtrahiert der Host ΔU, wendet die Schwelle an, summiert die Spalten und platziert gültige Datensätze.
+
+Der gleiche Sortierablauf verwendet entweder den NumPy-Differenzkanal oder SdkDifference. Im SDK-Pfad wird tatsächlich jeder Matrixeintrag über linear_fprop im offiziellen CPU-Backend ausgewertet; eine rauschfreie Prüfung aller gespeicherten Listen bestätigt die stabile Ausgabe. Ein gebündelter API-Aufruf beweist weder gleichzeitige physische Ausführung sämtlicher Einträge noch optische Summierung oder Routing. [D2]
+
+Periodische Scores können nicht unverändert für D eingesetzt werden: Der Bias Δ ist in Differenzeinheiten definiert. Eine nichtlineare Umsetzung benötigt eine eigene Herleitung der Schwellen und des Datenwegs. Sie bleibt deshalb eine getrennte Paar-Machbarkeitsstudie in Kapitel 7.
+
+## 6.7 Rauschen und Schwellenabstand
+
+Die Hauptauswertung addiert einen separaten angenommenen Gaußfehler zu jedem Matrixeintrag, einschließlich der Diagonale. Weder Gegenrichtung noch Selbstvergleich werden nachträglich korrigiert. Gemeinsame Eingänge könnten auf realer Hardware korrelierte Fehler verursachen; das unabhängige Modell ist eine ausdrücklich angenommene Sensitivitätsstudie.
+
+Das rohe Quellenmodell besitzt Nullabstände zur Schwelle. Für [1,0] beträgt die untere Differenz Δ und nach Bias genau null. Ein kleiner negativer Fehler löscht diesen Beitrag. Vorherige Rundung auf das Raster Δ schafft hier einen Abstand von einer halben Stufe zur Entscheidungsgrenze. Vier Kontrollen mit je 100.000 Paaren prüfen die daraus folgenden gaußschen Wahrscheinlichkeiten. Nur in diesen isolierten Paarprüfungen wird die Diagonale exakt gehalten; die Hauptauswertung misst und verrauscht sie. [D8]
+
+Die Hilfsmatrix löst Gleichstände bei exakter Rechnung, aber keine widersprüchlichen verrauschten Vergleiche. Physisches Rauschen der Smart Pixels, optische Rangsummierung, Biasabweichungen und reale Kanalabhängigkeiten werden durch diese Gleichungsprüfung nicht vollständig reproduziert.
 
 # 7. Q.ANT-SDK und periodischer Vergleich
 
@@ -415,11 +408,7 @@ Die algebraische Umformung erhält nicht automatisch das Verhalten in endlicher 
 
 Beim 8-Bit-Paar (165,166) lauten die drei gerundeten Produkte −1,015625; +1,015625; 1,5703125. Damit entsteht dieselbe Phase wie bei einem Gleichstand. Nach Abzug der einzigen Referenz aus (0,0) ist der Score null. Alle 40 Fehler sind solche falschen Gleichstände; Vorzeichenumkehrungen oder beschädigte echte Gleichstände treten nicht auf. Die kleinste Scoregröße über alle ungleichen 8-Bit-Paare beträgt deshalb null. Der kleinste von null verschiedene Score darf nicht als verfügbare Mindestreserve ausgegeben werden. Referenzkorrektur und Toleranzzone stellen verlorene Information nicht wieder her.
 
-Eine vorher festgelegte Stichprobe verwendet jeweils die ersten 100 Listen aus sechs vorhandenen Datensätzen. Beide Mappings werden mit der affinen Variante und den zwei Kontrollen ausgeführt: insgesamt 3.600 Sortierläufe, davon 1.200 affine. Alle Kontrollsortierungen sind korrekt und stabil. Die Tabelle zeigt die affine Variante; jede Zelle hat 100 Versuche. [D7]
-
-{{table:affine_sorts}}
-
-Alle affinen Ausgaben der Stichprobe bleiben gültige Permutationen. Falsche Gleichstände aktivieren jedoch die Originalindexregel für tatsächlich unterschiedliche Schlüssel. Eine gültige Ausgabe ist somit nicht zwangsläufig korrekt sortiert. Die Stichprobenquoten sind weder universelle Fehlerwahrscheinlichkeiten noch Hardwaremesswerte.
+Die Untersuchung ist auf die Vergleichsfunktion begrenzt. Ihre Scores werden nicht als Differenzmatrix des maßgeblichen Louri-Sortierers verwendet.
 
 ## 7.5 Konsequenz für die Machbarkeitsstudie
 
@@ -461,7 +450,7 @@ $$u(x)=\frac{x}{M}\left(1-\frac{1}{L_{\mathrm{in}}}\right),\quad \widehat{x}=\De
 
 Mit Δ_in = 1/L_in gilt bei gleichen Schlüssel- und Eingabebreiten exakt x̂ = x/2ᵇ. Die Skalierung richtet sich nach dem vollständigen deklarierten Bereich, nicht nach Minimum und Maximum einer einzelnen Liste. Dadurch bleiben Signalabstände zwischen Listen vergleichbar.
 
-## 8.3 Der signorientierte Referenzkomparator
+## 8.3 Differenzkanal und anschließende Sortierentscheidung
 
 Es gilt Δ_in = Δ_out = Δ = 2⁻ᵇ. Der Komparator bildet die Differenz d = â − b̂, addiert ε aus einer Gaußverteilung mit Standardabweichung σ = ηΔ, rundet zum nächsten geraden Integercode und sättigt auf den b-Bit-Codebereich:
 
@@ -469,13 +458,15 @@ $$c=\mathrm{roundEven}\left(\frac{d+\varepsilon}{\Delta}\right),\quad c_{\mathrm
 
 Die sechs η-Werte sind 0; 0,05; 0,10; 0,15; 0,20 und 0,25. Sie sind synthetische Sensitivitätswerte in Einheiten des Differenzrasters. Sie sind weder gemessene Q.ANT-Störungen noch Fehlerwahrscheinlichkeiten oder Prozentwerte einer optischen Leistung.
 
-Ohne Zusatzrauschen ist d/Δ = a − b ganzzahlig. Runden verändert diesen Code nicht; Sättigung verändert weder sein Vorzeichen noch seinen Nullstatus. Deshalb ist die signbasierte Entscheidung trotz begrenztem Ausgabebereich exakt. Die Aussage gilt nicht für eine Rekonstruktion des Differenzbetrags.
+Ohne Zusatzrauschen ist d/Δ = a − b ganzzahlig. Runden verändert diesen Code nicht; Sättigung verändert weder sein Vorzeichen noch seinen Nullstatus. Damit ist die Bitonic-Vorzeichenentscheidung exakt. Für Louri bleibt außerdem jeder positive Code mindestens eine Rasterstufe groß; nach dem unteren Bias ist er weiterhin nichtnegativ. Deshalb bleiben auch die rauschfreien Matrixentscheidungen exakt. Die Aussage gilt nicht für eine Rekonstruktion des Differenzbetrags.
 
-## 8.4 Ein fehlerhafter Gleichstand erklärt den ersten Ausfall
+## 8.4 Warum derselbe Messfehler unterschiedliche Folgen hat
 
-Für (10,9) bei 8 Bit ist d = 1/256. Bei ε = +1/1024 wird (d+ε)/Δ = 1,25 auf 1 gerundet; die Entscheidung bleibt korrekt. Bei ε = −3/1024 wird der Quotient 0,25 auf 0 gerundet. Die Originalindexregel behandelt die ungleichen Schlüssel dann fälschlich als Gleichstand und kann [10,9] stehen lassen.
+Für (10,9) bei 8 Bit ist d = 1/256. Ein Fehler −3/1024 lässt den Quotienten (d+ε)/Δ auf 0,25 fallen und damit auf null runden. Bitonic behandelt dieses Signal anhand der Originalindizes wie einen Gleichstand. In der Louri-Matrix wird jeder gemessene Wert zuerst um seinen positionsabhängigen Bias verschoben und danach separat geschwellt. Beide Richtungen können somit widersprüchliche Beiträge liefern.
 
-Im früheren Ausgangsmodell mit Δ_out = 2Δ_in konnten benachbarte Schlüssel bereits ohne Zusatzrauschen auf null runden. Dieses historische Modell bleibt im alten Code zur Herkunft nachvollziehbar, ist aber nicht das aktuelle Referenzexperiment. Die folgenden Ergebnisse verwenden ausdrücklich das gleiche Eingangs- und Ausgangsraster.
+Auch ein Selbstvergleich ist ein Messereignis. Aus d = 0 und ε < −Δ/2 kann nach Rundung ein negativer Wert werden; dann fehlt der erwartete diagonale Rangbeitrag. Bei langen Listen können solche Fehler zusätzlich zu falschen Paarentscheidungen auftreten. Die Implementierung ersetzt diesen Messwert nicht durch das bekannte exakte Ergebnis.
+
+Die Hauptauswertung verwendet ausdrücklich Δ_in = Δ_out. Rauschen, Quantisierung und Biasposition werden im Metadatensatz getrennt dokumentiert; es gibt keine versteckte zweite Rundung nach dem elektronischen Bias.
 
 ## 8.5 Ablauf und Statistik
 
@@ -485,13 +476,11 @@ Die vollständige Korrektheitsquote bezieht sich auf alle Versuche, einschließl
 
 # 9. Ein gemeinsames Signal- und Rauschmodell
 
-## 9.1 Warum die früheren Szenarien nicht direkt vergleichbar sind
+## 9.1 Warum Signalabstand und Störort gemeinsam definiert werden
 
-Im früheren Upstream-Szenario wird die Differenz gestört und anschließend auf Δ gerundet. Im Output-Szenario wird der periodische Ausgang gestört, ohne denselben Rundungsschritt. Außerdem vergrößert die unnormierte Sinuskennlinie den Signalabstand nahe null um ungefähr π/2. Der gleiche Zahlenwert von σ bezeichnet damit nicht die gleiche Entscheidungssituation. Der beobachtete Unterschied „5,9 % gegenüber 100 %“ beschreibt zwei verschiedene Modelle, keine gemessene Überlegenheit einer photonischen Nichtlinearität.
+Ein Rauschen auf der Differenz vor Rundung ist nicht dasselbe Experiment wie ein gleich großer Zahlenwert auf einem nichtlinearen Ausgang ohne Rundung. Die Kennlinie verändert Signalabstände; Rundung verändert Entscheidungsbereiche. Ein Qualitätsunterschied zwischen solchen Szenarien kann deshalb durch Skalierung und Quantisierung entstehen und belegt allein keinen physikalischen Vorteil.
 
-Für benachbarte Schlüssel, d = Δ und σ = 0,25Δ, liegt die direkte Nullschwelle vier Standardabweichungen entfernt. Die vorgelagerte Rundung setzt jedoch bereits bei d + ε < Δ/2 den Code auf null: Diese Grenze liegt nur zwei Standardabweichungen vom Sollwert entfernt. Der ideale unnormierte periodische Abstand beträgt ungefähr 6,28σ; mit der konkret gespeicherten BF16-Kennlinie beträgt der kleinste 8-Bit-Abstand ungefähr 8,00σ. Diese Unterschiede müssen vor einem Robustheitsvergleich beseitigt oder physikalisch begründet werden.
-
-Bei Gaußrauschen beträgt die Wahrscheinlichkeit eines falschen Nullcodes für d = Δ im Referenzmodell ungefähr Φ(−2) − Φ(−6) = 2,275 %. Eine echte Vorzeichenumkehr hat dagegen nur ungefähr die Wahrscheinlichkeit Φ(−6). Bei einem tatsächlichen Gleichstand wird der Nullcode mit Wahrscheinlichkeit 2Φ(−2) ≈ 4,55 % verlassen. Diese Einzelvergleichswerte erklären Fehlertypen; die vollständige Sortierwahrscheinlichkeit folgt daraus wegen abhängiger Abläufe nicht einfach durch Potenzieren.
+Das gemeinsame Modell beschreibt diese Verarbeitungsschritte getrennt in erklärten Einheiten. Direkte und ideale periodische Kennlinien werden in Paarprüfungen und Bitonic-Kontrollen verglichen. Der vollständige Louri-Sortierer verwendet ausschließlich den direkten Differenzkanal, weil sein Bias in genau diesen Einheiten definiert ist.
 
 ## 9.2 Einheitliche Koordinaten und Verarbeitungsschritte
 
@@ -533,7 +522,7 @@ Quantisierung, Clipping und Nichtlinearität können diese linearisierte Näheru
 
 Die vorhandene Kontrollserie prüft 280 Paarfälle mit je 100.000 Stichproben, insgesamt 28 Millionen Entscheidungen. Für 182 geeignete Fälle werden analytische Wahrscheinlichkeiten mit Monte-Carlo-Ergebnissen abgeglichen. Die Toleranz berücksichtigt sechs Standardfehler und einen kleinen endlichen Stichprobenzuschlag; sie ist ein Implementierungstest, keine Aussage über Q.ANT.
 
-Bei gemeinsamer Zwischenquantisierung sind 1,4 Millionen paarweise verglichene Entscheidungen direkt und ideal-periodisch identisch. Eine zusätzliche Sortierkontrolle umfasst 144 Konfigurationen und 14.400 Sortierungen: sechs Datensätze, sechs Einstellungen, zwei Funktionen und zwei Mappings, jeweils die ersten 100 gespeicherten Listen. Die 24 rauschfreien Konfigurationen sind korrekt und stabil. Bei 1.200 passend gepaarten Sortierausgaben mit vorgelagerter Quantisierung sind die Ausgaben ebenfalls identisch. Diese Kontrollen begründen, warum Modellierung und Signalabstand vor einem physikalischen Robustheitsvergleich vereinheitlicht werden müssen.
+Bei gemeinsamer Zwischenquantisierung sind 1,4 Millionen paarweise verglichene Entscheidungen direkt und ideal-periodisch identisch. Die Sortierkontrolle umfasst 108 Konfigurationen und 10.800 Sortierungen: sechs Datensätze, sechs Einstellungen und drei zulässige Kombinationen aus Mapping und Kennlinie, jeweils die ersten 100 gespeicherten Listen. Bitonic nutzt direkte und ideal-periodische Werte; Louri ausschließlich direkte Differenzen mit anschließendem Bias und Schwelle. Alle 18 rauschfreien Konfigurationen sind korrekt und stabil. Die 600 passend gepaarten Bitonic-Ausgaben mit vorgelagerter Quantisierung sind identisch. Die periodische Kennlinie wird nicht ungeprüft mit Louri's Differenzbias kombiniert.
 
 # 10. Qualitätsmetriken: vollständige Ordnung und brauchbare Rangfolge
 
@@ -571,55 +560,45 @@ Es werden sowohl der Mittelwert über gültige Ausgaben als auch ein Mittelwert 
 
 PRISM untersucht die Auswahl relevanter KV-Cache-Blöcke für lange LLM-Kontexte mittels photonischer Ähnlichkeitsbewertung. Eine ausreichend gute Auswahl kann dort genügen, obwohl keine vollständig exakte Ordnung erzeugt wird. Das motiviert die Top-k-Perspektive. Die vorliegende Sortierauswertung nutzt jedoch andere Daten und ein anderes Anwendungskriterium; ihr Recall ist kein PRISM-Benchmark und sagt nichts unmittelbar über LLM-Qualität aus. Ein späterer Anwendungsvergleich benötigt dieselben Scores, Auswahlgrößen und Qualitätsziele. [23]
 
-## 10.6 Verfügbare Ausgaben und Auswertungslücken
+## 10.6 Vollständige aktuelle Ausgaben
 
-Für die nachträgliche Qualitätsauswertung waren 1.147 von 1.152 vorgesehenen Konfigurationen auswertbar: 288 Referenzkonfigurationen, 576 periodische Upstream-/Output-Konfigurationen und 283 von 288 Deadband-Konfigurationen. Das sind 1.147.000 ausgewertete Sortierausgaben. Die 288 periodischen Upstream-Konfigurationen reproduzieren die Referenz und sind keine zusätzliche unabhängige Evidenz.
+Alle 288 Konfigurationen der aktuellen Referenz mit insgesamt 288.000 Ausgaben sind gespeichert. Die Qualitätsauswertung liest diese Indizes erneut, rekonstruiert die Originalschlüssel und prüft jede Gültigkeits-, Korrektheits- und Stabilitätsangabe gegen die gespeicherten Zähler. Es fehlen keine Konfigurationen. Sie führt keinen Sortierer erneut aus. [D1, D4]
 
-Das damalige Deadband-Archiv besitzt kein vollständiges ZIP-Zentralverzeichnis. CRC-geprüfte vollständige Einträge konnten gelesen werden, ohne Daten zu verändern. Für fünf Konfigurationen mit 8 Bit, N = 256 und zugelassenen Duplikaten fehlen jedoch die benötigten Originalindex-Ausgaben: Rangsortierung bei η = 0,15 sowie beide Mappings bei η = 0,20 und 0,25. Dafür werden keine τ-, Abstands- oder Recall-Werte erfunden. Die gespeicherte coverage.csv benennt diese Lücken.
-
-Die abgeleiteten Qualitäts-CSV-Dateien und ihre Provenienz sind im Repository enthalten. Die älteren vollständigen periodischen Roharchive selbst sind im aktuellen Git-Stand nicht enthalten. Eine erneute Auswertung genau dieser historischen Ausgaben benötigt daher die ursprünglichen Archive; neue Läufe sind ein neues, gesondert zu kennzeichnendes Experiment. Die Referenz- und gemeinsamen Rauschkontrollen enthalten dagegen ihre Ausgaben im Repository.
+Die Matrixrangsortierung kann ungültige Ausgaben erzeugen. Für diese sind Kendall-τ, Schlüsselabstandsfehler und bedingter Recall nicht definiert. Die Tabellen nennen deshalb die gültige Teilmenge und zusätzlich einen ausdrücklich benannten Recall, der ungültige Ausgaben mit null bewertet.
 
 # 11. Ergebnisse aus den gespeicherten Versuchen
 
 ## 11.1 Umfang und Aussageebenen
 
+Die aktuellen Versuchsserien verwenden Bitonic und ausschließlich die vollständige Louri-Matrix. Die numerische Referenz, die SDK-Integration, Paar-Machbarkeit, gemeinsame Rauschkontrollen und digitale Zeitmessung beantworten unterschiedliche Fragen; ihre Laufzahlen sind nicht als unabhängige Hardwaremessungen zusammenzufassen.
+
 {{table:experiment_inventory}}
 
-Die Tabelle fasst unterschiedliche Prüfzwecke zusammen. Paarprüfungen, wiederverwendete Kontrollstreams und wiederholt zeitlich vermessene CPU-Eingaben werden nicht zu einer vermeintlich unabhängigen Gesamtstichprobe addiert. Die ausgewählten Tabellen dieses Kapitels werden beim Berichtsbau direkt aus den gespeicherten Ergebnisdateien gelesen. Die vollständigen CSV-Dateien bleiben im Repository verfügbar.
+## 11.2 Vollständige Sortierkorrektheit und Rangplatzierung
 
-## 11.2 Referenz: vollständige Korrektheit sinkt mit vielen nahen Vergleichen
-
-Im Referenzversuch sind bei η ≤ 0,10 in jeder der geprüften Konfigurationen alle 1.000 Sortierungen korrekt und stabil. Bei stärkeren Störungen treten zunächst einzelne nahe Fehlordnungen auf. Für 8 Bit und N = 256 enthält die Familie verschiedener Schlüssel sämtliche Werte des Wertebereichs; viele Schlüssel liegen direkt nebeneinander. Eine einzige Fehlordnung genügt, um die gesamte Liste als nicht korrekt zu zählen.
+Ohne Zusatzrauschen sind beide Verfahren bei allen gespeicherten Eingaben korrekt und stabil. Unter den angenommenen unabhängigen Fehlern werden die N² Rangbeiträge einschließlich der Diagonale störanfällig. Eine kleine Fehlerquote pro Messereignis kann bei langen Listen viele ganze Ausgaben ungültig machen. [D1]
 
 {{figure:reference_accuracy}}
 
 {{table:reference_maxn}}
 
-Bei zugelassenen Duplikaten ist Stabilität besonders empfindlich: Im 8-Bit-Fall mit N = 256 und η = 0,25 sind bei Bitonic 10,4 % der Listen nach Schlüsseln korrekt, aber nur 0,5 % stabil; bei Rangsortierung sind es 3,1 % beziehungsweise 0,6 %. Ein Rauschen, das einen wahren Gleichstand aufbricht, kann die Schlüsselordnung erhalten und trotzdem die Originalreihenfolge zerstören.
+Bei 4 Bit, N = 16 und η = 0,25 erzeugt Louri mit verschiedenen Schlüsseln 500 gültige, 495 korrekte und 495 stabile Ausgaben aus 1.000 Listen. Bei erlaubten Duplikaten sind es 354 gültige, 352 korrekte und 350 stabile Ausgaben. Für 8 Bit und N = 256 ist bei dieser Rauschstärke in beiden Familien keine Matrixausgabe gültig. Das ist ein Ergebnis des erklärten unabhängigen Messmodells, kein gemessener Hardwareausfall.
 
-## 11.3 Gute Rangfolge trotz geringer vollständiger Korrektheit
+## 11.3 Rankingqualität immer zusammen mit Gültigkeit
 
 {{table:quality_case}}
 
-Die Tabelle bezieht sich einheitlich auf 8 Bit, N = 256, verschiedene Schlüssel und η = 0,25 im Referenzmodell. Bei Bitonic liegen im Mittel nur 2,847 Inversionen unter 32.640 möglichen Paaren vor. Von den insgesamt 2.847 beobachteten Inversionen entfallen 2.834 auf Abstand eins und 13 auf Abstand zwei; bei größeren Abständen wurden keine beobachtet. Rund 99,54 % der Inversionen betreffen somit direkte Nachbarn. Das erklärt die Kombination aus 5,9 % vollständig korrekten Arrays und fast perfektem τ beziehungsweise Recall.
+Bitonic erhält auch bei falschen Entscheidungen eine vollständige Permutation. Bei 8 Bit, N = 256 und η = 0,25 können daher geringe vollständige Korrektheit und ein sehr hohes Kendall-τ nebeneinander auftreten. Für Louri sind bei dieser Bedingung keine gültigen Ausgaben vorhanden: Ein bedingtes τ oder ein bedingter Recall wird deshalb als undefiniert dargestellt. Eine hohe Qualität einer kleinen gültigen Teilmenge dürfte nicht als Qualität aller Versuche ausgegeben werden.
 
-Bei Rangsortierung sind 984 von 1.000 Ausgaben gültige Permutationen. Ihr gutes bedingtes Recall@10 von ungefähr 99,878 % muss deshalb zusammen mit dem Wert von 98,28 % über alle Versuche gelesen werden. Das Auslassen der 16 ungültigen Fälle würde die praktische Auswahlqualität günstiger erscheinen lassen, als sie unter dem definierten Ausgabevertrag ist.
+## 11.4 Nichtlineare Paar-Machbarkeit
 
-## 11.4 Periodischer Vergleich und Gleichstände
+Die periodische Host-Phase entscheidet alle untersuchten Paare nach Referenzkorrektur korrekt. Die affine Variante erzeugt dagegen die in Kapitel 7 erklärten 40 falschen 8-Bit-Gleichstände. Diese Paarbefunde bleiben für die Beurteilung einer möglichen nichtlinearen Implementierung relevant; sie werden nicht als vollständige Louri-Sortierergebnisse ausgegeben. [D3, D7]
 
-Die rauschfreien Paarprüfungen bestätigen nach Referenzkorrektur die Entscheidung für alle 256 geordneten 4-Bit-Paare und 65.536 geordneten 8-Bit-Paare. Die historischen vollständigen Sortierauswertungen bestätigen ebenfalls rauschfreie Korrektheit und Stabilität für die geprüften Konfigurationen. Daraus folgt keine neue Hardwareleistung: Die Funktion läuft im CPU-Backend, und ihre Phase wird auf dem Host vorbereitet.
-
-Besonders aufschlussreich ist das frühere Output-Szenario mit Duplikaten. Bei 8 Bit, N = 256 und η = 0,25 sind die Bitonic-Ausgaben nach Schlüsseln zu 100 % korrekt, aber keine ist stabil. Recall@10 nach stabilen IDs beträgt 97,76 %, bindungstolerant dagegen 100 %. Das mittlere τ_b von ungefähr 0,998046 liegt an seiner bindungsbedingten Obergrenze; τ_key ist eins. Die Rangsortierung erzeugt in dieser Konfiguration keine gültigen Ausgaben. Gleichstände sind somit keine unwichtige Randbedingung des Vergleichsbausteins.
-
-Ein tolerierter Nullbereich kann gestörte Gleichstände auffangen. Er kann aber zugleich benachbarte unterschiedliche Schlüssel als gleich behandeln. Bei symmetrischer Toleranz τ und minimalem ungleichem Signalabstand m schützt ein begrenzter Gesamtfehler kleiner als min(τ, m − τ) die Dreiwegeentscheidung. τ = m/2 balanciert diese zwei Abstände. Unbeschränktes Gaußrauschen liefert nur Fehlerwahrscheinlichkeiten, keine deterministische Garantie. Der CPU-Wert für m ist nicht auf eine ungemessene tcos-Kennlinie übertragbar.
-
-## 11.5 Gemeinsames Modell: was die Kontrollen tatsächlich zeigen
+## 11.5 Gemeinsames Modell: definierte Störorte und Quantisierung
 
 {{table:common_noise_cases}}
 
-Die ausgewählten Fälle verwenden 8 Bit, N = 256, verschiedene Schlüssel und je 100 Listen. Direkte und ideal-periodische Übertragung liefern in diesen dargestellten Fällen dieselben ausgewerteten Kennzahlen. In der Einstellung mit ausschließlich vorgelagertem Rauschen und gemeinsamer Quantisierung ist dies durch die Entscheidungskontrollen abgesichert. Für andere Einstellungen ist Gleichheit beobachteter Kennzahlen kein allgemeiner Identitätsbeweis.
-
-Zusätzliches Ausgangsrauschen senkt die vollständige Korrektheit; Rangkonflikte können die Gültigkeit stark reduzieren. Ein grobes Ausgaberaster von 2Δ erzeugt Fehlgleichstände bereits durch die Auflösung. Die Ergebnisse belegen daher die Bedeutung der gesamten Signalverarbeitung. Sie belegen keinen belastbaren Unterschied zwischen realen analogen Plattformen.
+Die Kontrollserie umfasst 28 Millionen Paarentscheidungen und 10.800 vollständige Sortierauswertungen. Die Paarfälle prüfen direkte und ideale periodische Kennlinien. Die 108 Sortierkonfigurationen kombinieren zwei Bitonic-Kennlinien mit einem direkten Louri-Kanal. Der vor dem Bias quantisierte direkte Rangkanal ist damit klar von einer hypothetischen nichtlinearen Rangimplementierung getrennt. Alle 18 rauschfreien Sortierkonfigurationen sind korrekt und stabil. [D5]
 
 ## 11.6 Digitale CPU-Baseline
 
@@ -649,13 +628,13 @@ c ist eine Kapazitätsannahme, kein öffentlich bestätigtes Q.ANT-Limit. BF16-E
 
 {{table:resource_counts}}
 
-Für N = 256 und eine genügend große einzelne Rangcharge stehen 36 lineare Bitonic-Aufrufe einem Rangaufruf gegenüber. Rangsortierung überträgt dafür rund siebenmal so viele logische Nutzbytes. Bei c = 128 benötigt bereits die lineare Rangvariante 255 Aufrufe, Bitonic weiterhin 36; mit je einem zusätzlichen periodischen Aufruf pro Teilcharge sind es 510 gegenüber 72. Der vermeintliche Ein-Aufruf-Vorteil hängt also wesentlich von der realen Kapazität ab.
+Für N = 256 und eine genügend große einzelne Rangcharge stehen 36 lineare Bitonic-Aufrufe einem Rangaufruf gegenüber. Für Louri entstehen 65.536 Vergleiche und 393.220 logische Bytes; für Bitonic 4.608 Vergleiche und 27.792 Bytes. Die Rangvariante benötigt damit rund 14,1-mal so viele logische Bytes. Bei c = 128 sind es 512 Rangaufrufe gegenüber 36 Bitonic-Aufrufen. Der vermeintliche Ein-Aufruf-Vorteil hängt also wesentlich von der realen Kapazität ab.
 
-## 12.2 Zusätzlicher periodischer Hostpfad
+## 12.2 Rolle der elektronischen Verarbeitung
 
-Der vorhandene periodische Ablauf liest die lineare Differenz zurück, berechnet die Phase elektronisch, übergibt Phase und Amplitude an einen weiteren Aufruf und liest dessen Ausgang zurück. Dies erzeugt zusätzliche Arrays, Aufrufe und Datenverkehr. Bei vollständig passenden Chargen und N = 256 ergeben sich 72 Aufrufe und 55.440 logische Bytes für Bitonic beziehungsweise zwei Aufrufe und 391.684 Bytes für Rangsortierung. Eine einmalige Referenzauswertung kommt gesondert hinzu; ein Referenzpaar umfasst sechs logische Bytes in diesem vereinfachten Nutzdatenmodell.
+Im maßgeblichen SDK-Mapping liefert die lineare Operation eine Differenz an den Host zurück. Louri benötigt anschließend Biasabzug, Schwelle, N Spaltensummen und die Platzierung der Originaldatensätze. Bitonic benötigt Entscheidung und Austausch nach jeder Stufe. Diese Arbeit und das Packen der Paare müssen Teil einer späteren Gesamtlaufzeit sein.
 
-Da sign(d) auf dem Host bereits verfügbar wäre, muss eine alternative Kaskade eine konkrete Aufgabe übernehmen: etwa die Entscheidung vor einer elektronischen Zwischenübertragung bilden oder innerhalb einer bestätigten Pipeline mehrere Schritte zusammenfassen. „Hostfrei“ ist dabei nicht gleichbedeutend mit „vollständig optisch“. Ein Nutzen ist erst mit dem tatsächlichen Ausführungspfad und einem gleichwertigen Qualitätsziel bewertbar.
+Ein periodischer Folgeaufruf ist für die bereits elektronisch verfügbare Differenzentscheidung nicht erforderlich. Seine mögliche Rolle hängt von einem nachgewiesenen internen Datenweg ab, der tatsächlich eine zusätzliche Aufgabe übernimmt oder eine Übertragung vermeidet. Eine hostfreie Verbindung wäre dabei noch kein Beleg für vollständig optische Verarbeitung.
 
 ## 12.3 Eine bedingte Laufzeitgleichung
 
@@ -677,83 +656,68 @@ Eine spätere Energiebaseline muss dieselben Ein- und Ausgaben und dieselbe Qual
 
 ## 13.1 Die aktuelle Ausführungskette
 
-Die aktuelle Implementierung liegt im Paket qant_sorting. Wiederverwendbare Modelle, Sortierabläufe und Qualitätsmetriken stehen auf dessen erster Ebene; ausführbare Versuche liegen unter experiments. Der zentrale Einstieg lautet python -m qant_sorting COMMAND. COMMAND --help zeigt die jeweiligen Optionen. Die folgenden Dateinamen beziehen sich auf diese Paketstruktur; ältere Metadaten behalten ihre ursprünglichen Pfade und Quellhashes.
-
-Die Datensätze werden einmal erzeugt und danach identisch wiederverwendet. Das Referenzmodell stellt einen kontrollierten Komparator bereit; die Sortierlogik hält Originaldatensätze und Indizes getrennt vom gestörten Signal. Ein SDK-Adapter realisiert denselben linearen Paarbaustein im offiziellen CPU-Backend. Die periodische Variante ergänzt Phase, Referenzkorrektur und optional einen Nullbereich. Qualitätsauswertung und CPU-Benchmark lesen die gespeicherten Eingaben beziehungsweise Ausgaben, ohne sie stillschweigend zu reparieren.
-
-Die separate affine CPU-Kontrolle in check_affine_periodic.py ergänzt zwei Vergleichspfade um die Phasenbildung in der MVM. Sie speichert auch fehlgeschlagene Paarentscheidungen und Sortierungen unverändert; sie ersetzt keinen vorhandenen Komparator.
-
-Das gemeinsame Rauschmodell ist ein eigener kontrollierter Komparator. Es ersetzt nicht automatisch sämtliche älteren Experimente. Seine Dateien tragen eigene Einstellungen, Provenienz und Kontrollnachweise, damit synthetische Float64-Resultate nicht mit SDK- oder Hardwareausgaben verwechselt werden.
+input_validation.py prüft die Schlüssel. comparison.py bildet den erklärten normierten Differenzkanal. sorting_schedules.py enthält die aktive Bitonic-Schichtung und den vollständigen Louri-Ablauf. louri_reference.py stellt die Quellengleichungen mit einsehbaren Zwischenmatrizen bereit. metrics.py und ranking_quality.py bewerten die fertig erzeugten Ausgaben unabhängig.
 
 {{table:module_map}}
 
 ## 13.2 Datenverträge und Fehlerbehandlung
 
-Listen bestehen aus Schlüsseln und eindeutigen Originalindizes. Die Eingabeprüfung kontrolliert Wertebereiche und Formen; Bitonic benötigt Zweierpotenzen. Bei gemessenem Gleichstand entscheidet der Originalindex. Die Ausgabeprüfung trennt gültige Datensatzpermutation, Schlüsselordnung und Stabilität. Widersprüchliche Rangentscheidungen bleiben als ungültige Ausgabe mit −1-Markern sichtbar; es gibt keine digitale Reparatur.
+Eingaben sind rechteckige Stapel mit Form (Versuche,N). Die Paarform von Louri lautet (Versuche,N²); jede Richtung und die Diagonale werden übergeben. Der Parameter bias_step muss ausdrücklich zum Differenzraster passen. Ungültige Rangplatzierung liefert −1-Markierungen und wird nicht repariert. Rohschlüssel werden durch signierte Integerwerte repräsentiert, damit Differenzen und Fehlermarkierungen nicht überlaufen.
 
-Metadaten enthalten Seeds, Konfigurationen und Quell-/Eingabehashes. Unvollständige historische Archive erfordern eine ausdrückliche Teilauswertung mit ausgewiesenen Lücken. Ein fehlgeschlagener Hardwarepfad wird nicht still durch eine CPU-Ausführung als Hardwareerfolg ersetzt.
+## 13.3 Ein aktueller Stand
 
-## 13.3 Aktueller Code und historische Dateien
-
-paths.py definiert Repository-Stamm und Eingabeidentität. io.py bündelt CSV-Ausgabe, gestreamte SHA-256-Berechnung und Quellinventar. Gemeinsame Versuchsparameter liegen in experiments/settings.py. Die Komparatoren bleiben wegen ihrer unterschiedlichen wissenschaftlichen Annahmen getrennt. Importe aktueller Module starten keine Versuche oder Dateiausgaben.
-
-legacy enthält die unverändert verschobenen Prototypen und den früheren Berichtsgenerator. requirements enthält die Umgebungen; die identischen Abhängigkeiten von Qualitätsanalyse und gemeinsamem Rauschmodell stehen in analysis.txt. docs/source_layout.json dokumentiert die Pfadzuordnung. Historische Metadaten behalten ihre ursprünglichen Quellhashes.
-
-python -m qant_sorting report erzeugt aus Text, Literatur und gespeicherten Ergebnissen die einzige aktuelle PDF in reports. Frühere Berichte bleiben in der Git-Historie erhalten. Der historische Generator schreibt ausschließlich nach tmp/legacy_reports.
+Das Repository enthält eine Rangimplementierung für die Masterarbeit und die dazugehörigen aktuellen Ergebnisse. Veraltete Prototypen, doppelte Eingabearchive, nicht mehr verwendete Sortierläufe, Wiederherstellungswerkzeuge für alte Archive und frühere Berichtskopien gehören nicht zum aktuellen Dateibaum. Versionsvergleiche bleiben über Git möglich. Die bereitgestellte SDK-Datei ist eine benötigte, lizenzierte Abhängigkeit; Ergebnis-NPZ-Dateien enthalten die für eine unabhängige Nachbewertung benötigten Originalausgaben.
 
 # 14. Reproduzierbarkeit und Prüfung
 
 ## 14.1 Identität der Eingaben und des SDK
 
-Der verwendete Eingabekorpus data/inputs.npz besitzt den SHA-256-Wert:
+Der SHA-256-Wert des unveränderten Eingabekorpus data/inputs.npz lautet:
 
 `79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da`
 
-Der SDK-Installationshelfer bindet Version 2.3.1 an Commit:
+Die CPU-SDK-Prüfung verwendet Version 2.3.1 und den festgehaltenen Quellcommit:
 
 `72a2d99f10240b6df3c6d0f636dfa0e2b5d38902`
 
-Die bisherigen Versuchsserien beruhen auf der Forschungs-Codebasis fbb418d0b80c04b4fa7c38fe92f56fc7b7317bcd. Die affine Machbarkeitskontrolle vom 9. Oktober 2026 ergänzt den Hauptzweigstand 61b6d74ff7bc9ad10749e073f5f3a329ca8460e7, ohne frühere wissenschaftliche Algorithmen, Eingaben oder Ergebnisse zu verändern. report_provenance.json bewahrt die bisherige Quellen- und Evidenzinventur; affine_evidence.json ergänzt die affinen Ergebnisdateien mit Hashes. Die nachfolgende Paketorganisation basiert auf Commit a750d88b217b0dd6ae732a4e1e5dcb27ade2e75f. Ursprüngliche Quellhashes bleiben als historischer Snapshot erhalten; die PDF-Erzeugung prüft weiterhin die tatsächlich verwendeten Ergebnisdateien. Der zugehörige Git-Commit hält die genaue Fassung fest.
+Die SDK-Quellprüfungen stehen in docs/sdk_source_audit.json und docs/nonlinearity_source_audit.json. Die Metadaten jeder Versuchsserie speichern Eingabeidentität, Modellannahmen, Seeds und die bei der Ausführung vorhandenen Quellhashes. report_assets/evidence.json bindet die tatsächlich verwendeten Ergebnisdateien an den Bericht; sources.json dokumentiert die bereitgestellte Literatur.
 
-## 14.2 Getrennte Umgebungen statt stiller Versionsmischung
+## 14.2 Umgebungen und Grenzen
 
-Die ursprüngliche Referenz, die neueren Qualitäts-/Rauschwerkzeuge, die CPU-Zeitmessung und der Bericht besitzen unterschiedliche Abhängigkeitsdateien. Für einen reproduzierbaren Lauf ist jeweils eine eigene Umgebung sinnvoll. Die historische requirements/reference.txt enthält NumPy 2.5.3; die neueren CPU- und Kontrollauswertungen dokumentieren NumPy 2.3.5. Das ist offenzulegen und nicht durch eine rückwirkende Versionsänderung zu kaschieren.
+Die numerischen Auswertungen verwenden Python 3.12 und NumPy 2.3.5; requirements/analysis.txt enthält zusätzlich SciPy 1.17.0 für unabhängige Metrikprüfungen. requirements/sdk.txt ergänzt ml-dtypes 0.6.0, cffi 2.1.1 und pycparser 3.0. Das offizielle CPU-Wheel wird aus dem hashgeprüften vendor-Paket installiert. Der Bericht verwendet die getrennten Darstellungsabhängigkeiten in requirements/report.txt.
 
-Die affine CPU-Kontrolle verwendet Python 3.12.14, NumPy 2.3.5, ml-dtypes 0.6.0, cffi 2.1.1, pycparser 3.0 und das hashgeprüfte offizielle CPU-Wheel 2.3.1. requirements/sdk.txt und docs/PERIODIC_FEASIBILITY.md beschreiben die getrennte Einrichtung.
-
-Die CPU-Baseline benötigt requirements/cpu.txt, die gemeinsame Rauschkontrolle requirements/analysis.txt und die Rankingauswertung requirements/analysis.txt. Für die PDF-Erzeugung dient requirements/report.txt. Das SDK wird über den vorgesehenen Installationshelfer in einer kompatiblen Umgebung eingebunden. Laufzeitwerte gelten für die jeweils protokollierte Umgebung; Abweichungen auf anderen Rechnern sind zu erwarten.
+Die digitale Zeitmessung bleibt an ihre protokollierte CPU-, Betriebssystem- und Softwareumgebung gebunden. Ein erneuter Lauf kann andere Zeiten liefern. Numerische und SDK-Ergebnisse sind keine photonischen Zeitmessungen.
 
 ## 14.3 Reproduktionsbefehle
 
-Die Befehle werden im Repository-Stamm ausgeführt. Neue Ausgaben erhalten eigene Verzeichnisse, damit gespeicherte Referenzen nicht überschrieben werden. Zunächst wird die passende Umgebung eingerichtet; danach können die gewünschten Teilschritte getrennt ausgeführt werden.
-
 ```bash
-python -m qant_sorting noise --output-dir results/reproduced
-python -m qant_sorting verify results/reproduced
-python -m qant_sorting install-sdk
-python -m qant_sorting sdk
-python -m qant_sorting nonlinearity
-python -m qant_sorting periodic-pairs --output-file results/periodic_reproduced/pair_checks.json
-```
-
-Die SDK-Schritte benötigen den installierten offiziellen CPU-Pfad. Sie liefern keine Hardwaremessung. Neue periodische Ausgaben können mit run_periodic_evaluation.py erzeugt werden; Szenario und Ausgabeordner müssen zum gewünschten Versuch passen. Die anschließend ausgeführte Qualitätsanalyse benötigt die entsprechenden Originalindex-Ausgaben.
-
-```bash
-python -m qant_sorting affine --output-dir results/affine_periodic_reproduced
-python -m qant_sorting common-noise --output-dir results/common_noise_reproduced
-python -m qant_sorting cpu --output-dir results/cpu_baseline_reproduced
-python -m qant_sorting quality --allow-incomplete --output-dir results/ranking_quality_reproduced
+python -m pip install -r requirements/analysis.txt
 python -m unittest discover -s tests -v
-python -m qant_sorting report
+python -m qant_sorting noise
+python -m qant_sorting verify results/reproduced
+python -m qant_sorting louri
+python -m qant_sorting quality
+python -m qant_sorting common-noise
+python -m qant_sorting resources
 ```
 
-Der Qualitätsbefehl reproduziert die historischen periodischen Kennzahlen nur, wenn auch die dazugehörigen älteren Roharchive verfügbar sind. --allow-incomplete erlaubt dokumentierte Teilauswertung, beschafft aber keine fehlenden Dateien und füllt keine Lücken. Ein frischer Git-Klon enthält bereits die abgeleiteten historischen Qualitätstabellen. Die PDF-Erzeugung verwendet diese gespeicherten Tabellen und führt keine Sortier- oder Zeitmessung neu aus.
+In einer SDK-Umgebung:
+
+```bash
+python -m pip install -r requirements/sdk.txt
+python -m qant_sorting install-sdk --no-deps
+python -m qant_sorting sdk
+python -m qant_sorting affine
+python -m qant_sorting periodic-pairs
+```
+
+Neue Läufe schreiben in separate Reproduktionsordner. Die Standardauswertung der Qualitätsmetriken liest die gespeicherte aktuelle Referenz. python -m qant_sorting report erzeugt daraus die einzige aktuelle PDF in reports.
 
 ## 14.4 Was die Prüfungen absichern
 
-Die mathematischen Tests betreffen Signentscheidung, Bindungsregeln, Bitonic-Stufen, Rangbelegung, Quantisierung und die kontrollierten Rauschfälle. Die Rankingmetriken wurden zusätzlich anhand gezielter kleiner Beispiele und 40 SciPy-Vergleiche geprüft. Ergebnisvalidierungen gleichen Eingabehashes, Konfigurationsabdeckung, Zählungen, Kontrollen und End-to-End-Ausgaben ab.
+Die Prüfungen decken die veröffentlichten Matrizen, stabile Gleichstände, Rangnummerierung, negative oder doppelte Ränge, alle N² Aufrufe, vollständige SDK-Paarübergabe, Reproduzierbarkeit der Zufallsströme und unabhängige Qualitätsscores ab. Gezielt injizierte widersprüchliche Gegenrichtungen dürfen nicht durch Komplementbildung korrigiert werden. Die Reihenfolge der Rauschereignisse ist für jede Matrix und jeden absoluten Versuchsindex festgelegt.
 
-Diese Prüfungen stützen die Implementierung unter ihrem jeweiligen Modell. Sie ersetzen weder einen physikalischen Kennliniennachweis noch die externe Reproduktion der CPU-Zeitmessungen. Die Berichtsprüfung kontrolliert zusätzlich Quellenzuordnung, die unveränderten wissenschaftlichen Daten, Tabellenwerte, lesbare PDF-Seiten und das Vorhandensein genau einer aktuellen Datei im Ordner reports. Für die Paketorganisation wurden die vollständige Referenz mit 288.000 Sortierungen, der lineare CPU-Kontrolllauf mit 48.000 Sortierungen, die gemeinsame Rauschkontrolle und die affine Kontrolle separat reproduziert. Das Prüfprotokoll validation/structure_cleanup_20261009.json dokumentiert den Ergebnisabgleich und die Strukturtests.
+Sie belegen keine reale Kennlinie, optische Rangsummierung, physische Kaskadierbarkeit, gerätespezifische Fehlerverteilung oder Energieeffizienz.
 
 # 15. Hardwarefragen und noch ausstehende Arbeit
 
@@ -767,7 +731,7 @@ Eine Anfragevorlage und ein Messplan liegen vor. Der Entwurf fragt zusätzlich n
 
 ## 15.2 Vorbereiteter Kennliniensweep
 
-measure_periodic_curve.py kann Phasenpunkte, tatsächlich codierte BF16-Werte, Wiederholungen, Mittelwerte, Streuungen, Zeitstempel und API-Zeiten protokollieren. Eine historische CPU-Kontrolle verwendete 257 angeforderte Punkte zwischen 0 und π bei Amplitude eins und 20 Wiederholungen. Aufgrund der BF16-Codierung verbleiben 237 verschiedene Phasencodes. Die deterministischen CPU-Ergebnisse charakterisieren keine physikalische Drift oder Auflösung; das zugehörige alte Rohverzeichnis ist im aktuellen Git-Stand nicht enthalten.
+measure_periodic_curve.py kann Phasenpunkte, tatsächlich codierte BF16-Werte, Wiederholungen, Mittelwerte, Streuungen, Zeitstempel und API-Zeiten protokollieren. Sein Backend muss ausdrücklich gewählt und überprüft werden. Ein deterministischer CPU-Sweep prüft nur die API-Funktion; reale Auflösung, Drift und Rauschen erfordern wiederholte Gerätemessungen mit dokumentierter Messgrenze.
 
 Für eine reale Messung sind zuerst Herstellerfreigaben zu Wertebereich, Dimensionen und Treiber einzuholen. Danach sind insbesondere die tatsächlich verwendeten Schlüsseldifferenzen, Punkte nahe dem Gleichstand, Vorwärts-/Rückwärtssweeps und zeitlich eingestreute Referenzen zu messen. Rohwerte und Fehlerstatus werden erhalten; ein einzelner Gaußfit reicht nicht, wenn Ausreißer, Kanalunterschiede oder Korrelationen die Entscheidung bestimmen.
 
@@ -779,19 +743,17 @@ Für einen NPU-Vergleich werden erst kalibrierte Genauigkeit und anschließend v
 
 ## 15.4 Arbeit auch ohne Hardwarezugang tragfähig halten
 
-Der nächste Schwerpunkt ist die quantitativ belegte Parametrisierung des gemeinsamen Modells oder, falls diese ausbleibt, eine klar begrenzte Sensitivitätsanalyse über dokumentierte Annahmebereiche. Danach folgen eine ergänzende GPU-Baseline bei verfügbarer Plattform und eine Ressourcenanalyse mit expliziten Bedingungen für einen möglichen Vorteil. Historische periodische Roharchive sollten für eine vollständige Archivierung wiederbeschafft oder als dauerhaft fehlend gekennzeichnet werden.
+Der nächste Schwerpunkt ist die quantitativ belegte Parametrisierung des gemeinsamen Modells oder, falls diese ausbleibt, eine klar begrenzte Sensitivitätsanalyse über dokumentierte Annahmebereiche. Danach folgen eine ergänzende GPU-Baseline bei verfügbarer Plattform und eine Ressourcenanalyse mit expliziten Bedingungen für einen möglichen Vorteil.
 
 Ohne Hardware bleibt eine belastbare Arbeit möglich: Sie kann mathematische Eignung, softwareseitige Funktionsfähigkeit, Fehlertypen, Qualitätsanforderungen, digitalen Aufwand und bedingte Systemgrenzen nachweisen. Ihre Schlussfolgerung darf dann keine gemessene photonische Beschleunigung, Energieüberlegenheit oder physikalische Rauschrobustheit behaupten.
 
 # 16. Gesamtbewertung des aktuellen Stands
 
-Die Recherche verbindet klassische optische Sortiernetze mit heutigen hybriden photonischen Prozessoren und einer systematischen Betrachtung von Präzision, Datenbewegung und Energie. Die fünf Architekturen sind unter einem einheitlichen real-RAM-artigen Arbeitsmaß eingeordnet. Unterschiedliche Installationsbreite, Parallelität und Regeneration werden sichtbar, ohne sie mit der Zahl skalarer Rechenoperationen gleichzusetzen.
+Die Arbeit stellt Bitonic und die vollständige Rangmatrix nach Louri unter dem unveränderten Komplexitätsmodell C = (T,S,H,D) gegenüber. Die Quellengleichungen, Gleichstandsregel und Rangnummerierung sind nachvollziehbar implementiert. Die vollständige Matrix ist im offiziellen CPU-SDK als lineare Paarverarbeitung mit elektronischem Bias, Schwelle und Rangbildung geprüft.
 
-Für zwei ausgewählte Mappings liegen ausführbarer Code, gespeicherte Eingaben, mathematische Kontrollen und vollständige Sortierauswertungen vor. Der periodische Baustein mit Host-Phasenbildung ist im CPU-Backend funktionsfähig, im vorhandenen Hostablauf jedoch nicht als nützliche Beschleunigung begründet. Die untersuchte affine Alternative verliert bei 8 Bit bereits ohne Rauschen Vergleichsinformation. Sie liefert damit eine konkrete Grenze dieser Umsetzung und eine gezielte Frage an den Hersteller. Die gemeinsame Rauschmodellierung beseitigt einen zentralen Vergleichsfehler der früheren Szenarien: Signalabstand, Rundung und Rauschort müssen gemeinsam interpretiert werden.
+Ohne Rauschen stimmen beide Verfahren mit stabiler digitaler Sortierung überein. Unter den ausdrücklich angenommenen Störungen unterscheiden sie sich deutlich: Bitonic erhält die Datensatzpermutation, während inkonsistente Matrixentscheidungen und gestörte Selbstvergleiche die Rangplatzierung ungültig machen können. Diese Ausfälle bleiben sichtbar. Bedingte Rankingqualität ersetzt nicht die Gültigkeitsquote.
 
-Kendall-τ, Abstandsfehler und Recall zeigen, wie stark eine strenge vollständige Korrektheitsquote von einer guten näherungsweisen Rangfolge abweichen kann. Gleichzeitig verhindern Gültigkeits- und Stabilitätsmetriken, dass Rangkonflikte oder vertauschte Duplikate verborgen bleiben. Die CPU-Baseline schafft einen real gemessenen digitalen Bezugspunkt.
-
-Der erreichte Beitrag ist damit eine nachvollziehbare Forschungs- und Evaluierungsgrundlage mit klaren positiven und negativen Ergebnissen. Die verbleibende Frage ist nicht, ob sich Sortierung formal in photonisch geeignete Funktionen zerlegen lässt, sondern ob ein belegter vollständiger Datenpfad diese Funktionen mit ausreichender Qualität und vertretbarem Systemaufwand ausführt.
+Die nichtlineare Machbarkeitsstudie liefert mit 40 falschen affinen 8-Bit-Gleichständen einen reproduzierbaren Präzisionsbefund. Ein Vorteil auf realer photonischer Hardware ist weiterhin offen. Die nächsten Schritte betreffen belegte Rausch- und Kapazitätsparameter, einen fairen GPU-Vergleich und gegebenenfalls gemessene vollständige Datenwege. Die dokumentierte Modellierung und CPU-Validierung bleiben auch ohne Hardwarezugang tragfähig.
 
 # Anhang A. Literaturverzeichnis und Einordnung
 
@@ -811,7 +773,7 @@ Für die Zusammenführung wurden beide Präsentations-PDFs, der bisherige ausfü
 
 {{table:data_inventory}}
 
-Die maschinenlesbare Datei report_assets/report_provenance.json enthält SHA-256-Prüfsummen der bereitgestellten Quellen, des Berichtstextes und der für diesen Bericht verwendeten Ergebnisdateien. Die Hashes erlauben eine Zuordnung zu einer konkreten Fassung; sie ersetzen keine öffentlich verfügbare Kopie einer fehlenden Quelle. Der bisherige MANIFEST.json im Repository gehört zum historischen Projektstand und ist kein aktuelles Gesamtmanifest dieser Konsolidierung.
+report_assets/sources.json enthält die Identitäten der bereitgestellten Recherchequellen. report_assets/evidence.json bindet alle aktuell verwendeten Ergebnisdateien über SHA-256 an den Bericht. Die Laufmetadaten halten Quellhashes und Umgebungen zum jeweiligen Ausführungszeitpunkt fest. Sie ersetzen keine physische Gerätecharakterisierung.
 
 # Anhang C. Begriffe und Leseschlüssel
 

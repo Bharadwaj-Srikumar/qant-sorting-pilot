@@ -3,10 +3,10 @@
 # NPZ case names and numeric arrays -> compare first-failure JSON records.
 # Source hashes and run durations may change after documentation or environment
 # changes, so metadata is intentionally outside this numerical-equivalence test.
-# This requires complete archives; optional salvage belongs to saved_output_reader.
+# Only complete current archives are accepted.
 # No source is changed and no sorter is executed by the verifier.
 
-"""Check a new run against every saved result from the original noise sweep."""
+"""Check a new run against every saved result from the current full-matrix noise sweep."""
 
 import argparse
 import csv

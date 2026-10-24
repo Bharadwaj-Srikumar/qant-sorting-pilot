@@ -1,6 +1,6 @@
 # Periodischer Vergleich: Datenweg und endliche Präzision
 
-Stand: 9. Oktober 2026. Begrenzte CPU-Machbarkeitsstudie, keine Hardwaremessung.
+Stand: 24. Oktober 2026. Begrenzte CPU-Machbarkeitsstudie, keine Hardwaremessung.
 
 ## Ergebnis und Bedeutung
 
@@ -53,7 +53,7 @@ Geprüft wurde Version 2.3.1, Quellcommit
 `72a2d99f10240b6df3c6d0f636dfa0e2b5d38902`. Acht lokal gelesene Quelldateien
 stimmen mit den Blob-Hashes des offiziellen Git-Baums überein; Einzeldateien
 und dauerhafte Quelllinks stehen in
-[`sdk_source_audit.json`](../results/affine_periodic_20261009/sdk_source_audit.json).
+[`sdk_source_audit.json`](sdk_source_audit.json).
 
 - `_wrapper.py` dokumentiert NumPy-BF16-Eingaben und -Ausgaben für `linear_fprop`
   sowie den getrennten periodischen Aufruf; `_utils.py` prüft NumPy-Arrays.
@@ -95,34 +95,20 @@ Die kleinste *von null verschiedene* Größe 0.007808685302734375 ist deshalb
 keine nutzbare Mindestreserve. Referenzabzug oder eine größere Toleranzzone
 können bereits verlorene Information nicht wiederherstellen.
 
-## Auswirkungen in beiden Sortermappings
+## Rolle in der Masterarbeit
 
-Vor der Auswertung festgelegte Stichprobe: jeweils die ersten 100 gespeicherten
-Listen aus sechs Datensätzen, zwei Mappings und drei Vergleichspfade. Das sind
-3.600 vollständige CPU-Sortierläufe, davon 1.200 mit der affinen Variante.
-Eingaben: beide Schlüsselfamilien bei (4 Bit,N=16), (8 Bit,N=16) und (8 Bit,N=256).
-Die Stapelgröße beträgt 10. Es wurden keine Laufzeit- oder Energiemessungen erhoben.
-
-| Affine Variante | Bitonic: korrekt und stabil / 100 | Rang: korrekt und stabil / 100 |
-|---|---:|---:|
-| 4 Bit, N=16, verschieden | 100 | 100 |
-| 4 Bit, N=16, Duplikate erlaubt | 100 | 100 |
-| 8 Bit, N=16, verschieden | 95 | 95 |
-| 8 Bit, N=16, Duplikate erlaubt | 97 | 97 |
-| 8 Bit, N=256, verschieden | 0 | 0 |
-| 8 Bit, N=256, Duplikate erlaubt | 0 | 0 |
-
-Alle Ausgaben bleiben in dieser Stichprobe gültige Permutationen. Falsche
-Gleichstände lösen die Originalindexregel aus, obwohl unterschiedliche Schlüssel
-vorliegen. Gültigkeit allein bedeutet daher keine korrekte Ordnung. Beide
-Kontrollpfade sortieren jeweils alle 1.200 Listen korrekt und stabil. Die
-beobachteten Stichprobenquoten sind keine Aussage über jede mögliche Liste.
+Die periodischen Varianten werden als Paar-Machbarkeitsstudie bewertet. Sie sind
+kein Ersatz für die Differenzmatrix des maßgeblichen Louri-Verfahrens: Dessen
+positionsabhängiger Bias ist in linearen Differenzeinheiten definiert. Der
+vollständige Louri-Sortierer verwendet den direkten Kanal und ist separat über
+das offizielle CPU-SDK geprüft. Es werden keine früheren reduzierten Rangläufe
+als Ergebnisse der vollständigen Matrix ausgegeben.
 
 ## Reproduktion und gespeicherte Evidenz
 
 Linux x86_64, Python 3.12.14, offizieller CPU-SDK 2.3.1;
 NumPy 2.3.5, ml-dtypes 0.6.0, cffi 2.1.1, pycparser 3.0.
-Die historischen Abhängigkeiten und Ergebnisse werden nicht ersetzt.
+Die verwendeten Versionen sind in requirements/sdk.txt festgelegt.
 Eine eigene Umgebung lässt sich mit Python 3.12 wie folgt einrichten:
 
 ```bash
@@ -142,12 +128,10 @@ betragen. Auch der Runner prüft diesen sowie den bestehenden Eingabekorpus-Hash
 und die tatsächlich gemeldete CPU-Treiberidentität. Ein vorhandenes Ziel wird
 nicht überschrieben. Kein automatischer Hardwaremodus ist enthalten.
 
-Unter `results/affine_periodic_20261009/` liegen `summary.json` mit vollständigen
-Zählungen und Umgebungs-/Quellhashes, `outputs.npz` mit allen Paarscores und
-Sortierausgaben sowie `sdk_source_audit.json`. Die Paarachsen im Archiv sind
-direkt die Schlüssel a,b. Sortierausgaben tragen Datensatz, Mapping und Pfad
-im Namen; Flags sind `[valid, correct, stable]`. Drei gezielte Regressionstests
-ergänzen die exhaustive Prüfung und die bestehenden Tests.
+Unter `results/affine/` liegen `summary.json` mit Zählungen und Umgebung sowie
+`outputs.npz` mit allen Paarscores und Phasen. Die SDK-Quellprüfung steht in
+`docs/sdk_source_audit.json`. Es gibt keine vollständigen periodischen Rangläufe
+in dieser Paarstudie. Die bekannten fehlerhaften 8-Bit-Paare bleiben gespeichert.
 
 ## Konsequenz und nächste Entscheidung
 

@@ -2,7 +2,7 @@
 # Each row is an independent list. A record is (integer key, original index).
 # The supplied difference(a, b) callable is the only interchangeable arithmetic
 # component; it must return the same shape, with positive/zero/negative scores.
-# Bitonic evaluates dependent layers; rank sorting evaluates unordered pairs.
+# Bitonic evaluates dependent layers; rank sorting evaluates every directed matrix entry, including the diagonal.
 # All swaps, rank sums, tie decisions and output placement are exact electronic
 # operations in this simulation. Their Python execution is not optical timing.
 # Both functions return (values, indices, valid_mask), with values/indices of
@@ -13,8 +13,8 @@
 
 Stirk and Athale motivate a pipeline of compare/exchange modules. Here we
 execute its active Batcher layers, not its bit-serial optical device physics.
-Louri motivates broadcast-and-compare ranking. Our adaptation compares each
-unordered pair once and sums/places records electronically.
+Louri motivates broadcast-and-compare ranking. The full N-by-N difference/bias/threshold equations are used; sums and
+record placement are electronic in this mapping.
 """
 
 import numpy as np
@@ -81,56 +81,35 @@ def bitonic_sort(keys, difference):
     return values, indices, np.ones(len(keys), dtype=bool)
 
 
-# Input keys: signed integer rows; each unordered pair (i,j), i<j, is compared
-# once. A measured positive difference votes that i is larger; otherwise j is
-# larger, which includes the stable tie rule favoring earlier index i.
-# The number of smaller records is a proposed zero-based output position.
-# Return valid outputs only when these positions form a permutation of 0..N-1.
-# Inconsistent/noisy comparisons can create collisions; an invalid row contains
-# -1 values AND indices. No digital re-sort or silent collision repair is allowed.
-def rank_sort(keys, difference):
-    """Compare every unordered pair, count smaller records, then place them.
+def rank_sort(keys, difference, *, bias_step):
+    """Execute Louri's full matrix; evaluate BOTH directions and every diagonal.
 
-    One difference supplies complementary decisions for a pair (i,j), i<j.
-    A positive difference increments rank[i]; otherwise rank[j] increases.
-    Thus a measured zero favors the earlier original index. This differs
-    explicitly from Louri's full optical difference/bias matrix and optical
-    summation; no equivalence of the physical noisy circuits is claimed.
+    keys has shape (trials,N). The supplied callable receives (trials,N*N)
+    raw-key pairs in row-major matrix order: cell (i,j) evaluates x[j]-x[i].
+    Each cell is a separate observation; no reverse decision is complemented,
+    and no noisy diagonal is silently restored. This also lets the SDK submit
+    all N*N pairs through its normal linear adapter.
+
+    bias_step is the normalized distance between adjacent INTEGER keys (2**-b
+    in the registered experiments), not a noise tolerance. Returned scores must
+    be DIFFERENCES in those units. A cosine/sine score is not interchangeable.
+    Subtract the lower-triangular bias, threshold >=0, then sum COLUMNS. Source
+    ranks start at 1 because noiseless self-comparisons contribute one.
+    Invalid/out-of-range ranks retain -1 records; no digital repair is performed.
     """
-    n = keys.shape[1]
-    left, right = np.triu_indices(n, 1)
-    left_is_larger = difference(keys[:, left], keys[:, right]) > 0
-    ranks = np.zeros_like(keys, dtype=np.int64)
-
-    # np.triu_indices lists (0,1),(0,2),...,(1,2),... in contiguous groups.
-    # Visit each group's outcomes once. This removes the old N full scans
-    # of all pairs: rank accumulation now uses O(N²) work per input array.
-    # Pairs from triu_indices are grouped by their left endpoint. Consume each
-    # comparison once: wins update that left record, complementary outcomes update
-    # the corresponding right records. A repeated full pair-mask scan is avoided.
-    offset = 0
-    for i in range(n - 1):
-        count = n - i - 1
-        wins = left_is_larger[:, offset:offset + count]
-        ranks[:, i] += wins.sum(axis=1)
-        ranks[:, i + 1:] += ~wins
-        offset += count
-
-    # Inconsistent comparisons can produce repeated ranks. Count occupied
-    # positions in O(N), rather than sorting the ranks or repairing them.
-    # A valid ranking occupies every output position exactly once. Counting these
-    # occupancies checks the condition in linear placement work; it does not sort
-    # or repair inconsistent ranks.
-    occupied = np.zeros_like(ranks)
-    rows = np.arange(len(keys))[:, None]
-    np.add.at(occupied, (rows, ranks), 1)
-    valid = np.all(occupied == 1, axis=1)
-
-    # Only a unique rank permutation is placed. Invalid trials get -1 markers
-    # and remain failed sorts; no rank clipping or digital re-sort occurs.
-    output = np.full_like(keys, -1)
-    indices = np.full_like(keys, -1)
-    valid_rows = np.flatnonzero(valid)
-    output[valid_rows[:, None], ranks[valid_rows]] = keys[valid_rows]
-    indices[valid_rows[:, None], ranks[valid_rows]] = np.arange(n)
-    return output, indices, valid
+    from qant_sorting.louri_reference import place_ranks
+    if not np.isfinite(bias_step) or bias_step <= 0:
+        raise ValueError("bias_step must be finite and positive")
+    keys = np.asarray(keys)
+    if keys.ndim != 2 or 0 in keys.shape:
+        raise ValueError("keys must be a nonempty (trials,N) array")
+    trials, n = keys.shape
+    shape = (trials, n, n)
+    a = np.broadcast_to(keys[:, None, :], shape).reshape(trials, n*n)
+    b = np.broadcast_to(keys[:, :, None], shape).reshape(trials, n*n)
+    measured = np.asarray(difference(a, b), dtype=np.float64)
+    if measured.shape != a.shape or not np.isfinite(measured).all():
+        raise ValueError("difference must return finite scores with the pair-array shape")
+    biased = measured.reshape(shape) - bias_step * np.tril(np.ones((n, n)), k=-1)
+    ranks = np.sum(biased >= 0, axis=1, dtype=np.int64) - 1
+    return place_ranks(keys, ranks)

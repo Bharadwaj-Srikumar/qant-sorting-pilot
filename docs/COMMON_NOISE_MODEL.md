@@ -1,6 +1,6 @@
 # Gemeinsames Signal-, Rausch- und Quantisierungsmodell
 
-Stand: 7. Oktober 2026 · Sprint 3
+Stand: 24. Oktober 2026
 
 ## Ergebnis und Zweck
 
@@ -17,8 +17,7 @@ ausgewählten 8-Bit-Kontrollen ebenfalls sehr ähnlich. Daraus folgt keine
 allgemeine Gleichwertigkeit realer Geräte: Kennlinie, Wandlung, Rauschen,
 Kalibrierung und Kosten fehlen weiterhin als Hardwaredaten.
 
-Dies ist **ein Modell mit gezielt veränderten Einstellungen**. Es ersetzt keine
-alten Dateien oder Messergebnisse. Die Implementierung rechnet in Float64 und
+Dies ist **ein Modell mit gezielt veränderten Einstellungen**. Die Implementierung rechnet in Float64 und
 ruft das SDK nicht auf. Das Komplexitätsmodell **C = (T, S, H, D)** bleibt
 unverändert; die folgenden Größen sind Signal- und Evaluierungsgrößen.
 
@@ -47,9 +46,11 @@ y=\mathrm{clip}_{[-1,1]}Q_{q_{\rm out}}
   \big((1+\epsilon_g)g(z)+b_{\rm out}+\sigma_{\rm out}Z_{\rm out}\big).
 ```
 
-Die Elektronik entscheidet anhand `sign(y)` und behandelt y=0 mit der bisherigen
-Regel nach Originalindex. Originalschlüssel bleiben unverändert; fehlerhafte
-Ränge werden nicht repariert.
+Bei Bitonic entscheidet die Elektronik anhand `sign(y)` und behandelt y=0 nach
+dem Originalindex. Bei Louri wird nur die direkte Kennlinie verwendet: Auf y
+folgen der Dreiecksbias −ΔU, die inklusive Schwelle ≥0 und die Spaltensumme.
+Jede der N² Zellen erhält eine eigene Störung, auch die Diagonale. Originalschlüssel
+bleiben unverändert; fehlerhafte Ränge werden nicht repariert.
 
 - **σ_in:** effektive Störung der Differenz vor der Übertragungsfunktion.
   Sie fasst vorerst Fehler der Eingabe/MVM zusammen; sie ist kein gemessener
@@ -68,8 +69,9 @@ Ränge werden nicht repariert.
 Die Begrenzung auf [−1,1] hält den idealen Sinus auf einem monotonen Ast und
 verhindert Vorzeichenumkehr durch periodisches Zurückfalten bei Übersteuerung.
 Sie ist eine **angenommene Modellgrenze**, keine bestätigte Hardwarefunktion.
-Überschreitungen vor der Begrenzung werden gezählt. Die frühere signed-b-bit-
-Begrenzung [−1/2,1/2−Δ] bleibt nur in den alten Experimenten bestehen.
+Überschreitungen vor der Begrenzung werden gezählt. Die signed-b-bit-Begrenzung [−1/2,1/2−Δ] gilt dagegen im
+Hauptversuch `results/reference/`. Die unterschiedlichen Quantisierer sind
+explizite Sensitivitätskontrollen und dürfen nicht als identische Kanäle gelten.
 
 ## 2. Signalabstände und Normierung
 
@@ -241,90 +243,22 @@ unabhängig gezogenes Rauschen. Eine Zeitserie ist nötig, um das zu trennen.
 
 ## 6. Durchgeführte Kontrollen und Ergebnisse
 
-Der Lauf `results/common_noise_20261007/` enthält:
+Der aktuelle Lauf `results/common_noise/` enthält:
 
-- 280 Paarfälle mit jeweils 100.000 Stichproben: 4/8 Bit, zwei Funktionen,
-  zehn Einstellungen und Abstände 0, ±1, ±2, ±(2^b−1).
-- 182 analytisch prüfbare Wahrscheinlichkeitsfälle bestanden die dokumentierte
-  Monte-Carlo-Toleranz (6 Standardfehler plus 5/n und gegebenenfalls eine
-  explizite Schranke für die ausgelassene Clipping-Wahrscheinlichkeit).
-  Für nichtlineare kombinierte Störungen wird keine exakte Gaussianität behauptet.
-- 1.400.000 gepaarte Entscheidungen der Zwischenrundungs-Kontrolle waren identisch.
-- 144 Sortierfälle / 14.400 Sortierläufe: jeweils die ersten 100 vorhandenen
-  Eingaben aus sechs Datensätzen (4 Bit N=16; 8 Bit N=16/256; beide Familien),
-  sechs Einstellungen, beide Funktionen und beide Sortermappings.
-- Alle 24 rauschfreien Sortierfälle waren korrekt und stabil. Die 1.200 gepaarten
-  Sortierausgaben der Zwischenrundungs-Kontrolle waren exakt identisch.
+- 280 Paarfälle mit 28 Millionen Entscheidungen; 182 analytisch prüfbare Fälle bestanden.
+- 108 vollständige Sortierkonfigurationen mit 10.800 Auswertungen auf den ersten
+  100 Listen je ausgewähltem Datensatz.
+- Für Bitonic werden direkte und ideal-periodische Kennlinie verwendet. Die
+  vollständige Louri-Matrix verwendet ausschließlich direkte Differenzen,
+  einschließlich unabhängig gestörter Diagonale; ihr Bias folgt dem Kanal.
+- Alle 18 rauschfreien Sortierkonfigurationen sind korrekt und stabil.
+- `sort_outputs.npz` speichert Indizes und Flags; `sort_quality.csv` zeigt
+  Gültigkeit, Korrektheit, Stabilität, bedingte Rangqualität und Recall mit
+  ausdrücklich null bewerteten ungültigen Ausgaben.
 
-Der kleine Lauf dient der Modellprüfung, nicht einer abgeschlossenen statistischen
-Hardwarebewertung. Beide Funktionen nutzen dieselben Zufallszahlen als Kontrolle;
-die zwei Varianten sind deshalb **keine unabhängigen Wiederholungen**. Bitonic
-und Rangsortierung erhalten getrennte Streams. Ergebnisse aus 100 Eingaben sind
-nicht die alten 1.000er-Ergebnisse unter neuer Beschriftung.
+Eine periodische Kennlinie darf nicht ohne erneute Herleitung der Bias-/
+Schwellenbeziehung in die Louri-Matrix eingesetzt werden. Die Vorzeichenidentität
+zweier Kennlinien allein beweist diese Beziehung nicht.
 
-Beispiel: 8 Bit, N=256, unterschiedliche Schlüssel, je 100 Eingaben. In diesen
-Zeilen stimmen direkte und ideale periodische Variante überein:
-
-| Einstellung | Mapping | gültig | vollständig korrekt | mittleres τ-b, gültige Ausgaben | Recall@10, gültig / ungültig=0 |
-|---|---|---:|---:|---:|---:|
-| σ_in=0,25Δ; σ_out=0; q_out=Δ | Bitonic | 100/100 | 8/100 | 0,999814 | 0,998 / 0,998 |
-| dieselbe Einstellung | Rang | 100/100 | 4/100 | 0,999819 | 0,998 / 0,998 |
-| σ_in=σ_out=0,25Δ; q_out=Δ | Bitonic | 100/100 | 0/100 | 0,999371 | 0,993 / 0,993 |
-| dieselbe Einstellung | Rang | 72/100 | 0/100 | 0,999384 | 0,997222 / 0,718 |
-| σ_in=σ_out=0,25Δ; q_out=2Δ | Bitonic | 100/100 | 0/100 | 0,996376 | 0,973 / 0,973 |
-| dieselbe Einstellung | Rang | 0/100 | 0/100 | nicht definiert | nicht definiert / 0 |
-
-Diese Fälle zeigen den Einfluss von Rauschkombination und Quantisierung sowie
-die Bedeutung der Gültigkeitsquote bei Rangsortierung. Ein hoher bedingter
-Recall darf ungültige Ausgaben nicht verdecken. Der konstante positive Offset
-kann einzelne Quoten durch die asymmetrische Gleichstands-/Originalindexregel
-auch verbessern; das ist kein Argument für absichtlich erzeugte Hardwaredrift.
-
-`sort_quality.csv` enthält zusätzlich getrennte Fehler und Nenner für
-Schlüsselabstand 1, 2 und ≥3. Die Indizes und Flags sind gespeichert und können
-mit `ranking_quality.py` genauer ausgewertet werden. Recall meint die größten
-k Schlüssel und ist hier gleichstandsneutral; τ-b und normalisiertes τ_key
-bleiben getrennt (Definitionen in [RANKING_QUALITY.md](RANKING_QUALITY.md)).
-
-## 7. Reproduktion und nächster Evidenzschritt
-
-```bash
-python -m pip install -r requirements/analysis.txt
-python -m unittest discover -s tests -p 'test_common_noise_model.py' -v
-python -m qant_sorting common-noise --output-dir results/common_noise_reproduced
-```
-
-Die Ausgabe muss in ein leeres Verzeichnis erfolgen. Metadaten enthalten
-Versionen, Seeds, Einstellungen, Ein-/Ausgabehashes und die unveränderte
-Korpusidentität. Der neue Lauf benötigt keine fehlenden alten Deadband-Ausgaben
-und rekonstruiert diese auch nicht. Die in Sprint 2 dokumentierte Datenlücke
-bleibt bestehen.
-
-Für eine **Q.ANT-bezogene** Bewertung benötigen wir als Nächstes eine gemessene
-oder belegte Kennlinie mit Einheit/Normierung, zulässige Eingangsbereiche,
-Wandlungsraster/-grenzen, wiederholte Ausgaben je Signalniveau, Bandbreite,
-Kalibrierverfahren und Zeit-/Kanalkorrelationen. Der
-[Messplan](QANT_MEASUREMENT_PLAN.md) beschreibt diese Abfrage.
-Bis dahin bleiben die Zahlen Sensitivitätsannahmen. Ein größerer Sweep sollte
-erst auf einem begründeten Parameterbereich aufbauen. Laufzeit-/Energieaussagen
-erfordern zusätzlich den tatsächlichen Datenweg und Messungen.
-
-## Quellen
-
-[1] R. López-March et al., *Noise in analog programmable-photonic computation*,
-arXiv:2604.24541v1, 27.04.2026. Abschnitt 2, Gl. 6–9 sowie Abschnitt 3.
-https://arxiv.org/abs/2604.24541v1
-Die vorhandene lokale PDF wurde gelesen; SHA256:
-`3c982697860af379e2bf08dda78f89dbf45b1d74631ecfd92ad06298e6411874`.
-
-[2] Q.ANT SDK 2.3.1, Commit `72a2d99f10240b6df3c6d0f636dfa0e2b5d38902`.
-`python/qant_native_computing_toolkit/_wrapper.py`, Funktion
-`calc_scaled_periodic_nl_fprop`, und
-`src/qant_driver_import/backend_cpu.rs`, Funktion
-`qant_driver_scaled_periodic_nl_npu`. Quellstand lokal geprüft am 07.10.2026.
-https://github.com/Q-ANT-GmbH/qant_native_computing_toolkit/tree/72a2d99f10240b6df3c6d0f636dfa0e2b5d38902
-
-[3] Eigene unveränderte CPU-Paarprüfung: `results/periodic/pair_checks.json`;
-alte Signalpfade: `comparison.py`, `periodic_comparison.py`.
-Neue Modellgleichungen, Normierung und Sensitivitätswerte sind eigene explizite
-Festlegungen; sie werden keiner der Quellen als Gerätespezifikation zugeschrieben.
+Reproduktion: `python -m qant_sorting common-noise`. Die Standardausgabe ist
+`results/common_noise_reproduced/`. Der Lauf verändert keine gespeicherten Daten.

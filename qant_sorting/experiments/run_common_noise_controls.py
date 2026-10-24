@@ -110,7 +110,7 @@ def run(args):
     if args.pair_samples < 10000 or not 1 <= args.sort_trials <= 1000:
         raise ValueError("Need >=10000 pair samples and 1..1000 sort trials")
     source_names = ("qant_sorting/common_noise_model.py", "qant_sorting/experiments/run_common_noise_controls.py", "qant_sorting/ranking_quality.py",
-                    "qant_sorting/sorting_schedules.py", "qant_sorting/io.py", "qant_sorting/paths.py",
+                    "qant_sorting/sorting_schedules.py", "qant_sorting/louri_reference.py", "qant_sorting/io.py", "qant_sorting/paths.py",
                     "data/inputs.npz", "results/periodic/pair_checks.json")
     before = {name: file_hash(ROOT/name) for name in source_names}
     if before["data/inputs.npz"] != INPUT_SHA:
@@ -179,10 +179,11 @@ def run(args):
             for name in SORT_SETTINGS:
                 for mapping_index, (mapping, sorter) in enumerate((("bitonic", bitonic_sort), ("rank", rank_sort))):
                     orders = []
-                    for kind in ("direct", "ideal_sine"):
+                    for kind in (("direct",) if mapping == "rank" else ("direct", "ideal_sine")):
                         c = NoiseConfig(bits, kind, **SETTINGS[name])
                         comparator = CommonNoiseComparison(c, range(len(keys)), (SEED, 3, dataset_index, mapping_index))
-                        _, order, validity = sorter(keys, comparator)
+                        _, order, validity = (rank_sort(keys, comparator, bias_step=c.delta)
+                                              if mapping == "rank" else sorter(keys, comparator))
                         metrics = score_saved_order(prepared, order, [1, min(10, n), n])
                         np.testing.assert_array_equal(validity, metrics["flags"][:, 0])
                         orders.append(order)
@@ -212,7 +213,7 @@ def run(args):
                         saved[case+"_flags"] = metrics["flags"]
                         if name == "no_noise" and (valid, correct, stable) != (len(keys),)*3:
                             raise AssertionError("Noiseless sort failed")
-                    if name == "prequantized_control":
+                    if name == "prequantized_control" and mapping == "bitonic":
                         np.testing.assert_array_equal(*orders)
                         matched_sorts += len(keys)
     after = {name: file_hash(ROOT/name) for name in source_names}
@@ -238,7 +239,7 @@ def run(args):
         setting_note="bits=8 is an example; run covers 4 and 8, both transfers. All noise/drift settings are assumptions.",
         source_sha256=before,
         output_sha256={p.name:file_hash(p) for p in out.iterdir()},
-        random_pairing="Transfer variants share standard-normal samples. Stages/trials independent; drift fixed.",
+        random_pairing="Bitonic and pair transfer variants share samples. Full-matrix rank uses direct differences only, independent cell/stage/trial errors including diagonal; drift fixed.",
         exclusions=["physical tcos/BF16", "measured receiver parameters", "time/channel covariance calibration", "hardware timing/energy"])
     (out/"metadata.json").write_text(json.dumps(metadata, indent=2)+"\n")
     print(json.dumps(validation, indent=2))
