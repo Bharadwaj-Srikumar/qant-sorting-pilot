@@ -1,3 +1,18 @@
+# 24 October 2026: Louri full-matrix reference and noise controls
+
+- Implemented the paper's matrix, lower-triangular bias, threshold and one-based
+  column ranks; documented the source's contradictory tie prose.
+- Verified 155,328 noiseless input arrays against the existing adaptation and
+  stable argsort, including all 4-/8-bit pairs and every four-record 4-bit list.
+- Added 36,000 paired sensitivity evaluations across explicit quantization,
+  directed-error correlation and self-comparison assumptions. All 3,600 matched,
+  antisymmetric, exact-diagonal controls agree at the vote level.
+- Checked eight adjacent-key controls against analytic Gaussian probabilities;
+  saved output indices, ranks, validity, correctness, stability and ranking quality.
+- Added source fixtures and boundary tests, an English reading guide and the
+  current German report update. Existing algorithms and evidence stay unchanged;
+  no full physical noise reproduction or hardware performance claim is made.
+
 # 23 October 2026: GitHub equation rendering
 
 - Replaced 13 uses of GitHub-blocked `\operatorname` with `\mathrm` in

@@ -87,6 +87,12 @@ tie rule; it does not consult the original keys to correct that decision.
 Both mappings keep original records exact. Neither rebuilds keys from noisy
 differences. Neither includes an optical nonlinear cascade or hidden digital repair.
 
+The separate [Louri matrix reference](LOURI_REFERENCE.md) implements the paper's
+full difference matrix, lower-triangular unit bias, threshold and column sums.
+It verifies noiseless equivalence after converting one-based ranks to zero-based
+positions. Under noise, equivalence additionally depends on quantization, reverse
+decision correlation and treatment of the diagonal; it is not automatic.
+
 ## 6. Count work consistently
 
 For `N=2**m`, the active bitonic network has `K=m(m+1)/2` layers and `N/2`

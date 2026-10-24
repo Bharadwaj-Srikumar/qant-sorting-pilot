@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-24",
+  "base_commit": "13da5d242af3d78d31cc45159638c053daa684c6",
+  "scope": "Equation-level Louri reference and explicit noise/quantization sensitivity; no physical hardware claim",
+  "repository_evidence": [
+    {
+      "path": "results/louri_reference_20261024/b4_n16_distinct.npz",
+      "sha256": "168f390d60223bec39c58460bc3e382c2296f66eb660b908ab710765755827f9"
+    },
+    {
+      "path": "results/louri_reference_20261024/b4_n16_duplicates_allowed.npz",
+      "sha256": "69d9a34fb0eaca2f228ea29a5169f6807bb5411a54df3bdc9141207b1c0ba1e2"
+    },
+    {
+      "path": "results/louri_reference_20261024/b8_n16_distinct.npz",
+      "sha256": "9bd3be5a8b2c9e078453b6bc6ee2621d0b7ee2ddc39083509f4042310629c1ea"
+    },
+    {
+      "path": "results/louri_reference_20261024/b8_n16_duplicates_allowed.npz",
+      "sha256": "e5ce0812daf142046d5ba053255080cb4d16ca0b17e2d7a3c523832a369ea395"
+    },
+    {
+      "path": "results/louri_reference_20261024/b8_n256_distinct.npz",
+      "sha256": "e97aa8089c3f77dc1d7e23ecf32cebac3876663a71b81901e9558407e2a986bf"
+    },
+    {
+      "path": "results/louri_reference_20261024/b8_n256_duplicates_allowed.npz",
+      "sha256": "8ae4ae239d40fec70d1ef5c45f410885be8038203ef298a945b6e16b4a4d1110"
+    },
+    {
+      "path": "results/louri_reference_20261024/boundary_controls.csv",
+      "sha256": "70dab940a6c0e703f81ec814618614138cd9de23c222e95239175a33d08a64a6"
+    },
+    {
+      "path": "results/louri_reference_20261024/distance.csv.gz",
+      "sha256": "33144b8b73264d213e84d2074cfca6d28b12cd0e680ae2eca8efd770c5b098eb"
+    },
+    {
+      "path": "results/louri_reference_20261024/metadata.json",
+      "sha256": "a0609cdf501e0bff93b453f8d7f97290c1cc6fe76fda36874c452a45a777f51c"
+    },
+    {
+      "path": "results/louri_reference_20261024/summary.csv",
+      "sha256": "495a90ac23420c226a6bbd6ff5adbbc1144433beed8238441ae892b50ffbc32c"
+    },
+    {
+      "path": "results/louri_reference_20261024/validation.json",
+      "sha256": "2fc0a1a22828b1a100c907e2f58fefad7c5c0e528478b49def5116bd3155c09c"
+    }
+  ]
+}
