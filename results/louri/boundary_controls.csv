@@ -1,0 +1,5 @@
+bits,eta,quantization,coupling,diagonal,samples,valid,correct,analytic_correct,analytic_valid,check_passed
+4,0.25,none,independent,exact_isolation_control,100000,50213,50212,0.49998416437908344,0.5,True
+4,0.25,matched,independent,exact_isolation_control,100000,95636,95577,0.9550173046073012,0.9555348731109607,True
+8,0.25,none,independent,exact_isolation_control,100000,49706,49705,0.49998416437908344,0.5,True
+8,0.25,matched,independent,exact_isolation_control,100000,95480,95439,0.9550173046073012,0.9555348731109607,True

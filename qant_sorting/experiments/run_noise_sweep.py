@@ -6,14 +6,14 @@
 # Positive eta values scale paired random draws; architecture streams differ.
 # Outputs include per-trial record indices, three flags, summary rows, and one
 # counterexample per failed case. verify_results checks numerical identity.
-# The protected reference path is rejected, but other existing output files can
-# be overwritten; choose a fresh result directory for a separate research run.
+# Existing output directories are rejected. Only a missing reference can be
+# registered; reproductions compare against its saved arrays and counts.
 
 """Reproduce the agreed six-level experiment using only NumPy.
 
 Run: python -m qant_sorting noise
 The saved reference is never overwritten. Every result is checked against it.
-No SDK, NPU, digital repair, repeated comparison or new noise rule is used.
+No SDK, NPU or digital repair is used. Rank evaluates all N*N cells.
 """
 
 from qant_sorting.io import source_hashes, write_csv
@@ -33,6 +33,7 @@ from qant_sorting.metrics import reference_flags, wilson_interval
 from qant_sorting.experiments.verify_results import REFERENCE, verify_results
 
 from qant_sorting.paths import ROOT, INPUT_SHA256
+from qant_sorting.sorting_schedules import rank_sort
 from qant_sorting.experiments.settings import ETA_VALUES, MASTER_SEED, MAPPINGS
 
 
@@ -44,6 +45,8 @@ from qant_sorting.experiments.settings import ETA_VALUES, MASTER_SEED, MAPPINGS
 # archive plus original inputs suffices to reconstruct every output ordering.
 def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
     """Evaluate one width/N/family/noise/mapping condition in small batches."""
+    if sort is rank_sort:
+        batch_size = min(batch_size, max(1, 1_000_000 // data.shape[1]**2))
     totals = dict.fromkeys(NoisyDifference.counter_names, 0)
     flags, indices = [], []
     first_failure = None
@@ -51,7 +54,8 @@ def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
         stop = min(start + batch_size, len(data))
         batch = data[start:stop]
         difference = NoisyDifference(precision, eta, seed_context, range(start, stop))
-        result = sort(batch, difference)
+        result = (rank_sort(batch, difference, bias_step=precision.delta_in)
+                  if sort is rank_sort else sort(batch, difference))
         batch_flags = reference_flags(batch, result)
         flags.append(batch_flags)
         indices.append(result[1])
@@ -84,9 +88,12 @@ def run(output_directory, batch_size):
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
     output_directory = output_directory.resolve()
-    if output_directory == REFERENCE.resolve():
+    registering = output_directory == REFERENCE.resolve()
+    if output_directory == REFERENCE.resolve() and REFERENCE.exists():
         raise ValueError("Choose a separate output directory; the reference is immutable")
     output_directory.mkdir(parents=True, exist_ok=True)
+    if any(output_directory.iterdir()):
+        raise ValueError("Use an empty output directory")
     input_path = ROOT / "data/inputs.npz"
     if hashlib.sha256(input_path.read_bytes()).hexdigest() != INPUT_SHA256:
         raise ValueError("Saved input corpus checksum differs from the agreed experiment")
@@ -128,7 +135,7 @@ def run(output_directory, batch_size):
 
                     # Counts independently check the active comparison schedule.
                     m = n.bit_length() - 1
-                    expected_pairs = n * m * (m + 1) // 4 if stream_id == 1 else n * (n - 1) // 2
+                    expected_pairs = n * m * (m + 1) // 4 if stream_id == 1 else n * n
                     if totals["comparisons"] != len(data) * expected_pairs:
                         raise AssertionError("Comparison count differs from the algorithm")
                     if eta == 0 and not flags.all():
@@ -150,17 +157,20 @@ def run(output_directory, batch_size):
     (output_directory / "failures.json").write_text(json.dumps(failures, indent=2))
 
     # Refactoring is accepted only if all previously reported outcomes match.
-    validation = verify_results(output_directory)
+    validation = (dict(reference_comparison="New full-matrix baseline; eta=0 checked against stable argsort",
+                       configurations=len(rows), noiseless_sort_executions=sum(r["trials"] for r in rows if r["eta"]==0))
+                  if registering else verify_results(output_directory))
     (output_directory / "validation.json").write_text(json.dumps(validation, indent=2))
     metadata = dict(
-        revision="documented_noise_sweep_20261004",
+        revision="thesis_full_matrix_20261024", rank_algorithm="Louri full N*N matrix including measured diagonal",
+        rank_bias="Subtract delta_in below diagonal AFTER output quantization; exact >=0 threshold and column sum",
         rows=len(rows), executions=sum(row["trials"] for row in rows),
         input_master_seed=MASTER_SEED, eta_values=list(ETA_VALUES),
         batch_size=batch_size, inputs_sha256=INPUT_SHA256,
         python=platform.python_version(), numpy=np.__version__,
         elapsed_seconds=time.perf_counter() - started,
         hardware_executed=False, sdk_noise_model=False,
-        noise="Independent Gaussian draws per comparison and between mappings; paired streams across positive eta levels.",
+        noise="Independent Gaussian draws for every directed matrix cell INCLUDING the diagonal and between mappings; paired streams across positive eta levels. Assumed, not physical calibration.",
         timing="Run duration only; not a hardware latency or sorting performance benchmark.",
         source_sha256=source_hashes(),
         **validation,

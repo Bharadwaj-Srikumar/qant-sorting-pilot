@@ -86,14 +86,14 @@ class ModelTests(unittest.TestCase):
             data = np.array(list(itertools.product((0, 1), repeat=n)))
             for sorter in (bitonic_sort, rank_sort):
                 model = NoisyDifference(Precision(4, 4, 4))
-                self.assertTrue(reference_flags(data, sorter(data, model)).all())
+                self.assertTrue(reference_flags(data, sorter(data, model, **({"bias_step": 1/16} if sorter is rank_sort else {}))).all())
 
     # Inject a cyclic three-way relation with no consistent total order. Require
     # invalid output and -1 markers, proving collisions are not hidden by digital repair.
     def test_rank_cycles_fail_without_repair(self):
         # 0 beats 1, 1 beats 2, 2 beats 0: each gets rank 1, so placement fails.
         data = np.array([[3, 1, 2]])
-        result = rank_sort(data, lambda a, b: np.array([[1, -1, 1]]))
+        result = rank_sort(data, lambda a, b: np.array([[0, -1, 1, 1, 0, -1, -1, 1, 0]]), bias_step=1)
         self.assertFalse(result[2][0])
         np.testing.assert_array_equal(result[0], [[-1, -1, -1]])
 
@@ -111,12 +111,13 @@ class ModelTests(unittest.TestCase):
         precision = Precision(8, 8, 8)
         for stream, sorter in enumerate((bitonic_sort, rank_sort), 1):
             context = [20260930, 8, 8, 8, 16, 1, 2, stream]
-            whole = sorter(data, NoisyDifference(precision, 0.25, context, range(23)))
+            options = {"bias_step": precision.delta_in} if sorter is rank_sort else {}
+            whole = sorter(data, NoisyDifference(precision, 0.25, context, range(23)), **options)
             chunks = []
             for start in range(0, 23, 5):
                 stop = min(start + 5, 23)
                 model = NoisyDifference(precision, 0.25, context, range(start, stop))
-                chunks.append(sorter(data[start:stop], model))
+                chunks.append(sorter(data[start:stop], model, **options))
             for i in range(3):
                 np.testing.assert_array_equal(whole[i], np.concatenate([part[i] for part in chunks]))
 

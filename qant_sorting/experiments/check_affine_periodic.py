@@ -22,19 +22,11 @@ import numpy as np
 from ml_dtypes import bfloat16
 import qant_native_computing_toolkit as qant
 
-from qant_sorting.metrics import reference_flags
 from qant_sorting.periodic_comparison import ALPHA, U0, calibration_reference, periodic_values, require_cpu_backend
 from qant_sorting.sdk_mapping import SdkDifference
-from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
 
 from qant_sorting.paths import ROOT, INPUT_SHA256
 SDK_ARCHIVE_SHA256 = "99b4669d3256d92cc35efc1a2d6d59deef7a033d78397d71150333011eb93898"
-# Fix this small sort sample before inspecting its outcomes. It includes each
-# width's largest distinct domain plus a shared N=16 case for comparison.
-DATASETS = tuple(f"b{bits}_n{n}_{family}" for bits, n in ((4, 16), (8, 16), (8, 256))
-                 for family in ("distinct", "duplicates_allowed"))
-TRIALS = 100
-BATCH_SIZE = 10
 
 
 class AffinePeriodicComparison:
@@ -42,7 +34,7 @@ class AffinePeriodicComparison:
 
     Inputs are equally shaped nonempty integer arrays in the declared domain.
     The result is a float32 score of the same shape, interpreted electronically
-    by the existing sorters. Widening BF16 does not restore lost information.
+    in this pair feasibility study. Widening BF16 does not restore lost information.
     Calibration uses only the pair (0,0); integer truth never guides a decision.
     """
 
@@ -158,37 +150,6 @@ def pair_checks(arrays):
     return rows
 
 
-def sort_checks(inputs, arrays):
-    """Apply all three paths to the same fixed 600 saved lists and both sorters.
-
-    Store each uncorrected output and [valid, correct, stable] flags. Counts use
-    every attempted list, including invalid rank outputs. This is a bounded
-    integration control, not an exhaustive sort proof or performance benchmark.
-    """
-    rows = []
-    for name in DATASETS:
-        keys = inputs[name][:TRIALS]
-        bits = int(name.split("_")[0][1:])
-        for mapping, sorter in (("bitonic", bitonic_sort), ("rank", rank_sort)):
-            for path in ("direct_difference", "host_phase", "affine_phase"):
-                model = comparator(path, bits)
-                batches = [sorter(keys[i:i+BATCH_SIZE], model)
-                           for i in range(0, len(keys), BATCH_SIZE)]
-                result = tuple(np.concatenate([batch[j] for batch in batches]) for j in range(3))
-                flags = reference_flags(keys, result)
-                prefix = f"{name}_{mapping}_{path}"
-                arrays[prefix + "_values"] = result[0]
-                arrays[prefix + "_indices"] = result[1]
-                arrays[prefix + "_flags"] = flags
-                row = dict(dataset=name, mapping=mapping, path=path, trials=len(keys),
-                           valid=int(flags[:, 0].sum()), correct=int(flags[:, 1].sum()),
-                           stable=int(flags[:, 2].sum()))
-                if path != "affine_phase" and not flags.all():
-                    raise AssertionError(f"Noiseless sort control failed: {row}")
-                rows.append(row)
-    return rows
-
-
 def run(output_dir):
     """Check pinned identities, run finite controls, and write a fresh evidence set.
 
@@ -206,8 +167,6 @@ def run(output_dir):
         raise RuntimeError("Pinned input or SDK archive hash mismatch")
     arrays = {}
     pairs = pair_checks(arrays)
-    with np.load(ROOT / "data/inputs.npz", allow_pickle=False) as inputs:
-        sorts = sort_checks(inputs, arrays)
     output_dir.mkdir(parents=True)
     np.savez_compressed(output_dir / "outputs.npz", **arrays)
     report = dict(sdk=identity, python=platform.python_version(), platform=platform.platform(),
@@ -215,12 +174,12 @@ def run(output_dir):
         hardware_executed=False, added_noise=False, extra_quantizer=False, deadband=0,
         phase_constants=dict(u0=U0, alpha=ALPHA),
         calibration="One same-path (0,0) evaluation per affine instance; no per-pair correction",
-        sample=dict(datasets=DATASETS, first_trials=TRIALS, batch_size=BATCH_SIZE),
+        scope="Comparator feasibility only; periodic scores do not implement the canonical full-matrix rank bias",
         input_sha256=INPUT_SHA256, sdk_archive_sha256=SDK_ARCHIVE_SHA256,
         source_sha256=source_hashes(),
-        outputs_sha256=file_hash(output_dir / "outputs.npz"), pairs=pairs, sorts=sorts)
+        outputs_sha256=file_hash(output_dir / "outputs.npz"), pairs=pairs)
     (output_dir / "summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(dict(pairs=pairs, sorts=sorts), indent=2))
+    print(json.dumps(dict(pairs=pairs), indent=2))
 
 
 if __name__ == "__main__":

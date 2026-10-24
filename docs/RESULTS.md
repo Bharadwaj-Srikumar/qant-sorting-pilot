@@ -1,33 +1,55 @@
-# Noise sweep results
+# Current evaluation results
 
-Full-sort accuracy, 1,000 saved input arrays per setting. Each cell is **bitonic / rank** (%).
+The canonical architectures are **Bitonic** and **Louri full-matrix rank sorting**. Each rank run evaluates N² directed cells, including the diagonal. Reverse decisions are not inferred.
 
-| Setting | eta=0 | 0.05 | 0.10 | 0.15 | 0.20 | 0.25 |
+## Whole-array correctness
+
+Each cell is **Bitonic / Louri** (%), from 1,000 saved inputs per setting.
+
+| Setting | η=0 | 0.05 | 0.10 | 0.15 | 0.20 | 0.25 |
 |---|---:|---:|---:|---:|---:|---:|
-| 4-bit, N=16, distinct | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 99.6 / 99.9 | 95.5 / 95.0 | 84.3 / 83.1 |
-| 4-bit, N=16, duplicates allowed | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 99.6 / 99.7 | 95.1 / 95.2 | 87.9 / 80.2 |
-| 8-bit, N=256, distinct | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 93.9 / 96.1 | 44.7 / 45.4 | 5.9 / 4.0 |
-| 8-bit, N=256, duplicates allowed | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 95.5 / 94.7 | 54.8 / 38.3 | 10.4 / 3.1 |
+| 4-bit, N=16, distinct | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 99.6 / 97.9 | 95.5 / 82.1 | 84.3 / 49.5 |
+| 4-bit, N=16, duplicates allowed | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 99.6 / 97.7 | 95.1 / 75.5 | 87.9 / 35.2 |
+| 8-bit, N=256, distinct | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 93.9 / 81.2 | 44.7 / 3.5 | 5.9 / 0.0 |
+| 8-bit, N=256, duplicates allowed | 100.0 / 100.0 | 100.0 / 100.0 | 100.0 / 100.0 | 95.5 / 72.4 | 54.8 / 1.2 | 10.4 / 0.0 |
 
-All tested sizes—not only these maximum sizes—had 1,000/1,000 correct, stable sorts per configuration at eta <= 0.10. This is observed success under the stated input/noise model, not universal proof or measured Q.ANT accuracy.
+The complete sweep contains **288 configurations and 288,000 sorts**. At η=0,
+all 48,000 sorts are correct and stable. Each matrix cell receives independent
+Gaussian difference noise with σ=ηΔ, followed by the specified signed quantizer;
+Louri's exact host bias and inclusive threshold follow quantization. These are
+simulation assumptions, not measured Q.ANT noise.
 
-The full sweep covers 24 saved datasets × 6 noise values × 2 mappings = **288 configurations and 288,000 sorting executions**. The 288 CSV rows include 95% Wilson intervals.
+At 8 bits, N=256 and η=0.25, Louri has **no valid rank permutations** in either
+input regime. Such failures are retained and are not repaired electronically.
+Conditional Kendall-τ and recall are undefined when no valid outputs exist;
+recall utility that assigns zero to invalid outputs is zero. Bitonic always
+retains a permutation, which does not ensure sortedness. See
+[RANKING_QUALITY.md](RANKING_QUALITY.md) for the separate denominators.
 
-“Duplicates allowed” means uniform sampling with replacement, not a guarantee that every sampled array contains a repeated key. Distinct arrays at maximum N contain the complete key domain.
+"Duplicates allowed" means sampling with replacement. Distinct inputs at the
+maximum size cover the complete key domain. More cells create more opportunities
+for noisy threshold errors; simple independent-array probability claims are not
+made because outcomes also depend on the keys, thresholds and rank constraints.
 
-At larger N, more opportunities for a noisy decision can reduce whole-array success. Invalid or repeated ranks are failed outputs. Comparison diagnostics and stable-sort counts are distinct from the headline full-sort accuracy.
+## Independent checks and related evidence
 
-The documented cleanup reproduces every reference CSV row, all 576 saved flags/index arrays, and all first-failure examples exactly. Independent seeds between mappings and common streams across positive noise levels are unchanged.
+| Evidence | Current scope | Result |
+|---|---|---|
+| Literal Louri equations and stable argsort | 155,328 noiseless arrays | Agreement, including ties and rank offset |
+| Official CPU SDK | 65,792 pairs; 48,000 full sorts | Exact differences and correct stable orders |
+| Rerun with different batch size | 288,000 main-sort outcomes | All CSV rows, flags, indices and failure examples identical |
+| Ranking quality | All 288,000 main-sort outcomes | Complete coverage; τ, distance errors and Recall@k |
+| Common-channel controls | 28 million pair decisions; 10,800 sorts | Analytic and noiseless checks passed |
+| Periodic CPU pairs | All 65,792 ordered pairs | Correct after host reference correction |
+| Affine BF16 phase | All 65,792 pairs per path | 40 false 8-bit ties; no hardware advantage established |
+| Digital CPU baseline | 192 measured configurations | Dated platform-specific comparison; no GPU/NPU timing |
 
-Read [METHOD.md](METHOD.md) for the equations and [HARDWARE.md](HARDWARE.md) for the remaining hardware questions.
+The full matrix uses 65,536 pair differences at N=256, against 4,608 for Bitonic.
+One sufficiently large submission can contain the matrix; Bitonic requires 36
+dependent layers. Capacity limits, logical bytes and host work all affect any
+future timing comparison. See [HARDWARE.md](HARDWARE.md).
 
-## Interpretation after the SDK source audit
-
-These numerical results remain unchanged. They describe the difference/sign
-comparison model, not a native periodic or ReLU optical sorter. The noiseless
-SDK full-sort control uses only the linear API plus electronic decisions.
-
-A separate CPU arithmetic check now verifies `r=ReLU(a-b)`, `min=a-r`, `max=b+r`:
-256 ordered 4-bit pairs and 65,536 ordered 8-bit pairs pass, including equality.
-There is no additional quantizer, noise, full-sort run or physical NPU here.
-See `validation/nonlinearity_check.json` and `docs/QANT_NONLINEARITY.md`.
+Current evidence is in `results/reference`, `sdk`, `louri`, `ranking_quality`,
+`common_noise`, `resources`, `periodic`, `affine` and `cpu_baseline_20261007`.
+The report's evidence manifest records file hashes. See [METHOD.md](METHOD.md)
+for model equations and [THESIS_SCOPE.md](THESIS_SCOPE.md) for the research scope.

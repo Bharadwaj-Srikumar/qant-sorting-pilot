@@ -1,0 +1,155 @@
+{
+  "created_utc": "2026-10-24T08:35:44.790958+00:00",
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "seed": 20261007,
+  "pair_samples_per_case": 100000,
+  "first_saved_trials_per_dataset": 100,
+  "sort_datasets": [
+    "b4_n16_distinct",
+    "b4_n16_duplicates_allowed",
+    "b8_n16_distinct",
+    "b8_n16_duplicates_allowed",
+    "b8_n256_distinct",
+    "b8_n256_duplicates_allowed"
+  ],
+  "settings": {
+    "no_noise": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.0,
+      "readout_sigma_lsb": 0.0,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "prequantized_control": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.0,
+      "pre_step_lsb": 1,
+      "post_step_lsb": 0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "upstream_only": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.0,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "readout_only": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.0,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "combined": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "fine_output": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 0.5,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "coarse_output": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 2,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "no_output_quantizer": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.0,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.0,
+      "gain_error": 0.0
+    },
+    "positive_offset": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": 0.25,
+      "gain_error": 0.0
+    },
+    "negative_offset": {
+      "bits": 8,
+      "transfer": "direct",
+      "upstream_sigma_lsb": 0.25,
+      "readout_sigma_lsb": 0.25,
+      "pre_step_lsb": 0.0,
+      "post_step_lsb": 1.0,
+      "input_drift_lsb": 0.0,
+      "output_drift_lsb": -0.25,
+      "gain_error": 0.0
+    }
+  },
+  "setting_note": "bits=8 is an example; run covers 4 and 8, both transfers. All noise/drift settings are assumptions.",
+  "source_sha256": {
+    "qant_sorting/common_noise_model.py": "5d457896e3ea8fffabd187fd209c1b6ab17b9e46d834d7c8ae1f5cda0dc4e13d",
+    "qant_sorting/experiments/run_common_noise_controls.py": "d2ce358d126dab9f8f9bddd20be2c6ccd94711f029fb0c1a073d7a2ac93e055d",
+    "qant_sorting/ranking_quality.py": "0e97b306ffc6dbf440adea73eba588d18a138c9fb26b57d314a35ea35089f732",
+    "qant_sorting/sorting_schedules.py": "c7007c9daf185b77c81f7905a0dc36c0fd5fd0d817ec47d105fe59c9e6cb9128",
+    "qant_sorting/louri_reference.py": "7abff2ed9c635efd25424632f97e781ed25bdf7b05508db9a2b050d8cf46cb12",
+    "qant_sorting/io.py": "117f4d81dac76075ba0eeebe08254fff613f463a71945d0e36da064e46bdb28b",
+    "qant_sorting/paths.py": "b21effc63e4edca00af685828908aad7253d1591f2ca070477abe912eab5c946",
+    "data/inputs.npz": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+    "results/periodic/pair_checks.json": "77720940797458c2eb2c15518c67473854fdc258928277b86ffacb132ddee265"
+  },
+  "output_sha256": {
+    "signal_scales.csv": "28cec659f4bb8cd9ec40ac8095e725fc589092eb5ce335077a4de46d9269d8ce",
+    "sort_quality.csv": "5c1dd90dbf39f47a6c61a89b5479a72d907acd7a0861d90112536b00f73c9bc5",
+    "sort_outputs.npz": "15a5d3166ce340c1bb02149bd046eb90a7d9ee29e0901b0a841f2a871221dd17",
+    "pair_controls.csv": "ae364d170c060533bd9a5e2d7c8eccdc9b7cc2e73bb5f7429176ca83cf37ddf4",
+    "validation.json": "c2e2a493efcf46c3785959cdfbcc0044bd6bcb669cbb0fa058c3834964f70fa9"
+  },
+  "random_pairing": "Bitonic and pair transfer variants share samples. Full-matrix rank uses direct differences only, independent cell/stage/trial errors including diagonal; drift fixed.",
+  "exclusions": [
+    "physical tcos/BF16",
+    "measured receiver parameters",
+    "time/channel covariance calibration",
+    "hardware timing/energy"
+  ]
+}

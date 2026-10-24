@@ -1,4 +1,4 @@
-"""Equation-level Louri reference and controlled comparison-noise inputs.
+"""Inspectable equation-level reference for the canonical full-matrix sorter.
 
 Source: Louri, Hatch and Na, Applied Optics 34 (1995), pp. 3088-3090,
 equations (1)-(7), DOI 10.1364/AO.34.003087. Row i is the competing record;
@@ -118,45 +118,3 @@ def louri_matrix_rank(keys, bits, *, errors=None, quantization="none", diagonal=
     ranks = threshold.sum(axis=1, dtype=np.int64)
     return MatrixRanking(difference, measured, biased, threshold, ranks,
                          place_ranks(keys, ranks - 1))
-
-
-def comparison_errors(n, bits, eta, trial_ids, seed_context=(), coupling="independent"):
-    """Produce paired triangular errors and a full matrix of assumed errors.
-
-    Every trial has separate RNG streams, indexed by its absolute ID. The
-    primary stream exactly matches NoisyDifference's Gaussian draws for one
-    rank_sort call with the same seed_context/trial_ids. Rebatching is safe.
-    For i<j the triangular comparator evaluates x[i]-x[j], whereas matrix
-    D[i,j] has the opposite sign: E[i,j] = -primary_error. The reverse cell
-    uses either that same primary_error ('antisymmetric') or an independent
-    draw ('independent'). These are assumed correlation endpoints, not devices.
-    Diagonal draws have a separate independent stream in both modes. Callers
-    choose whether to retain them or use the 'exact' diagonal control.
-    """
-    precision = Precision(bits, bits, bits)
-    if not isinstance(n, int) or isinstance(n, bool) or n < 1:
-        raise ValueError("n must be a positive integer")
-    if not np.isfinite(eta) or eta < 0:
-        raise ValueError("eta must be finite and nonnegative")
-    if coupling not in ("independent", "antisymmetric"):
-        raise ValueError("unknown noise coupling")
-    ids = tuple(trial_ids)
-    if any(not isinstance(i, (int, np.integer)) or isinstance(i, (bool, np.bool_)) or i < 0 for i in ids):
-        raise ValueError("trial_ids must be nonnegative integers")
-    left, right = np.triu_indices(n, 1)
-    primary = np.zeros((len(ids), len(left)), dtype=np.float64)
-    matrix = np.zeros((len(ids), n, n), dtype=np.float64)
-    sigma = eta * precision.delta_out
-    if eta:
-        for row, trial in enumerate(ids):
-            primary[row] = np.random.default_rng(np.random.SeedSequence(
-                [*seed_context, int(trial)])).normal(0, sigma, len(left))
-            matrix[row, left, right] = -primary[row]
-            if coupling == "antisymmetric":
-                matrix[row, right, left] = primary[row]
-            else:
-                matrix[row, right, left] = np.random.default_rng(np.random.SeedSequence(
-                    [*seed_context, int(trial), 1])).normal(0, sigma, len(left))
-            matrix[row, np.arange(n), np.arange(n)] = np.random.default_rng(np.random.SeedSequence(
-                [*seed_context, int(trial), 2])).normal(0, sigma, n)
-    return primary, matrix

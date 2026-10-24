@@ -1,0 +1,136 @@
+{
+  "date": "2026-10-24",
+  "canonical_rank": "Full N*N Louri matrix, independent directed cells including diagonal, bias, inclusive threshold, column sums",
+  "tests": {
+    "passed": 51,
+    "skipped": 0,
+    "python": "3.12.14",
+    "sdk": "2.3.1 CPU"
+  },
+  "cli_help_commands": 14,
+  "broken_relative_markdown_links": [],
+  "bitonic_regression": {
+    "matched_arrays": 288
+  },
+  "batch_reproduction": {
+    "matched_configurations": 288,
+    "matched_arrays": 576
+  },
+  "source_equation_validation": {
+    "arrays": 155328,
+    "cases": {
+      "all_4bit_ordered_pairs": 256,
+      "all_8bit_ordered_pairs": 65536,
+      "all_4bit_four_record_lists": 65536,
+      "b4_n2_distinct": 1000,
+      "b4_n2_duplicates_allowed": 1000,
+      "b4_n4_distinct": 1000,
+      "b4_n4_duplicates_allowed": 1000,
+      "b4_n8_distinct": 1000,
+      "b4_n8_duplicates_allowed": 1000,
+      "b4_n16_distinct": 1000,
+      "b4_n16_duplicates_allowed": 1000,
+      "b8_n2_distinct": 1000,
+      "b8_n2_duplicates_allowed": 1000,
+      "b8_n4_distinct": 1000,
+      "b8_n4_duplicates_allowed": 1000,
+      "b8_n8_distinct": 1000,
+      "b8_n8_duplicates_allowed": 1000,
+      "b8_n16_distinct": 1000,
+      "b8_n16_duplicates_allowed": 1000,
+      "b8_n32_distinct": 1000,
+      "b8_n32_duplicates_allowed": 1000,
+      "b8_n64_distinct": 1000,
+      "b8_n64_duplicates_allowed": 1000,
+      "b8_n128_distinct": 1000,
+      "b8_n128_duplicates_allowed": 1000,
+      "b8_n256_distinct": 1000,
+      "b8_n256_duplicates_allowed": 1000
+    },
+    "failures": 0,
+    "checked": [
+      "source raw equations",
+      "source with matched quantizer",
+      "canonical N*N adapter",
+      "stable argsort"
+    ],
+    "analytic_boundary_controls": 4,
+    "boundary_pair_evaluations": 400000
+  },
+  "main": {
+    "configurations": 288,
+    "sorts": 288000,
+    "noiseless_sorts": 48000,
+    "all_noiseless_correct_stable": true
+  },
+  "sdk_sorts": 48000,
+  "quality_coverage": "All 288000 outcomes; no missing cases",
+  "common": {
+    "analytic_probability_cases_passed": 182,
+    "pair_cases": 280,
+    "pair_decisions": 28000000,
+    "prequantized_identical_paired_decisions": 1400000,
+    "sort_cases": 108,
+    "sort_runs": 10800,
+    "prequantized_identical_paired_sort_outputs": 600,
+    "noiseless_sort_cases_passed": 18,
+    "source_hashes_unchanged": true,
+    "note": "Synthetic Float64 controls, not SDK executions or Q.ANT measurements."
+  },
+  "report": {
+    "output": "reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf",
+    "pages": 53,
+    "tables": 24,
+    "figures": 2,
+    "source_sha256": "98ec9c3ada5d65aec0f9811fd494be48cf696311483501768d19ce30971af05b",
+    "pdf_sha256": "5fa35a8d36b0fdd2521b1ead0798088d5469efd982da079474e3239ce1e54c9d"
+  },
+  "pdf_review": {
+    "pages": 53,
+    "all_pages_contact_sheet_reviewed": true,
+    "detail_pages": [
+      18,
+      19,
+      33,
+      34,
+      37
+    ],
+    "issues": []
+  },
+  "limitations": [
+    "Independent directed Gaussian noise is an assumption, not calibrated optical physics.",
+    "Bias, thresholds, rank sums and routing are electronic.",
+    "No physical Q.ANT speed, energy or host-free cascade demonstrated."
+  ],
+  "current_python_sha256": {
+    "qant_sorting/__init__.py": "352f2d50772960b959880fe5020047efba6caa1fe3ffd606f129dff223844b71",
+    "qant_sorting/__main__.py": "26c19ae837531ad6a6feb3a1a58e089b1a58d482ece7eb47062e5da1f708a810",
+    "qant_sorting/common_noise_model.py": "5d457896e3ea8fffabd187fd209c1b6ab17b9e46d834d7c8ae1f5cda0dc4e13d",
+    "qant_sorting/comparison.py": "993023be58f763d448f238aca76a024f88c380ee591799f4d3299b25a49f96e5",
+    "qant_sorting/experiments/__init__.py": "238598838c3ab5977a703b5f730b5e89380af0cbb6b963ff2fdc0ee9b34ef6ba",
+    "qant_sorting/experiments/check_affine_periodic.py": "68d1c433216a3245a51df60570534758ce7b9b4b7d59c639563519504801c83c",
+    "qant_sorting/experiments/check_periodic_pairs.py": "356bcd5c1553565a7c760e87a984c98529df4d27c33510c186dadf8349515363",
+    "qant_sorting/experiments/check_sdk_nonlinearity.py": "0a2e958cc728c28e1bddcbf4ed0413bcd8b2d65ae65b3f5580b1d550942f456c",
+    "qant_sorting/experiments/evaluate_ranking_quality.py": "f795cbc52d7075eea3afb59286c19621a219df1267512c211adc9d39bd599ed2",
+    "qant_sorting/experiments/hardware_conditions.py": "4b66485ad810b9013a913e31a1d5322fd519158206a274473450614c26460823",
+    "qant_sorting/experiments/install_sdk.py": "c1138ce91f018401936dfe2daea9a7378472b6a88b9cd1536429f8b8f76e8a61",
+    "qant_sorting/experiments/measure_periodic_curve.py": "dd7cf51a81b045d4b7b7d144a9407a83f237f3cf0812dc8a46c4e512055a6651",
+    "qant_sorting/experiments/run_common_noise_controls.py": "d2ce358d126dab9f8f9bddd20be2c6ccd94711f029fb0c1a073d7a2ac93e055d",
+    "qant_sorting/experiments/run_cpu_baseline.py": "908a167ed8f12a6560eca883db8ef1fa2de82ce0f8e93ce5e8c83deac19b35b0",
+    "qant_sorting/experiments/run_louri_reference.py": "7a73d54d6c9f18b520a65b9e9b50541c1cef4cc3b2c9c17f3bd0ad9755cabe45",
+    "qant_sorting/experiments/run_noise_sweep.py": "10f5bcf57d7f489b51d205d6f57ea854df1360c9b46bfa591eb98b626d52f3d7",
+    "qant_sorting/experiments/run_sdk_control.py": "b256fef8d95769744acdb12b9298123edf1e80968976664fc00e7f05fdd68c78",
+    "qant_sorting/experiments/settings.py": "4f5f66dc520e9252338015c5ca83b0881e73ff8bc51adac1d6608f24905f98fc",
+    "qant_sorting/experiments/verify_results.py": "d96d7015c6e4e966ab9aa6c2a9f13febd562cd3c825cb035f56251fbbc12486a",
+    "qant_sorting/input_validation.py": "87628a30a9b236d57da015f459a00f01fc9fff311283603dcc078650e9970066",
+    "qant_sorting/io.py": "117f4d81dac76075ba0eeebe08254fff613f463a71945d0e36da064e46bdb28b",
+    "qant_sorting/louri_reference.py": "1540cefe7e78964c4e4b2a0d349bc390d74b06a35d29d14864b12c4d822e2319",
+    "qant_sorting/metrics.py": "f82b9f2f3d719aba4a9ea25541437af6469540c32e0a2d45d84bc21a846ad63f",
+    "qant_sorting/paths.py": "b21effc63e4edca00af685828908aad7253d1591f2ca070477abe912eab5c946",
+    "qant_sorting/periodic_comparison.py": "9e79866c8b8694e7157cbead21bbb7c62625249cdce21ced2c639bc03476b277",
+    "qant_sorting/ranking_quality.py": "0e97b306ffc6dbf440adea73eba588d18a138c9fb26b57d314a35ea35089f732",
+    "qant_sorting/report.py": "4a4b7ff47e50b78814044d165745a45cc7437a06b1f25b5f5f11d40a4e9e9685",
+    "qant_sorting/sdk_mapping.py": "03946a1cb09dde38b5e0f2dadfbf1cadb53f1f42aa793250b4d2d7f1c4e9a5c5",
+    "qant_sorting/sorting_schedules.py": "c7007c9daf185b77c81f7905a0dc36c0fd5fd0d817ec47d105fe59c9e6cb9128"
+  }
+}

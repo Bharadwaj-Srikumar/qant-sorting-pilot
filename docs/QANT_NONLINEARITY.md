@@ -1,6 +1,6 @@
 # Q.ANT nonlinearity: source-verified boundary, 5 October 2026
 
-The existing sorting results remain the **difference/sign baseline**. They do
+The current sorting results use **linear differences and host decisions**. They do
 not evaluate a photonic nonlinear compare-and-exchange (C&E) kernel. The public
 SDK supports a native periodic operation, while its ReLU implementation runs
 on the CPU. An earlier description of ReLU as natively optical is withdrawn.
@@ -52,12 +52,15 @@ identity require an additional policy and are handled by the existing baseline.
 The existing saturating comparator cannot supply exact min/max magnitudes.
 At 8 bits, (255,0) produces d=255/256, clipped to 127/256. Substituting that
 clipped value into the identity gives key values (128,127), not (0,255).
-The current sorter avoids this problem by routing the original records from
-the sign; this behavior and all reference results remain unchanged.
+Bitonic avoids this problem by routing original records from the sign. The
+full Louri matrix uses the measured difference followed by an explicit bias,
+threshold and column sum; it also routes original records. See
+[LOURI_REFERENCE.md](LOURI_REFERENCE.md) for its quantization conditions.
 
 ## 3. Separate, executed CPU check
 
-After `python -m qant_sorting install-sdk`, run:
+After installing `requirements/sdk.txt` in a Python 3.12 virtual environment
+and running `python -m qant_sorting install-sdk --no-deps`, run:
 
 ```bash
 python -m qant_sorting nonlinearity
@@ -72,21 +75,17 @@ noise or fixed-point clipping. This is not another full-sort experiment.
 ## 4. Assumptions and next decisions
 
 No native ReLU, native threshold, all-optical C&E, measured noise level or
-regeneration interval is newly assumed. The six-level Gaussian baseline is
-unchanged. Its eta is tied to the difference-output step and cannot be carried
+regeneration interval is newly assumed. The six-level Gaussian sweep uses the full directed Louri matrix. Its eta is tied to the difference-output step and cannot be carried
 over to a nonlinear output without a new scale/noise definition.
 
-The next experiment must first establish a documented, reproducible comparison
-construction using the available periodic operation. A shifted/scaled or
-multi-term construction is a candidate to investigate, not an implemented
-mapping. Validate equality and every adjacent-key gap across the full domain
-before full sorting. Then count its additional calls, transfers, host work and
-any approximation error. ReLU approximation additionally needs a magnitude
-error bound; correct signs alone do not prove exact min/max reconstruction.
-
-For bitonic, retain original records and the stable tie rule unless a separately
-validated reconstruction replaces them. For rank, a threshold/ordering decision
-and exact ties are still required before accumulation and placement.
+The periodic pair construction and affine phase control have now been tested
+in the official CPU backend; see [PERIODIC_FEASIBILITY.md](PERIODIC_FEASIBILITY.md).
+The host-phase construction is numerically correct for the tested pairs; the
+BF16 affine construction produces 40 false ties among the 8-bit pairs. Neither
+establishes a host-free cascade. Periodic scores are not passed directly into
+Louri's difference-bias equation: that requires a new threshold derivation.
+The periodic work therefore remains a bounded pair-feasibility study. A native
+hardware sorter would require supported transfer and routing boundaries first.
 
 Only after the execution path is established can repeated hardware measurements
 calibrate bias, noise, drift and correlations. A variable optical-regeneration

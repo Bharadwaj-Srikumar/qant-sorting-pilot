@@ -72,43 +72,36 @@ difference is positive and 10 is greater. If one noise sample is `-0.6/256`,
 the output code is `round_even(0.4)=0`: a false tie. The sorter uses its index
 tie rule; it does not consult the original keys to correct that decision.
 
-## 5. Use the decision in either sorter
+## 5. Use differences in the two architectures
 
-| Step | Pipelined-bitonic adaptation | Rank adaptation |
+| Step | Bitonic | Full Louri rank matrix |
 |---|---|---|
-| Select pairs | Fixed pairs in each Batcher layer | Every unordered pair `(i,j)`, with `i<j` |
-| Arithmetic | One difference per pair | One difference per pair |
-| Decide | Sign; original index resolves measured zero | Positive means `i` is larger; otherwise `j` is larger |
-| Update | Exchange original keys **and indices** electronically | Increment the larger record's integer rank electronically |
-| Continue | Finish a layer before the next dependent layer | Accumulate all pair decisions |
-| Output | Final record order | Place each original record at its unique rank |
-| Failure | Preserved records can be in the wrong order | Repeated ranks invalidate the output; unique ranks can still be wrong |
+| Pairs | N/2 pairs in each dependent layer | Every directed cell (i,j), including i=j: N² |
+| Arithmetic | Normalized difference | D[i,j] = Δ(x[j]−x[i]) |
+| Decision | Sign and original-index tie rule | Subtract Δ below diagonal, then threshold >=0 |
+| Accumulation | Swap original records | Sum threshold columns, then subtract 1 from source ranks |
+| Output | Final record permutation | Place only if all ranks uniquely cover 0..N−1 |
+| Failure | Valid records can be incorrectly ordered | Rank collisions/out-of-range positions invalidate the output |
 
-Both mappings keep original records exact. Neither rebuilds keys from noisy
-differences. Neither includes an optical nonlinear cascade or hidden digital repair.
+The [Louri guide](LOURI_REFERENCE.md) shows all 16 entries for N=4. Both directions
+are measured separately. Noisy self-comparisons are not restored. The unit bias
+resolves noiseless equality; it cannot repair contradictory noisy votes.
 
-The separate [Louri matrix reference](LOURI_REFERENCE.md) implements the paper's
-full difference matrix, lower-triangular unit bias, threshold and column sums.
-It verifies noiseless equivalence after converting one-based ranks to zero-based
-positions. Under noise, equivalence additionally depends on quantization, reverse
-decision correlation and treatment of the diagonal; it is not automatic.
+A difference callback must return scores in the declared difference units.
+`rank_sort(keys, difference, bias_step=2.0**(-bits))` requires the bias step
+explicitly. A cosine/sine score cannot be substituted without a new derivation.
 
 ## 6. Count work consistently
 
-For `N=2**m`, the active bitonic network has `K=m(m+1)/2` layers and `N/2`
-pairs per layer. Thus `C_B=NK/2` comparisons and total sequential comparison
-work `Theta(N log² N)`. Layer depth is `Theta(log² N)` and is a different quantity.
+For N=2**m, Bitonic uses K=m(m+1)/2 dependent layers and N/2 comparisons per
+layer: C_B=NK/2 and total scalar work Θ(N log²N). Parallel depth is distinct.
+Louri evaluates C_R=N² difference/threshold cells and sums N columns of N
+entries: total scalar work Θ(N²), with Θ(N²) materialized matrix/pair storage
+per trial. Final validity/placement work is Θ(N).
 
-Rank sorting uses `C_R=N(N-1)/2` pair differences. Every outcome updates one
-rank, so its comparison and accumulation work is `Theta(N²)`. Final placement
-and the occupancy check use `Theta(N)` work. The current implementation stores
-the pair outcomes, requiring quadratic auxiliary storage per trial; the batch
-size multiplies the host memory requirement.
-
-These are algorithmic counts under fixed-width, unit-cost operations. Neither
-Python wall-clock duration nor parallel layer depth is substituted for total
-sorting time in the established complexity convention. Physical module counts
-and regeneration depth require an explicitly supported hardware mapping.
+These counts assume fixed-width unit-cost arithmetic. The established real-RAM-like
+T counts the scalar work of a complete sort. It is not the number of SDK calls,
+parallel stages or measured seconds. No additional complexity axis is introduced.
 
 ## 7. Score complete outputs
 

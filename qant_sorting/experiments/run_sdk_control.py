@@ -1,109 +1,85 @@
-# Reading guide: optional, noiseless integration check of the pinned SDK.
-# First verify every 4/8-bit difference pair, then replay the stored input corpus
-# through both sorters and compare flags/indices against saved SDK CPU outputs.
-# The version/backend guard prevents these CPU expectations from being silently
-# treated as a hardware experiment. No synthetic noise or fixed-point output
-# quantizer is added. The result directory is results/sdk_reproduced.
-# Both original inputs and results/sdk_reference/trial_outcomes.npz are required.
+"""CPU-SDK integration for Bitonic and Louri's full difference matrix.
 
-"""Optional software-integration control using Q.ANT's official CPU backend.
-
-This is separate from the Gaussian sweep: BF16 SDK arithmetic receives no
-extra fixed-point quantizer or added noise. It verifies the API mapping only.
-It is deliberately guarded against accidental execution on a hardware driver.
+Every N*N rank cell, including both directions and the diagonal, is submitted
+through linear_fprop. Bias, threshold, column sums and placement run on the
+host. CPU integration does not establish photonic hardware performance.
 """
-
-from qant_sorting.io import source_hashes, write_csv
-
 import argparse
-import hashlib
 import json
 from pathlib import Path
-
 import numpy as np
-
+from qant_sorting.io import file_hash, source_hashes, write_csv
 from qant_sorting.input_validation import validate_keys
 from qant_sorting.metrics import reference_flags
 from qant_sorting.sdk_mapping import SdkDifference, backend_identity
 from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.paths import ROOT, INPUT_SHA256
 
-from qant_sorting.paths import ROOT
 
-
-# Run the pinned-CPU guard, exhaustive difference checks and saved-corpus replay.
-# Require numerical equality of every generated flag/index array with sdk_reference.
-# Verify total scalar pair counts independently from analytical sorter counts.
-# Write the reproduced CSV, NPZ and identity/hash metadata under sdk_reproduced;
-# do not interpret logical buffer size or total script duration as NPU performance.
 def main():
+    """Check every pair and all saved lists against independent stable argsort."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/sdk_reproduced")
+    parser.add_argument('--output-dir', type=Path, default=ROOT/'results/sdk_reproduced')
     args = parser.parse_args()
     identity = backend_identity()
-    if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
-        raise RuntimeError("This control requires the pinned official 2.3.1 CPU backend")
-
-    # Exhaustive pair checks cover all possible pairs in both key domains.
-    for bits in (4, 8):
-        a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
-        if not np.array_equal(SdkDifference(bits)(a, b), (a - b) / 2**bits):
-            raise AssertionError("The CPU backend did not reproduce exact pair differences")
-
-    output = args.output_dir
+    if identity['sdk_version'] != '2.3.1' or not identity['driver_info'].startswith('cpu-backend;'):
+        raise RuntimeError('This control requires the pinned official 2.3.1 CPU backend')
+    if file_hash(ROOT/'data/inputs.npz') != INPUT_SHA256:
+        raise ValueError('Unexpected input corpus')
+    output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
+    if any(output.iterdir()):
+        raise ValueError('Use an empty output directory')
+    before = source_hashes()
+    for bits in (4, 8):
+        a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing='ij')
+        np.testing.assert_array_equal(SdkDifference(bits)(a, b), (a-b)/2**bits)
     rows, outcomes = [], {}
-    with np.load(ROOT / "data/inputs.npz") as corpus:
-        with np.load(ROOT / "results/sdk_reference/trial_outcomes.npz") as reference:
-            for dataset in corpus.files:
-                bit_tag, n_tag, family = dataset.split("_", 2)
-                bits, n = int(bit_tag[1:]), int(n_tag[1:])
-                data = validate_keys(corpus[dataset], bits)
-                for name, sort in (("bitonic", bitonic_sort), ("rank", rank_sort)):
-                    flags, indices = [], []
-                    pair_count = api_calls = payload = 0
-                    for start in range(0, len(data), 64):
-                        batch = data[start:start + 64]
-                        difference = SdkDifference(bits)
-                        result = sort(batch, difference)
-                        flags.append(reference_flags(batch, result))
-                        indices.append(result[1])
-                        counts = difference.counts
-                        pair_count += counts.pair_differences
-                        api_calls += counts.api_calls
-                        payload += counts.feature_bytes + counts.weight_bytes + counts.output_bytes
-                    flags = np.concatenate(flags)
-                    indices = np.concatenate(indices).astype(np.int16)
-                    key = f"{dataset}_sdk_cpu_{name}"
-                    for suffix, actual in (("_flags", flags), ("_indices", indices)):
-                        if not np.array_equal(actual, reference[key + suffix]):
-                            raise AssertionError(f"Changed SDK control result: {key + suffix}")
-                        outcomes[key + suffix] = actual
-                    if not flags.all():
-                        raise AssertionError("A noiseless SDK control failed")
-                    m = n.bit_length() - 1
-                    expected = n * m * (m + 1) // 4 if name == "bitonic" else n * (n - 1) // 2
-                    if pair_count != len(data) * expected:
-                        raise AssertionError("SDK pair count differs from the algorithm")
-                    rows.append(dict(
-                        mapping=name, key_bits=bits, n=n, family=family,
-                        trials=len(data), correct_sorts=int(flags[:, 1].sum()),
-                        stable_sorts=int(flags[:, 2].sum()), pair_differences=pair_count,
-                        api_calls_batched_trials=api_calls, logical_payload_bytes=payload,
-                    ))
-                print(f"{dataset}: SDK CPU verified", flush=True)
-
-    write_csv(output / "accuracy.csv", rows)
-    np.savez_compressed(output / "trial_outcomes.npz", **outcomes)
-    metadata = dict(
-        **identity, hardware_executed=False, added_noise=False,
-        executions=sum(row["trials"] for row in rows), matched_arrays=len(outcomes),
-        inputs_sha256=hashlib.sha256((ROOT / "data/inputs.npz").read_bytes()).hexdigest(),
-        source_sha256=source_hashes(),
-        scope="Official CPU API control, not optical accuracy, throughput or power measurement.",
-    )
-    (output / "metadata.json").write_text(json.dumps(metadata, indent=2))
-    print(f"Verified {metadata['executions']:,} SDK CPU sorting executions.")
+    with np.load(ROOT/'data/inputs.npz', allow_pickle=False) as corpus:
+        for dataset in corpus.files:
+            bit_tag, n_tag, family = dataset.split('_', 2)
+            bits, n = int(bit_tag[1:]), int(n_tag[1:])
+            data = validate_keys(corpus[dataset], bits)
+            for name in ('bitonic', 'rank'):
+                flags, indices = [], []
+                pair_count = api_calls = payload = 0
+                # Limit the largest full-matrix temporary, preserving trial order.
+                batch_size = min(64, max(1, 1_000_000//(n*n)))
+                for start in range(0, len(data), batch_size):
+                    batch = data[start:start+batch_size]
+                    difference = SdkDifference(bits)
+                    result = (rank_sort(batch, difference, bias_step=2.**(-bits)) if name == 'rank'
+                              else bitonic_sort(batch, difference))
+                    flags.append(reference_flags(batch, result))
+                    indices.append(result[1])
+                    c = difference.counts
+                    pair_count += c.pair_differences
+                    api_calls += c.api_calls
+                    payload += c.feature_bytes+c.weight_bytes+c.output_bytes
+                flags, indices = np.concatenate(flags), np.concatenate(indices).astype(np.int16)
+                key = f'{dataset}_sdk_cpu_{name}'
+                outcomes[key+'_flags'], outcomes[key+'_indices'] = flags, indices
+                if not flags.all():
+                    raise AssertionError('Noiseless SDK sort disagrees with stable argsort')
+                m = n.bit_length()-1
+                expected = n*m*(m+1)//4 if name == 'bitonic' else n*n
+                if pair_count != len(data)*expected:
+                    raise AssertionError('The SDK did not evaluate the required number of cells')
+                rows.append(dict(mapping=name, key_bits=bits, n=n, family=family, trials=len(data),
+                    correct_sorts=int(flags[:, 1].sum()), stable_sorts=int(flags[:, 2].sum()),
+                    pair_differences=pair_count, api_calls_batched_trials=api_calls,
+                    logical_payload_bytes=payload, trial_batch_size=batch_size))
+            print(f'{dataset}: SDK CPU verified', flush=True)
+    write_csv(output/'accuracy.csv', rows)
+    np.savez_compressed(output/'trial_outcomes.npz', **outcomes)
+    metadata = dict(**identity, hardware_executed=False, added_noise=False, extra_quantizer=False,
+        executions=sum(r['trials'] for r in rows), inputs_sha256=INPUT_SHA256,
+        rank='N*N SDK differences including diagonal; host subtracts delta*U, thresholds >=0 and sums columns',
+        scope='CPU software integration; no NPU timing, optical noise or measured bus traffic',
+        source_sha256=before, outputs_sha256=file_hash(output/'trial_outcomes.npz'))
+    (output/'metadata.json').write_text(json.dumps(metadata, indent=2)+'\n')
+    print(f"Verified {metadata['executions']:,} complete SDK CPU sorts.")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

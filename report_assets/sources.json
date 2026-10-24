@@ -1,0 +1,205 @@
+{
+  "supplied_sources": [
+    {
+      "id": "01",
+      "title": "Recherchemappe: Analog Photonic Computing, hybride Architekturen und Sortierung",
+      "filename": "01-APC-Hybrid-Architectures-and-Sorters.pdf",
+      "pages": 460,
+      "sha256": "199ea88f9bf3c29d720c681c7a7a9fd00d9f0d00c4e6defcc0ce81583317f593",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "02",
+      "title": "Bitonic sorting using an optoelectronic recirculating architecture",
+      "filename": "02-Bitonic-Sorting-using-an-optoelectric-recirculating-architecture.pdf",
+      "pages": 9,
+      "sha256": "63aa2b2bc7f6b348be909ef48988c238d67fb45500ae5771d106285074b3903a",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "03",
+      "title": "Constant-time parallel sorting algorithm and its optical implementation using smart pixels",
+      "filename": "03-Constant-time-parallel-sorting-algorithm-and-its-optical-implementation-using-smart-pixels.pdf",
+      "pages": 10,
+      "sha256": "a4a283190cf53139162b9009ecfa36eef0c001a1262c59912abe1f4562a51308",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "04",
+      "title": "In-network stable radix sorter using many FPGAs with high-bandwidth photonics [Invited]",
+      "filename": "04-In-network_stable_radix_sorter_using_many_FPGAs_with_high-bandwidth_photonics_Invited.pdf",
+      "pages": 12,
+      "sha256": "dd5ab9f3c8d3ab6b5b24faf3753648647aa6bf322cbbd5373ad7abbaf8b4d0c9",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "05",
+      "title": "Sammlung optischer Sortierverfahren",
+      "filename": "05-Optische-Sortierverfahren.pdf",
+      "pages": 51,
+      "sha256": "2af985cb246a9f0a96e0e3a0859647575e427d46deec0f7e0098e0e0e2a48b74",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "06",
+      "title": "Perfect-shuffle interconnected bitonic sorter: optoelectronic design",
+      "filename": "06-Perfect-shuffle-interconnected-bitonic-sorter-optoelectronic-design.pdf",
+      "pages": 14,
+      "sha256": "c29e2229698dc94556c34c6256f4858cc0513359af804ce195fdefc500f1b656",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "07",
+      "title": "Sorting with optical compare-and-exchange modules",
+      "filename": "07-Sorting-with-optical-compare-and-exchange-modules.pdf",
+      "pages": 6,
+      "sha256": "d795f4ba6195fbecc159274a6c8b49286b224afbc7a48683d0f48e3525a6da1c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "08",
+      "title": "Digital-analog hybrid matrix multiplication processor for optical neural networks",
+      "filename": "08-Digital-analog-hybrid-matrix-multiplication-processor-for-optical-neural-networks.pdf",
+      "pages": 11,
+      "sha256": "a4cad123de0a704db8e0979f4d6d6e9760fbb76ad6c1b34b69d4ab0b48239fc0",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "09",
+      "title": "Efficient hardware error correction with hybrid on-offline configuration algorithm for optical processor",
+      "filename": "09-Efficient-hardware-error-correction-with-HOOC-algorithm-for-optical-processor.pdf",
+      "pages": 9,
+      "sha256": "7fe7fb249491796198e5b26801721b4ca5fc7465acee5033114fb7f49c40656c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "10",
+      "title": "Hybrid Photonic-digital Accelerator for Attention Mechanism (HyAtten)",
+      "filename": "10-Hybrid-Photonic-digital-Accelerator-for-Attention.pdf",
+      "pages": 7,
+      "sha256": "aacf7231e90444990dce9f6f617cc60f5962987a923ad9f3ebe91a1f51a3716d",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "11",
+      "title": "Integrated lithium niobate photonic computing circuit based on efficient and high-speed electro-optic conversion",
+      "filename": "11-Integrated-lithium-niobate-photonic-computing-circuit-based-on-electro-optic-conversion.pdf",
+      "pages": 11,
+      "sha256": "40380fbd9c6ffd33a9f21d39ea275a00d15674995855adb897463507f8962f16",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "12",
+      "title": "LightMat-HP: A Photonic\u2013Electronic System for Accelerating General Matrix Multiplication With Configurable Precision",
+      "filename": "12-LightMat-HP-Photonic-Electronic-System-for-Accelerating-GEMM-with-configurable-Precision.pdf",
+      "pages": 28,
+      "sha256": "63548c2ba75858c9a536d11f5a4e357f4de063dfd959d99154a577d155ec9494",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "13",
+      "title": "Photonic analog-to-digital conversion by use of nonlinear Fabry\u2013Perot resonators",
+      "filename": "13-Photonic-ADC-by-use-of-nonlinear-Fabry-Perot-resonators.pdf",
+      "pages": 9,
+      "sha256": "1ddaf274344070bf7e1d9e50f63fd962c7a7efc24428676c434a5fa43764b208",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "14",
+      "title": "Photonic Analog-to-Digital Architecture for Accelerating Multiply-Accumulate Operations",
+      "filename": "14-Photonic-ADC-for-Accelerating-MAC-Operations.pdf",
+      "pages": 3,
+      "sha256": "c1e8cdb067382cc4bc342b40028f99f75dc93e6c4abcd8ebbdbadd9548bdb6a6",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "15",
+      "title": "Progress in silicon-based reconfigurable and programmable all-optical signal processing chips",
+      "filename": "15-Progress-in-Silicon-Based-Reconfigurable-All-Optical-Signal-Processing-Chips.pdf",
+      "pages": 53,
+      "sha256": "92d27bf8a685caab8e4f050927d00730b651f99b9a461042446e29710b5f8a84",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "16",
+      "title": "Universal photonic artificial intelligence acceleration",
+      "filename": "16-Universal-photonic-artificial-intelligence-acceleration.pdf",
+      "pages": 8,
+      "sha256": "f7b5405b87c223feb1d22c1bf3bd32b732e27a79c5dfad9b7ee93c90d4bee8ea",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "17",
+      "title": "The spatial complexity of optical computing: toward space-efficient design",
+      "filename": "17-The-spatial-complexity-of-optical-computing-toward-space-efficient-design.pdf",
+      "pages": 11,
+      "sha256": "ba043e27767c08caa7f1c712fdfdc28a0f7556b4c28f8ad41c9f1f52d6fe13c8",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "18",
+      "title": "The physics of optical computing",
+      "filename": "18-The-physics-of-optical-computing.pdf",
+      "pages": 31,
+      "sha256": "e72a17b46bac1c8e2141295f71a17495c8954df69bd9ca077650573c34af4600",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "19",
+      "title": "Space-Time Complexity in Optical Computing",
+      "filename": "19-Space-Time-Complexity-in-Optical-Computing.pdf",
+      "pages": 6,
+      "sha256": "c7d65968762cfbeefd106e56948347b93adde4d30facaec183ec2eb8a2eab697",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "20",
+      "title": "Sorting Networks and Their Applications",
+      "filename": "20-Sorting-Networks-and-Their-Applications.pdf",
+      "pages": 8,
+      "sha256": "a70889def3d8e392e260ad3c11903667e2254b36fd022d3830be8f79cf96e29c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "21",
+      "title": "PRISM: Photonic Similarity Engine for KV Cache Block Selection in Long-Context LLM Inference",
+      "filename": "21-PRISM-Photonic-Similarity-Engine-for-KV-Cache-Block-Selection-in-Long-Context-LLM-Inference.pdf",
+      "pages": 27,
+      "sha256": "1a83c9940274013c7fcf6c405098c099c8de761e1a177624bbe86bffc645f16c",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "22",
+      "title": "Noise in analog programmable-photonic computation",
+      "filename": "22-Noise-in-analog-programmable-photonic-computation.pdf",
+      "pages": 27,
+      "sha256": "3c982697860af379e2bf08dda78f89dbf45b1d74631ecfd92ad06298e6411874",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "23",
+      "title": "Energy Efficiency in Analog Photonic Processors: Conversions and Losses at Scale",
+      "filename": "23-Energy_Efficiency_in_Analog_Photonic_Processors_Conversions_and_Losses_at_Scale.pdf",
+      "pages": 9,
+      "sha256": "e92fd7074ba6c0386d1893ba1d3121c5acd546f78558d3dd125e74363696a6e8",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "24",
+      "title": "Area-Time Complexity for VLSI",
+      "filename": "24-Area-Time-Complexityfor-VLSI.pdf",
+      "pages": 8,
+      "sha256": "6e752d2658c2e2a9dbcb4e7873ebb1c68f555d3d8c5cd774bfa5cd19505d85e9",
+      "kind": "provided_research_pdf"
+    },
+    {
+      "id": "25",
+      "title": "Analog Programmable-Photonic Computation",
+      "filename": "25-Analog_Programmable-Photonic_Computation.pdf",
+      "pages": 15,
+      "sha256": "5f2b646375747f999fe29614d9e873193897c7f325573eb0009a30e7e508ea00",
+      "kind": "provided_research_pdf"
+    }
+  ],
+  "scope": "Provided research papers used for the thesis; result provenance is in evidence.json"
+}

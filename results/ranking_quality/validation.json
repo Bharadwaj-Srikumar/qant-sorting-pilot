@@ -1,0 +1,9 @@
+{
+  "evaluated_cases": 288,
+  "evaluated_outputs": 288000,
+  "complete_coverage": true,
+  "missing_cases": [],
+  "saved_flags_and_counts_reproduced": true,
+  "distance_rows": 49058,
+  "new_sorter_executions": 0
+}

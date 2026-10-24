@@ -3,8 +3,8 @@
 # Gaussian disturbance -> fixed-point rounding/clipping -> electronic decision.
 # Arrays normally have shape (trials, pairs); counters pool scalar comparisons.
 # The callable returns measured differences, never repaired keys or a sorted array.
-# This model uses delta_in = delta_out = 2**(-bits). The older model.py uses
-# output step 2/2**bits and must not be substituted into this experiment.
+# This model uses delta_in = delta_out = 2**(-bits). Rank applies its lower-
+# triangular bias to the returned differences before thresholding and summing.
 # For sorter routing read sorting_schedules.py; for flags read metrics.py.
 # Neither bit width nor synthetic eta is a measured Q.ANT converter specification.
 
@@ -54,8 +54,8 @@ class Precision:
         return 1 / 2**self.input_bits
 
     # Return the AGREED output step, 1 / 2**output_bits.
-    # This is not the older model.py step 2 / 2**output_bits. The signed code range
-    # is therefore [-1/2, 1/2-delta_out], not the full difference magnitude range.
+    # The signed code range
+    # is [-1/2, 1/2-delta_out], not the full difference magnitude range.
     @property
     def delta_out(self):
         return 1 / 2**self.output_bits
