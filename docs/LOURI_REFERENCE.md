@@ -56,6 +56,10 @@ sums columns and validates placement. Invalid ranks produce `-1` records.
 
 [`louri_reference.py`](../qant_sorting/louri_reference.py) exposes intermediate
 matrices for explanation and source checking. It implements the same algorithm.
+Its `quantize_difference` helper controls reference quantization. Both paths
+share `place_ranks`, defined beside `rank_sort` in `sorting_schedules.py`, to
+reject invalid destinations and route original records. The reference imports
+this helper; the operational sorter does not import the reference module.
 
 With [`SdkDifference`](../qant_sorting/sdk_mapping.py), all N² pair rows are sent
 to the official `linear_fprop` CPU backend with weights `[1,-1]`. This is tested
