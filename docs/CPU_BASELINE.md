@@ -1,108 +1,106 @@
-# Digitale CPU-Baseline – erster Lauf vom 7. Oktober 2026
+# Digital CPU baseline - first run on 7 October 2026
 
-## Ergebnis und Reichweite
+## Results and scope
 
-Die Baseline wurde auf allen **24.000 gespeicherten Eingaben** aus 24 Datensätzen
-geprüft. Alle Ausgaben erhalten die Datensätze, sind korrekt sortiert und stabil.
-Es wurden **192 Konfigurationen** mit insgesamt **1.728 Zeitmessungen** erfasst:
-24 Datensätze × 2 Speicherformate × 4 Stapelgrößen × 9 Wiederholungen.
-Die drei gezielten Tests zur Ausgabesemantik und Stapelverarbeitung bestehen.
+The baseline was validated on all **24,000 saved inputs** from 24 datasets.
+Every output preserves the records, is correctly sorted, and is stable.
+The measurements cover **192 configurations** and **1,728 timing samples**:
+24 datasets × 2 storage formats × 4 batch sizes × 9 repetitions.
+The three targeted tests of output semantics and batch processing pass.
 
-Dies sind erste Messungen in einer geteilten Ausführungsumgebung. Sie belegen
-keinen NPU-Vorteil und keinen allgemeinen CPU-Bestwert. Vor abschließenden
-Leistungsbehauptungen ist eine Messung auf einer kontrollierten Maschine sinnvoll.
+These are initial measurements in a shared execution environment. They establish
+neither an NPU advantage nor a general best CPU performance. Measurements on a
+controlled machine are advisable before making final performance claims.
 
-## Messumfang
+## Measurement scope
 
-- NumPy `argsort(kind="stable")` erzeugt die Originalindizes;
-  `take_along_axis` erzeugt die sortierten Werte.
-- Ausgabe: sortierte Schlüssel **und** Indizes der Originaldatensätze.
-- 4-Bit-Schlüssel 0–15 und 8-Bit-Schlüssel 0–255, einschließlich gleicher Schlüssel.
-- `int64` entspricht dem gespeicherten Korpus. `uint8` enthält dieselben Werte in
-  einem passenden kompakten Speicherformat. Beide Varianten bleiben getrennt.
-  Der gültige Schlüsselbereich ist nicht mit der Speicherbreite gleichzusetzen.
-- Stapelgrößen 1, 10, 100, 1.000; jede Liste wird unabhängig innerhalb ihrer Zeile
-  sortiert. Es wird nicht der gesamte Stapel als eine lange Liste sortiert.
-- Alle 1.000 Listen je Datensatz werden je gemessenem Durchlauf verwendet.
-  Keine Zeile wird verworfen oder durch Padding ersetzt.
-- Eingaben liegen bereits im CPU-Speicher. Datei-I/O, Typkonvertierung,
-  Eingabevorbereitung und Korrektheitsprüfungen liegen außerhalb der Zeitmessung.
-- Python-Aufruf, Ausgabeallokation, Sortierung, Anordnung der Werte und normale
-  Freigabe der Ergebnisse liegen innerhalb der Messung.
+- NumPy `argsort(kind="stable")` produces the original indices;
+  `take_along_axis` produces the sorted values.
+- Output: sorted keys **and** indices of the original records.
+- 4-bit keys from 0–15 and 8-bit keys from 0–255, including equal keys.
+- `int64` matches the stored corpus. `uint8` stores the same values in a suitable
+  compact format. The two variants are reported separately. The valid key range
+  must not be confused with the storage width.
+- Batch sizes are 1, 10, 100, and 1,000; each list is sorted independently within
+  its row. The entire batch is not sorted as one long list.
+- Every measured pass uses all 1,000 lists in each dataset. No rows are discarded
+  or replaced by padding.
+- Inputs already reside in CPU memory. File I/O, type conversion, input
+  preparation, and correctness checks are outside the timed region.
+- The Python call, output allocation, sorting, gathering of values, and normal
+  release of results are inside the timed region.
 
-## Messprotokoll
+## Measurement protocol
 
-Pro Konfiguration erfolgen zwei vollständige Aufwärmdurchläufe und eine
-Kalibrierung der Wiederholungszahl. Jede der neun Zeitproben umfasst mindestens
-angestrebte 15 ms auf Basis dieser Kalibrierung. Die tatsächlichen Zeiten werden
-unverändert gespeichert. Die Reihenfolge der Konfigurationen wird mit dem
-festgehaltenen Seed 20261007 gemischt. Die Eingaben sind schreibgeschützt und
-werden wiederholt verwendet; dies ist ein Benchmark mit aufgewärmten Caches.
+Each configuration receives two complete warm-up passes and a calibration of
+the repetition count. Based on this calibration, each of the nine timing samples
+targets a minimum duration of 15 ms. Actual durations are stored unchanged.
+Configuration order is shuffled with the recorded seed 20261007. Inputs are
+read-only and reused; this is a benchmark with warm caches.
 
-Jede Probe liefert eine **mittlere Zeit pro Stapelaufruf**. Die Tabelle zeigt den
-Median dieser neun Mittelwerte und deren Interquartilsabstand (IQR). Diese
-Streuung ist weder eine Verteilung individueller Anfrage-Latenzen noch ein
-Konfidenzintervall. Bei vier von 192 Konfigurationen überschreitet die relative
-IQR 20 %; diese Fälle bleiben sichtbar und sollten auf kontrollierter Hardware
-besonders überprüft werden. Es wurden keine langsamen Proben entfernt.
+Each sample yields a **mean time per batch call**. The table reports the median
+of these nine means and their interquartile range (IQR). This variation is
+neither a distribution of individual request latencies nor a confidence
+interval. The relative IQR exceeds 20% in four of the 192 configurations. These
+cases remain visible and deserve particular attention in a controlled hardware
+rerun. No slow samples were removed.
 
-## Beispiel: 8 Bit, N = 256, unterschiedliche Schlüssel
+## Example: 8 bits, N = 256, distinct keys
 
-| Speicherformat | Listen pro Aufruf | Zeit pro Aufruf | Amortisierte Zeit pro Liste | relative IQR |
+| Storage format | Lists per call | Time per call | Amortized time per list | Relative IQR |
 |---|---:|---:|---:|---:|
-| int64 | 1 | 11.90 µs | 11.90 µs | 5.4 % |
-| int64 | 1000 | 8851.66 µs | 8.85 µs | 12.2 % |
-| uint8 | 1 | 5.26 µs | 5.26 µs | 10.6 % |
-| uint8 | 1000 | 1407.79 µs | 1.41 µs | 3.7 % |
+| int64 | 1 | 11.90 µs | 11.90 µs | 5.4% |
+| int64 | 1000 | 8851.66 µs | 8.85 µs | 12.2% |
+| uint8 | 1 | 5.26 µs | 5.26 µs | 10.6% |
+| uint8 | 1000 | 1407.79 µs | 1.41 µs | 3.7% |
 
-Ein Aufruf mit 1.000 Listen liefert sämtliche 1.000 Ausgaben erst nach der
-angegebenen Aufrufzeit. Die kleinere amortisierte Zeit ist eine Durchsatzgröße,
-keine Antwortzeit einer einzelnen Liste. Selbst bei Stapelgröße 1 ist der
-Tabellenwert eine aus wiederholten Durchläufen gemittelte Aufrufzeit.
+A call containing 1,000 lists returns all 1,000 outputs only after the stated
+call duration. The smaller amortized time measures throughput, not the response
+time for an individual list. Even at batch size 1, the tabulated value is a
+call duration averaged over repeated passes.
 
-## Umgebung und Reproduktion
+## Environment and reproduction
 
-Gemessen: AMD EPYC 9V74, Python 3.12.14, NumPy 2.3.5, Linux x86-64.
-Der Container sieht neun logische CPUs; seine cgroup-Quote entspricht acht
-CPU-Zeiteinheiten. Das bedeutet nicht, dass die NumPy-Sortierung acht Kerne nutzt.
-Keine Prozessaffinität wurde festgesetzt. Vollständige relevante Metadaten stehen
-in `results/cpu_baseline_20261007/metadata.json`.
+Measured environment: AMD EPYC 9V74, Python 3.12.14, NumPy 2.3.5, Linux x86-64.
+The container sees nine logical CPUs; its cgroup quota corresponds to eight
+CPU-time units. This does not mean that NumPy sorting uses eight cores.
+Process affinity was not fixed. Full relevant metadata are recorded in
+`results/cpu_baseline_20261007/metadata.json`.
 
-Für diesen Benchmark eine separate Umgebung verwenden; die historischen SDK-
-und Sweep-Abhängigkeiten werden nicht geändert:
+Use a separate environment for this benchmark; the historical SDK and sweep
+dependencies remain unchanged:
 
 ```bash
 python -m venv .venv-baseline
-# Umgebung aktivieren, anschließend:
+# Activate the environment, then run:
 python -m pip install -r requirements/cpu.txt
 python -m unittest discover -s tests -p test_cpu_baseline.py -v
 python -m qant_sorting cpu --output-dir results/cpu_baseline_reproduced
 ```
 
-Das Ausgabeverzeichnis muss leer sein. Der SHA-256 des Korpus wird vor dem Lauf
-geprüft. Software- und Eingabehash, Rohzeiten sowie eine Korrektheitsprüfung
-werden gespeichert. Laufzeiten sind maschinenabhängig und sollen bei Wiederholung
-nicht bitgenau übereinstimmen.
+The output directory must be empty. The corpus SHA-256 is checked before the
+run. Software and input hashes, raw timings, and a correctness check are saved.
+Timings depend on the machine and are not expected to match bit for bit on a rerun.
 
-| Datei | Inhalt |
+| File | Contents |
 |---|---|
-| `summary.csv` | Median, IQR und Durchsatz für jede Konfiguration |
-| `samples.csv` | Alle 1.728 Rohzeitproben und Zahl der Aufrufe |
-| `validation.json` | Korrektheit, Stabilität und Datensatzerhaltung |
-| `metadata.json` | Umgebung, Messgrenzen, Parameter und Hashes |
+| `summary.csv` | Median, IQR, and throughput for each configuration |
+| `samples.csv` | All 1,728 raw timing samples and call counts |
+| `validation.json` | Correctness, stability, and record preservation |
+| `metadata.json` | Environment, measurement boundaries, parameters, and hashes |
 
-## Einordnung
+## Interpretation
 
-Es wird eine Bibliotheksbaseline gemessen, keine speziell entwickelte schnellste
-CPU-Sortierung. GPU-Messungen stehen noch aus. Die Zeit eines Q.ANT-CPU-Backends
-darf nicht als NPU-Laufzeit in einen Beschleunigungsfaktor eingehen. Ohne reale
-NPU-Messungen können die digitalen Zeiten als Zielwerte für eine ausdrücklich
-bedingte Gesamtzeitrechnung dienen. Energie wurde hier nicht gemessen.
+This measures a library baseline, not a custom implementation of the fastest
+possible CPU sorter. GPU measurements remain pending. Q.ANT CPU-backend timing
+must not be treated as NPU runtime when calculating speedup. Without real NPU
+measurements, the digital timings can serve as targets for an explicitly
+conditional end-to-end timing estimate. Energy was not measured here.
 
-Das Komplexitätsmodell C=(T,S,H,D) bleibt unverändert. Diese Sekundenmessungen
-ersetzen nicht die Definition von T als sequenzielle real-RAM-Schrittzahl.
+The complexity model C=(T,S,H,D) remains unchanged. These measurements in seconds
+do not replace the definition of T as a sequential real-RAM step count.
 
-Methodische Dokumentation: [NumPy argsort](https://numpy.org/doc/2.3/reference/generated/numpy.argsort.html)
-und [take_along_axis](https://numpy.org/doc/2.3/reference/generated/numpy.take_along_axis.html).
+Method documentation: [NumPy argsort](https://numpy.org/doc/2.3/reference/generated/numpy.argsort.html)
+and [take_along_axis](https://numpy.org/doc/2.3/reference/generated/numpy.take_along_axis.html).
 
-Weitere Arbeit: siehe [Forschungsumfang und nächste Schritte](THESIS_SCOPE.md).
+Further work: see [Thesis scope and next steps](THESIS_SCOPE.md).

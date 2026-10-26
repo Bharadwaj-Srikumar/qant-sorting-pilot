@@ -2,7 +2,7 @@
   "supplied_sources": [
     {
       "id": "01",
-      "title": "Recherchemappe: Analog Photonic Computing, hybride Architekturen und Sortierung",
+      "title": "Research compilation: Analog Photonic Computing, hybrid architectures, and sorting",
       "filename": "01-APC-Hybrid-Architectures-and-Sorters.pdf",
       "pages": 460,
       "sha256": "199ea88f9bf3c29d720c681c7a7a9fd00d9f0d00c4e6defcc0ce81583317f593",
@@ -34,7 +34,7 @@
     },
     {
       "id": "05",
-      "title": "Sammlung optischer Sortierverfahren",
+      "title": "Collection of optical sorting methods",
       "filename": "05-Optische-Sortierverfahren.pdf",
       "pages": 51,
       "sha256": "2af985cb246a9f0a96e0e3a0859647575e427d46deec0f7e0098e0e0e2a48b74",
@@ -90,7 +90,7 @@
     },
     {
       "id": "12",
-      "title": "LightMat-HP: A Photonic\u2013Electronic System for Accelerating General Matrix Multiplication With Configurable Precision",
+      "title": "LightMat-HP: A Photonic–Electronic System for Accelerating General Matrix Multiplication With Configurable Precision",
       "filename": "12-LightMat-HP-Photonic-Electronic-System-for-Accelerating-GEMM-with-configurable-Precision.pdf",
       "pages": 28,
       "sha256": "63548c2ba75858c9a536d11f5a4e357f4de063dfd959d99154a577d155ec9494",
@@ -98,7 +98,7 @@
     },
     {
       "id": "13",
-      "title": "Photonic analog-to-digital conversion by use of nonlinear Fabry\u2013Perot resonators",
+      "title": "Photonic analog-to-digital conversion by use of nonlinear Fabry–Perot resonators",
       "filename": "13-Photonic-ADC-by-use-of-nonlinear-Fabry-Perot-resonators.pdf",
       "pages": 9,
       "sha256": "1ddaf274344070bf7e1d9e50f63fd962c7a7efc24428676c434a5fa43764b208",

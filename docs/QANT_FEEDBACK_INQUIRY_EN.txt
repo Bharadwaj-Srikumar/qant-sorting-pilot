@@ -1,0 +1,63 @@
+Subject: Master's thesis - data paths, transfer characteristics, and possible access to the Q.ANT NPU
+
+Dear Q.ANT team,
+
+For my master's thesis in Computer Science at Bochum University of Applied
+Sciences, supervised by Prof. Henrik Blunck, I am investigating mappings of
+Bitonic and rank sorting onto hybrid photonic processors. The work is designed
+to provide meaningful results through modelling and reproducible evaluation
+even without hardware access.
+
+Using your SDK 2.3.1 CPU backend, I have investigated linear difference
+calculations and a comparator based on the periodic function. In the current
+path, the host receives the difference d and computes u = u0 - alpha*d before
+calling the periodic function. At that point, sign(d) already suffices for the
+decision. I would therefore like to clarify whether a different execution path
+could give the native nonlinearity a useful role in the complete computation.
+
+An affine CPU control computes the phase within the linear call from
+[a/2^w, b/2^w, 1] (w = key width), using weights [-pi/2, pi/2, pi/2]. At 8 bits,
+this particular encoding produces 40 false ties among 65,536 ordered pairs
+because the CPU backend rounds individual products to BF16. For example, 165
+and 166 become indistinguishable. I treat this as a CPU finding and would
+particularly like to clarify its relationship to actual device precision.
+
+The following information would be especially helpful for a technical assessment:
+
+1. Can MVM or an affine calculation and the periodic nonlinearity be connected
+   within the NPU without returning the intermediate result to the host?
+   Is a constant offset supported? Which internal electronic processing steps,
+   buffers, and E/O and O/E conversions remain? Is there a documented interface
+   for this execution path?
+
+2. What are the actual transfer characteristics, input ranges, and resolutions
+   of the periodic function? Are data available on channel differences, drift,
+   and repeated outputs, especially near a decision boundary?
+
+3. Are measurements or models of noise and quantization available, including
+   the signal reference, measurement bandwidth, and operating conditions?
+   How do the SDK's BF16 values map to physical signal ranges? Does rounding
+   each MVM product in the CPU backend reflect the hardware, or is it only a
+   software-modelling choice? What internal precision is used for products,
+   accumulation, and the transition to the nonlinearity?
+
+4. Which capacity, call, and transfer limits are documented for the linear
+   and periodic operations? Can weights and intermediate results remain
+   resident on the device?
+
+5. Would limited research access be possible, or alternatively could suitable
+   transfer-characteristic and noise data be provided?
+
+A measurement plan and a transfer-characteristic acquisition script are ready.
+I explicitly do not treat the existing CPU results as evidence of physical
+transfer characteristics, optical cascading, or a runtime or energy advantage.
+
+The public project repository is available at:
+https://github.com/Bharadwaj-Srikumar/qant-sorting-pilot
+
+Thank you for your support.
+
+Kind regards,
+Bharadwaj Srikumar
+
+[Draft for review; not yet sent.]

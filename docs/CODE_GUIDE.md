@@ -67,3 +67,10 @@ braces. Check rendered output when changing formulas.
 identify code as it existed during execution; subsequent documentation edits do
 not retroactively rewrite those snapshots. The current report checks all evidence
 against `report_assets/evidence.json`.
+
+## Documentation language
+
+Maintain project documentation, code comments, report text, generated labels,
+and inquiry templates in English. Use decimal points and commas for thousands
+in report prose and tables. Preserve original author names, source filenames,
+URLs, checksums, and third-party legal notices as provenance identifiers.
