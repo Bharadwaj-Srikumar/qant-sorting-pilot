@@ -1,40 +1,40 @@
-# Gemeinsames Signal-, Rausch- und Quantisierungsmodell
+# Shared signal, noise, and quantization model
 
-Stand: 24. Oktober 2026
+As of 24 October 2026
 
-## Ergebnis und Zweck
+## Findings and purpose
 
-Der bisherige Vergleich „5,9 % vs. 100 % korrekt“ vergleicht unterschiedliche
-Störstellen, Signalabstände und Rundungsregeln. Er ist **kein Nachweis eines
-photonischen Rauschvorteils**. Das neue Modell macht diese Unterschiede einzeln
-sichtbar. Es erklärt, wann eine Vergleichsentscheidung kippt, einen falschen
-Gleichstand erzeugt oder einen echten Gleichstand aufbricht.
+The earlier comparison of “5.9% versus 100% correct” compares different noise
+injection points, signal spacings, and rounding rules. It is **not evidence of
+a photonic noise advantage**. The shared model separates these differences. It
+explains when a comparison decision reverses, produces a false tie, or breaks
+a true tie.
 
-Die gemeinsamen Kontrollen liefern bei gleicher Störung und Rundung vor der
-Transformation **identische Entscheidungen für direkten und idealen periodischen
-Vergleich**. Bei einheitlicher Ausgangsquantisierung sind die Ergebnisse der
-ausgewählten 8-Bit-Kontrollen ebenfalls sehr ähnlich. Daraus folgt keine
-allgemeine Gleichwertigkeit realer Geräte: Kennlinie, Wandlung, Rauschen,
-Kalibrierung und Kosten fehlen weiterhin als Hardwaredaten.
+With identical disturbances and rounding before the transformation, the shared
+controls produce **identical decisions for direct and ideal periodic
+comparison**. With a common output quantizer, the selected 8-bit controls also
+produce very similar results. This does not establish general equivalence of
+real devices: hardware data on transfer characteristics, conversion, noise,
+calibration, and cost are still missing.
 
-Dies ist **ein Modell mit gezielt veränderten Einstellungen**. Die Implementierung rechnet in Float64 und
-ruft das SDK nicht auf. Das Komplexitätsmodell **C = (T, S, H, D)** bleibt
-unverändert; die folgenden Größen sind Signal- und Evaluierungsgrößen.
+This is **one model with deliberately varied settings**. The implementation uses
+Float64 and does not call the SDK. The complexity model **C = (T, S, H, D)**
+remains unchanged; the quantities below describe signals and evaluation settings.
 
-## 1. Ein Signalweg für beide Varianten
+## 1. One signal path for both variants
 
-Für ganzzahlige Schlüssel a,b im Bereich 0 bis 2^b−1 gilt
+For integer keys a,b ranging from 0 to 2^b−1:
 
 ```math
 \Delta=2^{-b},\qquad x_a=a\Delta,\quad x_b=b\Delta,
 \qquad d=x_a-x_b=(a-b)\Delta.
 ```
 
-`bits` bezeichnet im Code die Schlüsselbreite. Die verwendeten Eingaben liegen
-bereits exakt auf diesem Raster. Eine Eingangsrundung auf Δ verändert sie nicht.
-Für andere Eingabewerte wäre sie ausdrücklich zu modellieren.
+`bits` denotes the key width in the code. The inputs used already lie exactly
+on this grid. Input rounding to Δ therefore leaves them unchanged. For other
+input values, such rounding would need to be modelled explicitly.
 
-Der gemeinsame Ablauf lautet:
+The shared pipeline is:
 
 ```math
 z=\mathrm{clip}_{[-1,1]}
@@ -46,219 +46,218 @@ y=\mathrm{clip}_{[-1,1]}Q_{q_{\rm out}}
   \big((1+\epsilon_g)g(z)+b_{\rm out}+\sigma_{\rm out}Z_{\rm out}\big).
 ```
 
-Bei Bitonic entscheidet die Elektronik anhand `sign(y)` und behandelt y=0 nach
-dem Originalindex. Bei Louri wird nur die direkte Kennlinie verwendet: Auf y
-folgen der Dreiecksbias −ΔU, die inklusive Schwelle ≥0 und die Spaltensumme.
-Jede der N² Zellen erhält eine eigene Störung, auch die Diagonale. Originalschlüssel
-bleiben unverändert; fehlerhafte Ränge werden nicht repariert.
+For Bitonic, the electronics interpret `sign(y)` and resolve y=0 using the
+original index. Louri uses only the direct transfer function: y is followed by
+the triangular bias −ΔU, the inclusive threshold ≥0, and column summation.
+Each of the N² cells receives its own disturbance, including the diagonal.
+Original keys remain unchanged; incorrect ranks are not repaired.
 
-- **σ_in:** effektive Störung der Differenz vor der Übertragungsfunktion.
-  Sie fasst vorerst Fehler der Eingabe/MVM zusammen; sie ist kein gemessener
-  Einzelmodulatorwert. Bei getrennten Eingabefehlern gilt
+- **σ_in:** effective disturbance of the difference before the transfer function.
+  It currently combines input/MVM errors; it is not a measured individual
+  modulator value. For separate input errors,
   Var(e_a−e_b)=Var(e_a)+Var(e_b)−2Cov(e_a,e_b).
-- **σ_out:** zusätzliche Auslesestörung nach der Übertragungsfunktion, in der
-  unten festgelegten normierten Ausgangseinheit.
-- **b_in, b_out:** verbleibende feste Offsets während eines Durchlaufs, etwa
-  nach einer Kalibrierung. Das ist eine Drift-Sensitivität, kein zeitliches
-  Driftmodell. Ein Offset wird nicht für jeden Vergleich neu gezogen.
-- **ε_g:** relativer Verstärkungsfehler; im vorliegenden Lauf auf null gesetzt.
-  Eine Implementierungsoption ist noch kein experimenteller Nachweis ihrer Wirkung.
-- **Z_in, Z_out:** unabhängige Standardnormalvariablen, neu pro Vergleich.
-  Zeit-/Kanalkorrelationen sind im aktuellen Sweep nicht kalibriert oder simuliert.
+- **σ_out:** additional readout disturbance after the transfer function, in the
+  normalized output unit defined below.
+- **b_in, b_out:** fixed residual offsets during a run, for example after
+  calibration. This represents sensitivity to drift, not a time-dependent drift
+  model. An offset is not redrawn for each comparison.
+- **ε_g:** relative gain error; set to zero in the current run. An implementation
+  option does not itself constitute experimental evidence of its effect.
+- **Z_in, Z_out:** independent standard normal variables, sampled anew for each
+  comparison. Temporal and channel correlations are neither calibrated nor
+  simulated in the current sweep.
 
-Die Begrenzung auf [−1,1] hält den idealen Sinus auf einem monotonen Ast und
-verhindert Vorzeichenumkehr durch periodisches Zurückfalten bei Übersteuerung.
-Sie ist eine **angenommene Modellgrenze**, keine bestätigte Hardwarefunktion.
-Überschreitungen vor der Begrenzung werden gezählt. Die signed-b-bit-Begrenzung [−1/2,1/2−Δ] gilt dagegen im
-Hauptversuch `results/reference/`. Die unterschiedlichen Quantisierer sind
-explizite Sensitivitätskontrollen und dürfen nicht als identische Kanäle gelten.
+Clipping to [−1,1] keeps the ideal sine on a monotone branch and prevents sign
+reversal caused by periodic folding under overdrive. This is an **assumed model
+boundary**, not a confirmed hardware feature. Exceedances before clipping are
+counted. In contrast, the main experiment in `results/reference/` uses the signed
+b-bit limit [−1/2,1/2−Δ]. These different quantizers are explicit sensitivity
+controls and must not be treated as identical channels.
 
-## 2. Signalabstände und Normierung
+## 2. Signal spacing and normalization
 
-Es werden zwei Funktionen verglichen:
+Two functions are compared:
 
 ```math
-g_{\rm direkt}(d)=d,\qquad
-g_{\rm periodisch}(d)=\frac{\sin(\alpha d)}{\alpha},
+g_{\rm direct}(d)=d,\qquad
+g_{\rm periodic}(d)=\frac{\sin(\alpha d)}{\alpha},
 \qquad \alpha=\pi/2.
 ```
 
-Beide haben am Vergleichspunkt d=0 die Steigung 1. Die Division durch α ist
-eine Wahl der **Ausgangseinheit**. Damit dieselbe Zahl σ_out vergleichbar ist,
-muss auch reales Ausgangsrauschen durch dieselbe Verstärkung geteilt werden.
-Das setzt weder einen kostenlosen Verstärker noch identische Geräte voraus.
-Gleiche normierte σ_out sind hier eine ausdrücklich angenommene Kontrollbedingung.
+Both have slope 1 at the comparison boundary d=0. Division by α defines the
+**output unit**. For the same numerical σ_out to be comparable, actual output
+noise must also be divided by the same gain. This assumes neither a free
+amplifier nor identical devices. Equal normalized σ_out values are an explicitly
+assumed control condition here.
 
-Für Schlüsselabstand m=|a−b| beträgt der Abstand des idealen Signals zur
-Nullentscheidung mΔ beziehungsweise sin(αmΔ)/α. Allgemein ist der Abstand
-benachbarter Signalstufen g((m+1)Δ)−g(mΔ); er ist beim Sinus nicht konstant.
-Für die Vergleichsentscheidung ist insbesondere der Abstand von ±Δ zu 0 relevant.
+For key distance m=|a−b|, the ideal signal's distance to the zero threshold is
+mΔ or sin(αmΔ)/α, respectively. In general, adjacent signal levels are separated
+by g((m+1)Δ)−g(mΔ); this spacing is not constant for the sine. The distance from
+±Δ to zero is particularly relevant to the comparison decision.
 
-| Größe | 4 Bit | 8 Bit |
+| Quantity | 4 bits | 8 bits |
 |---|---:|---:|
-| Schlüsselabstand Δ | 0,0625 | 0,00390625 |
-| Direkt: Abstand für m=1 zur Null | 0,0625 | 0,00390625 |
-| Normierter Sinus: Abstand für m=1 zur Null | ca. 0,0623996 | ca. 0,00390623 |
-| Angenommene Standardabweichung 0,25Δ | 0,015625 | 0,0009765625 |
+| Key spacing Δ | 0.0625 | 0.00390625 |
+| Direct: distance to zero for m=1 | 0.0625 | 0.00390625 |
+| Normalized sine: distance to zero for m=1 | approx. 0.0623996 | approx. 0.00390623 |
+| Assumed standard deviation 0.25Δ | 0.015625 | 0.0009765625 |
 
-Eine Nichtlinearität verstärkt auch bereits vorhandenes Eingangsrauschen.
-Für kleine Störungen ohne wirksame Quantisierung/Begrenzung gilt näherungsweise
+A nonlinearity also transforms existing input noise. For small disturbances
+without effective quantization or clipping, approximately:
 
 ```math
 \mathrm{Var}(y\mid d)\approx
  (1+\epsilon_g)^2[g'(d)]^2\sigma_{\rm in}^2+\sigma_{\rm out}^2,
 ```
 
-sofern die beiden Störungen unabhängig sind. Das unnormierte sin(αd) hat nahe
-null ungefähr α-fachen Signalabstand **und** α-faches Eingangsrauschen.
-Die größere Steigung allein verbessert daher dieses Verhältnis nicht.
-Gegen festes, später hinzugefügtes Ausleserauschen kann Verstärkung helfen;
-dafür müssen reale Verstärkung, Bereich, Rauschposition und Kosten bekannt sein.
+provided the two disturbances are independent. Near zero, the unnormalized
+sin(αd) increases both the signal spacing **and** the input noise by approximately
+α. A larger slope alone therefore does not improve their ratio. Gain can help
+against fixed readout noise added later, but actual gain, range, noise injection
+point, and cost must be known.
 
-## 3. Quantisierung ist eine Entscheidungsregel
+## 3. Quantization is a decision rule
 
 ```math
 Q_q(v)=q\,\mathrm{roundToEven}(v/q),\qquad Q_0(v)=v.
 ```
 
-Bei q_out=Δ gehört [−Δ/2,+Δ/2] zum Nullcode. Exakte Halbwerte gehen zum geraden
-Code; insbesondere werden ±Δ/2 null. Ein positiver Nachbarschlüssel d=Δ hat
-damit nur **Δ/2 Abstand zum falschen Gleichstand**, obwohl sein Abstand zu
-null Δ beträgt. Ein groberes Raster schützt echte Gleichstände besser, kann
-aber ungleiche Schlüssel zusammenfallen lassen.
+With q_out=Δ, [−Δ/2,+Δ/2] maps to the zero code. Exact halfway values round to the
+even code; in particular, ±Δ/2 both become zero. A positive adjacent-key
+difference d=Δ therefore has only **Δ/2 margin to a false tie**, even though its
+distance to zero is Δ. A coarser grid protects true ties better but can merge
+unequal keys.
 
-Die Quantisierer werden deterministisch ausgewertet. Es wird **kein zusätzliches
-unabhängiges „Quantisierungsrauschen“ q²/12** hinzuaddiert: Diese Näherung ist an
-den hier entscheidenden Schwellen nicht allgemein gerechtfertigt.
+Quantizers are evaluated deterministically. **No additional independent
+“quantization noise” q²/12** is added: that approximation is not generally
+justified at the decision thresholds that matter here.
 
-q_pre=0 ist der Standard ohne Zwischenrundung. q_pre=Δ, q_out=0 wird nur als
-Kontrolle verwendet: sign(g(Q_Δ(d+e)))=sign(Q_Δ(d+e)) für beide monotonen,
-vorzeichenerhaltenden Funktionen. Das modelliert keine nachgewiesene hostfreie
-Q.ANT-Kaskade. q_out=0 bedeutet keine zusätzliche feste Ausgangsrundung und
-kein Toleranzband. Bei kontinuierlichem Rauschen wird dann d=0 mit
-Wahrscheinlichkeit 1 als ungleich behandelt.
+q_pre=0 is the default without intermediate rounding. q_pre=Δ, q_out=0 is used
+only as a control: sign(g(Q_Δ(d+e)))=sign(Q_Δ(d+e)) for both monotone,
+sign-preserving functions. This does not model a demonstrated Q.ANT cascade
+without a host round trip. q_out=0 means no additional fixed output rounding
+and no tolerance band. With continuous noise, d=0 is then classified as unequal
+with probability 1.
 
-**Rasterweite ist nicht Hardwareauflösung:** Schlüsselbreite, simuliertes
-Quantisierungsraster, BF16-Datentyp und physikalische ENOB sind verschiedene
-Angaben. Der symmetrische Modellbereich [−1,1] mit Schritt Δ enthält mehr als
-2^b Codes; daraus wird keine b-bit-ADC-Aussage abgeleitet. Die reale Codezahl,
-Asymmetrie, Übersteuerung und Wandlung müssen separat belegt werden.
+**Grid spacing is not hardware resolution:** key width, simulated quantization
+grid, BF16 data type, and physical ENOB are distinct quantities. The symmetric
+model range [−1,1] with step Δ contains more than 2^b codes; this does not imply
+a b-bit ADC. Actual code count, asymmetry, overdrive, and conversion require
+separate evidence.
 
-## 4. Was den alten Unterschied erklärt
+## 4. Explaining the earlier difference
 
-Für den alten direkten/upstream-Pfad, d=Δ und σ=0,25Δ:
+For the earlier direct/upstream path with d=Δ and σ=0.25Δ:
 
 ```math
-P(\text{falscher Gleichstand})=
-\Phi(-2)-\Phi(-6)\approx 2{,}275\%,
+P(\text{false tie})=
+\Phi(-2)-\Phi(-6)\approx 2.275\%,
 ```
 
 ```math
-P(\text{Vorzeichenumkehr})=\Phi(-6)\approx9{,}87\cdot10^{-10}.
+P(\text{sign reversal})=\Phi(-6)\approx9.87\cdot10^{-10}.
 ```
 
-Für echte Gleichstände beträgt die Wahrscheinlichkeit des Aufbrechens nach
-dieser Rundung 2Φ(−2)≈4,550 %. Ein falscher Gleichstand ist noch nicht in jedem
-Fall eine falsche binäre Sortierentscheidung: Das hängt vom Originalindex ab.
-Ein Array benötigt viele solche Entscheidungen; Einzelpaarwahrscheinlichkeiten
-dürfen nicht ohne Abhängigkeitsmodell zu einer Arrayquote hochgerechnet werden.
+For true ties, the probability of being broken after this rounding is
+2Φ(−2)≈4.550%. A false tie does not always cause an incorrect binary sorting
+decision: that depends on the original index. An array requires many such
+decisions; pair probabilities must not be extrapolated to an array success rate
+without a dependence model.
 
-Im alten Output-Szenario kam σ=0,25Δ **nach** dem unnormierten periodischen
-Signal hinzu, ohne nachgeschaltetes festes Raster. Für 8 Bit gilt:
+In the earlier output scenario, σ=0.25Δ was added **after** the unnormalized
+periodic signal, with no subsequent fixed grid. For 8 bits:
 
-| Alter Pfad | Abstand / jeweiliges σ | Bedeutung |
+| Earlier path | Distance / corresponding σ | Meaning |
 |---|---:|---|
-| Direkte Differenz zur Null | 4 | σ in Differenzeinheiten |
-| Direkte Differenz zur Rundungsgrenze | 2 | Eintritt in den falschen Nullcode |
-| Idealer unnormierter Sinus zur Null | ca. 6,283 | σ in unnormierten Score-Einheiten |
-| Gespeichertes offizielles CPU-Ergebnis zur Null | ca. 7,996 | kleinster ungleicher Score nach BF16 und Referenzkorrektur |
+| Direct difference to zero | 4 | σ in difference units |
+| Direct difference to rounding boundary | 2 | Entry into the false zero code |
+| Ideal unnormalized sine to zero | approx. 6.283 | σ in unnormalized score units |
+| Saved official CPU result to zero | approx. 7.996 | Smallest unequal score after BF16 and reference correction |
 
-Der letzte Wert folgt aus `results/periodic/pair_checks.json`:
-0,007808685302734375 / 0,0009765625. Er ist ein **CPU-Softwarewert**, kein
-Hardwareabstand. BF16-Phasenrundung macht die Kennlinie stufig; eine glatte
-Sinusableitung beschreibt diese CPU-Schritte nicht. Das neue Float64-Modell
-isoliert die Modellannahmen und ersetzt diese SDK-Prüfung nicht.
+The last value follows from `results/periodic/pair_checks.json`:
+0.007808685302734375 / 0.0009765625. It is a **CPU software value**, not a hardware
+signal margin. BF16 phase rounding makes the transfer characteristic stepwise;
+a smooth sine derivative does not describe these CPU steps. The new Float64
+model isolates the modelling assumptions and does not replace the SDK check.
 
-Damit ist der Einwand des Betreuers bestätigt und präzisiert. „Etwa 6σ“
-beschreibt den idealen alten Sinusfall; die konkret gespeicherte CPU-Implementierung
-hat einen anderen Abstand. Beide sind mit der 2σ-Rundungsgrenze nicht unmittelbar
-vergleichbar.
+This confirms and refines the supervisor's objection. “About 6σ” describes the
+ideal earlier sine case; the saved CPU implementation has a different margin.
+Neither is directly comparable with the 2σ rounding boundary.
 
-## 5. Belege und ausdrücklich angenommene Parameter
+## 5. Evidence and explicitly assumed parameters
 
-| Parameter / Aussage | Verwendung / Wert | Evidenzstatus |
+| Parameter / statement | Use / value | Evidence status |
 |---|---|---|
-| Schlüsselbreite und Normierung | b=4/8, Δ=2^−b | Festgelegter Versuch; gespeicherter Korpus |
-| Ideale periodische Funktion | sin(πd/2)/(π/2) | Mathematische Kontrollfunktion; keine gemessene tcos-Kennlinie |
-| Native API und CPU-BF16 | periodische tcos-API; CPU berechnet Kosinus | Belegter SDK-Quellstand 2.3.1 [2]; kein ENOB-Nachweis |
-| σ_in/Δ, σ_out/Δ | jeweils 0 oder 0,25 | Angenommene Sensitivitätswerte, Anschluss an alten η-Endpunkt |
-| q_pre/Δ | 0 oder 1 | Angenommener Schalter zur Trennung der Zwischenrundung |
-| q_out/Δ | 0; 0,5; 1; 2 | Angenommene Auflösungssensitivität; keine DAC/ADC-Spezifikation |
-| b_out/Δ | −0,25; 0; +0,25 | Angenommene feste Restoffsets |
-| b_in, ε_g | 0 im gespeicherten Lauf | Ausgeschlossene Effekte dieses Laufs; Code erlaubt spätere Variation |
-| Gaussianität, Unabhängigkeit | unabhängige Samples pro Vergleich/Stufe | Kontrollannahme, keine belegte Q.ANT-Verteilung |
-| Signalgrenzen | [−1,1], symmetrische Begrenzung | Kontrollannahme; reale zulässige Bereiche unbekannt |
-| Referenzunsicherheit | bislang nicht separat geschätzt | Im Offset-/Auslesebudget explizit zu ergänzen, sobald Daten vorliegen |
-| RIN/Shot/Thermal, Fehlerfortpflanzung | strukturgebende Modellgrundlage | López-March et al. [1], Abschnitt 2, Gl. 6–9, S. 6–8 |
-| RIN −145 dB/Hz, 1550 nm, 400 kHz Laserlinienbreite | nur als Kontext der Quelle genannt | Messaufbau aus [1], S. 8; **nicht in die Sortiersimulation übernommen** |
-| Q.ANT-Bandbreite, Photoströme, thermische PSD, Kovarianzen | unbekannt; kein Zahlenwert eingesetzt | Herstellerdaten/Messungen erforderlich |
+| Key width and normalization | b=4/8, Δ=2^−b | Defined experiment; saved corpus |
+| Ideal periodic function | sin(πd/2)/(π/2) | Mathematical control function; not a measured tcos characteristic |
+| Native API and CPU BF16 | Periodic tcos API; CPU computes cosine | Documented SDK source version 2.3.1 [2]; no ENOB evidence |
+| σ_in/Δ, σ_out/Δ | Each 0 or 0.25 | Assumed sensitivity values, matching the earlier η endpoint |
+| q_pre/Δ | 0 or 1 | Assumed switch isolating intermediate rounding |
+| q_out/Δ | 0; 0.5; 1; 2 | Assumed resolution sensitivity; not a DAC/ADC specification |
+| b_out/Δ | −0.25; 0; +0.25 | Assumed fixed residual offsets |
+| b_in, ε_g | 0 in the saved run | Effects excluded from this run; code supports later variation |
+| Gaussianity, independence | Independent samples per comparison/stage | Control assumption; not an established Q.ANT distribution |
+| Signal limits | [−1,1], symmetric clipping | Control assumption; actual allowable ranges unknown |
+| Reference uncertainty | Not separately estimated yet | To be included explicitly in the offset/readout budget once data are available |
+| RIN/shot/thermal noise, error propagation | Structural basis of the model | López-March et al. [1], Section 2, Eqs. 6–9, pp. 6–8 |
+| RIN −145 dB/Hz, 1550 nm, 400 kHz laser linewidth | Source context only | Measurement setup in [1], p. 8; **not imported into the sorting simulation** |
+| Q.ANT bandwidth, photocurrents, thermal PSD, covariances | Unknown; no numerical value inserted | Manufacturer data or measurements required |
 
-### Anschluss an ein physikalisches Modell
+### Connection to a physical model
 
-[1] trennt Rauschquellen und propagiert Photostromschwankungen über die
-Übertragungsfunktion. Die Arbeit untersucht eine andere Silizium-PIP-Anordnung;
-ihre normierten Varianzdiagramme liefern kein universelles absolutes σ für
-unseren Sortervergleich. Übernommen wird die **Modellstruktur**, nicht eine
-scheinbar gerätespezifische Rauschzahl.
+[1] separates noise sources and propagates photocurrent fluctuations through
+the transfer function. It studies a different silicon PIP arrangement; its
+normalized variance plots do not supply a universal absolute σ for our sorter
+comparison. We adopt the **model structure**, not an apparently device-specific
+noise number.
 
-Für eine einzelne Photodiode und weiße, einseitige spektrale Dichten lautet
-eine passende Parametrisierung:
+For a single photodiode with white, one-sided spectral densities, a suitable
+parameterization is:
 
 ```math
 \mathrm{Var}(\delta I)=B_{\rm eq}
  \left(S_{I,\rm th}+2q_e I+10^{\mathrm{RIN}_{\rm dB/Hz}/10} I^2\right).
 ```
 
-I: Ampere; B_eq: äquivalente Rauschbandbreite in Hz; S_I,th: A²/Hz;
-10^(RIN/10): 1/Hz; q_e: Elementarladung. Ergebnis: A².
-`receiver_current_variance` implementiert diese Formel nur mit explizit
-übergebenen Werten. Sie wird mangels belegter Geräteparameter **nicht** zur
-Parametrierung der aktuellen Sortierläufe benutzt. Laserlinienbreite ist nicht
-die elektrische Rauschbandbreite; RIN pro Hz allein ist keine Varianz.
+I: amperes; B_eq: equivalent noise bandwidth in Hz; S_I,th: A²/Hz;
+10^(RIN/10): 1/Hz; q_e: elementary charge. The result is in A².
+`receiver_current_variance` implements this formula only with explicitly supplied
+values. Because supported device parameters are unavailable, it is **not used**
+to parameterize the current sorting runs. Laser linewidth is not electrical
+noise bandwidth; RIN per Hz alone is not a variance.
 
-Für die Abbildung in unsere Signalgröße gilt in erster Ordnung
-Var(s)≈JΣ_IJᵀ; der Jacobian J enthält Empfängertransfer und Normierung.
-`projected_variance` erhält die gesamte Kovarianz. Bei einem Differenzempfänger
-sind positive Zweigströme und deren Korrelationen nötig: Der Shot-Term darf
-nicht mit einem vorzeichenbehafteten Differenzstrom berechnet werden. Ein
-gemeinsamer RIN-Anteil kann sich abhängig vom Aufbau teilweise aufheben.
-Zusätzliche Kanal-/Phasenfehler und Kalibrierfehler müssen ohne Doppelzählung
-ergänzt werden. Die Kleinsignalnäherung gilt nicht pauschal nahe Singularitäten,
-Sättigung oder starken Störungen.
+For conversion into our signal quantity, first-order propagation gives
+Var(s)≈JΣ_IJᵀ; the Jacobian J includes the receiver transfer and normalization.
+`projected_variance` accepts the full covariance matrix. A differential receiver
+requires positive branch currents and their correlations: the shot term must
+not use a signed difference current. A common RIN component may partially
+cancel depending on the design. Additional channel, phase, and calibration
+errors must be included without double counting. The small-signal approximation
+does not automatically hold near singularities, saturation, or large disturbances.
 
-Eine gemessene Referenz ist ebenfalls verrauscht:
-Var(y−y_ref)=Var(y)+Var(y_ref)−2Cov(y,y_ref). Bei einer einmalig gespeicherten
-Referenz ist ihr Fehler zwischen Vergleichen gemeinsam, kein jedes Mal neu
-unabhängig gezogenes Rauschen. Eine Zeitserie ist nötig, um das zu trennen.
+A measured reference is itself noisy:
+Var(y−y_ref)=Var(y)+Var(y_ref)−2Cov(y,y_ref). If a reference is measured once and
+stored, its error is shared across comparisons, rather than independently
+redrawn each time. A time series is needed to distinguish these effects.
 
-## 6. Durchgeführte Kontrollen und Ergebnisse
+## 6. Completed controls and results
 
-Der aktuelle Lauf `results/common_noise/` enthält:
+The current run in `results/common_noise/` contains:
 
-- 280 Paarfälle mit 28 Millionen Entscheidungen; 182 analytisch prüfbare Fälle bestanden.
-- 108 vollständige Sortierkonfigurationen mit 10.800 Auswertungen auf den ersten
-  100 Listen je ausgewähltem Datensatz.
-- Für Bitonic werden direkte und ideal-periodische Kennlinie verwendet. Die
-  vollständige Louri-Matrix verwendet ausschließlich direkte Differenzen,
-  einschließlich unabhängig gestörter Diagonale; ihr Bias folgt dem Kanal.
-- Alle 18 rauschfreien Sortierkonfigurationen sind korrekt und stabil.
-- `sort_outputs.npz` speichert Indizes und Flags; `sort_quality.csv` zeigt
-  Gültigkeit, Korrektheit, Stabilität, bedingte Rangqualität und Recall mit
-  ausdrücklich null bewerteten ungültigen Ausgaben.
+- 280 pair cases with 28 million decisions; all 182 analytically checkable cases passed.
+- 108 complete sorting configurations with 10,800 evaluations on the first
+  100 lists of each selected dataset.
+- Bitonic uses both direct and ideal periodic transfer functions. The complete
+  Louri matrix uses only direct differences, including independently disturbed
+  diagonal entries; its bias is applied after the channel.
+- All 18 noiseless sorting configurations are correct and stable.
+- `sort_outputs.npz` stores indices and flags; `sort_quality.csv` reports
+  validity, correctness, stability, conditional ranking quality, and recall,
+  including an explicitly defined variant that scores invalid outputs as zero.
 
-Eine periodische Kennlinie darf nicht ohne erneute Herleitung der Bias-/
-Schwellenbeziehung in die Louri-Matrix eingesetzt werden. Die Vorzeichenidentität
-zweier Kennlinien allein beweist diese Beziehung nicht.
+A periodic transfer function must not be inserted into the Louri matrix without
+re-deriving the bias/threshold relationship. Equality of signs for two transfer
+functions alone does not prove that relationship.
 
-Reproduktion: `python -m qant_sorting common-noise`. Die Standardausgabe ist
-`results/common_noise_reproduced/`. Der Lauf verändert keine gespeicherten Daten.
+Reproduction: `python -m qant_sorting common-noise`. The default output directory
+is `results/common_noise_reproduced/`. The run does not modify saved evidence.

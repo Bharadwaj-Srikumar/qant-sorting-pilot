@@ -78,12 +78,12 @@
     "note": "Synthetic Float64 controls, not SDK executions or Q.ANT measurements."
   },
   "report": {
-    "output": "reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf",
     "pages": 53,
     "tables": 24,
     "figures": 2,
     "source_sha256": "98ec9c3ada5d65aec0f9811fd494be48cf696311483501768d19ce30971af05b",
-    "pdf_sha256": "5fa35a8d36b0fdd2521b1ead0798088d5469efd982da079474e3239ce1e54c9d"
+    "pdf_sha256": "5fa35a8d36b0fdd2521b1ead0798088d5469efd982da079474e3239ce1e54c9d",
+    "note": "Historical build receipt. Superseded by the English report; see english_documentation_20261026.json for the current build and review."
   },
   "pdf_review": {
     "pages": 53,

@@ -40,12 +40,12 @@ class StructureTests(unittest.TestCase):
         """Preserve serialized evidence semantics, including Unicode and empties."""
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "records.csv"
-            write_csv(path, [{"scenario": "Gleichstände", "count": 4},
+            write_csv(path, [{"scenario": "Ties (τ)", "count": 4},
                              {"scenario": "", "count": 0}])
             with path.open(encoding="utf-8", newline="") as handle:
                 reader = csv.DictReader(handle)
                 self.assertEqual(reader.fieldnames, ["scenario", "count"])
-                self.assertEqual(list(reader)[0], {"scenario": "Gleichstände", "count": "4"})
+                self.assertEqual(list(reader)[0], {"scenario": "Ties (τ)", "count": "4"})
             self.assertEqual(file_hash(path), hashlib.sha256(path.read_bytes()).hexdigest())
             with self.assertRaises(ValueError):
                 write_csv(Path(directory) / "empty.csv", [])

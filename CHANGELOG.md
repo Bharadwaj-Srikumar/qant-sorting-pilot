@@ -1,3 +1,12 @@
+# 26 October 2026 - English thesis documentation
+
+- Translated the remaining technical guides, inquiry draft, complete report,
+  reference notes, and generated tables, diagrams, captions, and PDF metadata.
+- Replaced the report and inquiry filenames with English names and updated links.
+- Used English decimal and thousands separators throughout the report.
+- Preserved the mathematical model, algorithms, saved results, source identities,
+  and evidence hashes. The current PDF retains all 24 tables and both charts.
+
 # 24 October 2026 — one canonical rank architecture
 
 - Moved shared rank validation and placement (`place_ranks`) beside `rank_sort`

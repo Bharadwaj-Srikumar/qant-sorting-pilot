@@ -9,7 +9,7 @@ speed or energy advantage.
 ## Start here
 
 - [Thesis scope and decisions](docs/THESIS_SCOPE.md)
-- [Current complete thesis report, German](reports/Masterarbeit_Hybride_Photonische_Sortierung.pdf)
+- [Current complete thesis report, English](reports/Masters_Thesis_Hybrid_Photonic_Sorting.pdf)
 - [Read the code one step at a time](docs/CODE_GUIDE.md)
 - [Comparison model](docs/METHOD.md) and [Louri's equations](docs/LOURI_REFERENCE.md)
 - [Current results](docs/RESULTS.md), [ranking quality](docs/RANKING_QUALITY.md),

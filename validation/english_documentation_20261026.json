@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-26",
+  "scope": "English translation of project documentation and report generation; scientific results unchanged.",
+  "base_commit": "167eba870af92d5d02368612b3f7a9945f9d11df",
+  "report": {
+    "output": "reports/Masters_Thesis_Hybrid_Photonic_Sorting.pdf",
+    "pages": 49,
+    "tables": 24,
+    "figures": 2,
+    "source_sha256": "e38b0bb1de14a09d6bb2acdfe58d2d6d2090fb2688c6816255421ac46bda5587",
+    "pdf_sha256": "31416f9fec8bce6a1a6b2bf228996a0b85b483e839befdd8906a08b1ae1d1d50"
+  },
+  "preservation_checks": {
+    "report_headings": 101,
+    "report_markers_preserved": true,
+    "display_equations_preserved_except_translated_labels": true,
+    "report_reproduction_code_blocks_unchanged": true,
+    "numeric_citation_identifiers_preserved": true,
+    "bibliography_urls_and_ids_preserved": true,
+    "original_source_filenames_hashes_and_page_counts_preserved": true,
+    "saved_evidence_hashes_verified": true,
+    "data_and_results_unchanged": true
+  },
+  "language_and_links": {
+    "german_prose_scan_hits": [],
+    "broken_relative_markdown_links": [],
+    "english_numeric_format_verified": true,
+    "provenance_policy": "Original source filenames, author names, URLs, and third-party legal notices are preserved verbatim."
+  },
+  "tests": {
+    "run": 51,
+    "passed": 46,
+    "skipped": 5,
+    "failures": 0,
+    "skip_reason": "Optional Q.ANT CPU SDK not installed in this translation environment."
+  },
+  "pdf_review": {
+    "pages": 49,
+    "all_pages_contact_sheet_reviewed": true,
+    "detail_pages": [
+      12,
+      17,
+      25,
+      31,
+      32,
+      49
+    ],
+    "out_of_page_text": [],
+    "issues": []
+  }
+}
