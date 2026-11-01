@@ -27,6 +27,7 @@ ETA_VALUES = (0.0, 0.05, 0.10, 0.15, 0.20, 0.25)
 MASTER_SEED = 20260930
 MAPPINGS = {
     "Pipelined bitonic adaptation": (bitonic_sort, 1),
+    # Preserve the historical CSV label for exact reference reproduction.
     "Louri full-matrix rank": (rank_sort, 2),
 }
 
@@ -207,7 +208,7 @@ def run(output_directory, batch_size):
     (output_directory / "validation.json").write_text(json.dumps(validation, indent=2))
     metadata = dict(
         revision="thesis_full_matrix_20261024",
-        rank_algorithm="Louri full N*N matrix including measured diagonal",
+        rank_algorithm="Full N*N rank matrix including measured diagonal",
         rank_bias="Subtract delta_in below diagonal AFTER output quantization; exact >=0 threshold and column sum",
         rows=len(rows), executions=sum(row["trials"] for row in rows),
         input_master_seed=MASTER_SEED, eta_values=list(ETA_VALUES),

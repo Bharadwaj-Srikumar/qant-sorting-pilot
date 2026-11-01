@@ -59,7 +59,7 @@ def bitonic_sort(keys, difference):
 
 
 def rank_sort(keys, difference, *, bias_step):
-    """Evaluate Louri's full N*N difference matrix, including the diagonal.
+    """Evaluate the full N*N rank difference matrix, including the diagonal.
 
     Cell (i,j) measures x[j]-x[i]; both directions are separate observations.
     The callback receives (trials,N*N) pairs and must return finite differences

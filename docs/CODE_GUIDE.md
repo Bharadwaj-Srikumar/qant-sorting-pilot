@@ -36,7 +36,7 @@ code checks the completed output against an independent stable digital reference
    round to the nearest-even code and clip to [-1/2, 1/2-delta].
 2. **`qant_sorting/sorters.py`**: read `bitonic_sort` and its layer generator,
    then `rank_sort` and `place_ranks`. Both receive the same kind of comparison
-   callable. Bitonic evaluates dependent layers; Louri evaluates N² directed
+   callable. Bitonic evaluates dependent layers; the rank sorter evaluates N² directed
    cells, including the diagonal.
 3. **`qant_sorting/evaluation.py`**: start with `reference_flags`. Validity,
    sortedness and stability are separate questions. Read `prepare_keys` and
@@ -46,7 +46,7 @@ code checks the completed output against an independent stable digital reference
    saves outputs, then verifies them against the recorded reference. File helpers
    stay in this module so the full evaluation needs no separate utility package.
 
-For Louri's matrix orientation and worked example, use [LOURI_REFERENCE.md](LOURI_REFERENCE.md).
+For the rank matrix orientation and worked example, use [RANK_SORTER.md](RANK_SORTER.md).
 Cell (i,j) measures the normalized difference delta * (keys[j]-keys[i]). The host subtracts
 one normalized key step below the diagonal, thresholds at >=0, sums columns and
 subtracts one to obtain zero-based destinations. Collisions and invalid ranks
@@ -71,7 +71,7 @@ produce -1 markers; no hidden digital repair is applied.
 ```bash
 python -m qant_sorting.run       # full registered reference sweep
 python -m qant_sorting.controls  # separate common-channel sensitivity controls
-python -m studies.check_louri   # independent equation-level checks
+python -m studies.check_rank_sorter   # independent equation-level checks
 python -m studies.ranking_quality  # rescore saved reference outputs
 ```
 

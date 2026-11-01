@@ -1,9 +1,12 @@
 # Hybrid photonic sorting - master's thesis
 
-This project compares **Bitonic sorting** with **Louri's full-matrix rank sorter**.
+This project compares **Bitonic sorting** with a **full-matrix rank sorter**.
 It studies how assumed comparison noise and quantization affect sorting quality.
 The algorithms move original integer keys and record IDs; only their comparison
 scores are disturbed.
+
+The rank formulation follows the source paper cited in the
+[rank-sorter reference and validation guide](docs/RANK_SORTER.md).
 
 ## Run the main evaluation
 
@@ -33,7 +36,7 @@ valid/correct/stable flags, so outputs can be checked independently.
 |---|---|
 | [comparison.py](qant_sorting/comparison.py) | Check inputs; normalize key pairs; add the main Gaussian noise; round and clip |
 | [common_noise.py](qant_sorting/common_noise.py) | A separate model for upstream/readout noise, transfer shape and offsets |
-| [sorters.py](qant_sorting/sorters.py) | Bitonic layers, full N² Louri ranking and record placement |
+| [sorters.py](qant_sorting/sorters.py) | Bitonic layers, full N² rank comparisons and record placement |
 | [evaluation.py](qant_sorting/evaluation.py) | Validity, correctness, stability, uncertainty and partial ordering metrics |
 | [run.py](qant_sorting/run.py) | Experiment settings, input loading, the main sweep and result files |
 | [controls.py](qant_sorting/controls.py) | Pair-level and complete-sort checks of the common-noise model |
@@ -60,7 +63,7 @@ is relevant to the thesis; the studies do not run automatically.
 
 | Command | Question |
 |---|---|
-| `python -m studies.check_louri` | Does the implementation match the source equations and threshold controls? |
+| `python -m studies.check_rank_sorter` | Does the implementation match the source equations and threshold controls? |
 | `python -m studies.ranking_quality` | How good are the saved orders beyond complete-sort accuracy? |
 | `python -m studies.check_sdk` | Do the mappings work through the official CPU SDK? |
 | `python -m studies.check_periodic` | What does the periodic CPU operation do for every key pair? |
@@ -111,7 +114,7 @@ when the optional toolkit is unavailable.
 - `studies/` holds the supporting investigations; `tools/` contains the SDK installer.
   `vendor/` contains the licensed CPU toolkit and its notices.
 
-Louri evaluates all N² directed cells, including noisy self-comparisons. Its
+The rank sorter evaluates all N² directed cells, including noisy self-comparisons. Its
 bias, threshold, column sums and placement are exact host operations. Invalid
 rank outputs are retained as failures. Physical noise calibration, a useful
 internal optical cascade, GPU comparison, and complete NPU timing/energy remain

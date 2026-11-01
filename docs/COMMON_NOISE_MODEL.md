@@ -47,7 +47,7 @@ y=\mathrm{clip}_{[-1,1]}Q_{q_{\rm out}}
 ```
 
 For Bitonic, the electronics interpret `sign(y)` and resolve y=0 using the
-original index. Louri uses only the direct transfer function: y is followed by
+original index. The rank sorter uses only the direct transfer function: y is followed by
 the triangular bias −ΔU, the inclusive threshold ≥0, and column summation.
 Each of the N² cells receives its own disturbance, including the diagonal.
 Original keys remain unchanged; incorrect ranks are not repaired.
@@ -248,14 +248,14 @@ The current run in `results/common_noise/` contains:
 - 108 complete sorting configurations with 10,800 evaluations on the first
   100 lists of each selected dataset.
 - Bitonic uses both direct and ideal periodic transfer functions. The complete
-  Louri matrix uses only direct differences, including independently disturbed
+  rank matrix uses only direct differences, including independently disturbed
   diagonal entries; its bias is applied after the channel.
 - All 18 noiseless sorting configurations are correct and stable.
 - `sort_outputs.npz` stores indices and flags; `sort_quality.csv` reports
   validity, correctness, stability, conditional ranking quality, and recall,
   including an explicitly defined variant that scores invalid outputs as zero.
 
-A periodic transfer function must not be inserted into the Louri matrix without
+A periodic transfer function must not be inserted into the rank matrix without
 re-deriving the bias/threshold relationship. Equality of signs for two transfer
 functions alone does not prove that relationship.
 

@@ -1,4 +1,4 @@
-# Louri's full matrix: the thesis rank implementation
+# Full-matrix rank sorter: reference and validation
 
 Source: A. Louri, J. A. Hatch, Jr. and J. Na, *Constant-time parallel sorting
 algorithm and its optical implementation using smart pixels*, Applied Optics
@@ -54,7 +54,7 @@ matrix order into `(trials,N*N)` arrays. The difference callable processes each
 cell separately. Then the host subtracts the lower-triangular bias, thresholds,
 sums columns and validates placement. Invalid ranks produce `-1` records.
 
-[`louri_equations.py`](../studies/louri_equations.py) exposes intermediate
+[`rank_sorter_reference.py`](../studies/rank_sorter_reference.py) exposes intermediate
 matrices for explanation and source checking. It implements the same algorithm.
 Its `quantize_difference` helper controls reference quantization. Both paths
 share `place_ranks`, defined beside `rank_sort` in `sorters.py`, to
@@ -107,7 +107,7 @@ These are checked analytically and by sampling; they are not physical reliabilit
   input family has a valid rank output. See [results](RESULTS.md) for context.
 
 ```bash
-python -m studies.check_louri
+python -m studies.check_rank_sorter
 python -m qant_sorting.run
 python -m studies.check_sdk
 ```

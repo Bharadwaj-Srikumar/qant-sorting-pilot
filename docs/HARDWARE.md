@@ -47,7 +47,7 @@ For N=256, with enough rows per call:
 | Mapping | Pair differences | Calls | Logical bytes, weights reloaded |
 |---|---:|---:|---:|
 | Bitonic | 4,608 | 36 | 27,792 |
-| Louri full matrix | 65,536 | 1 | 393,220 |
+| Full rank matrix | 65,536 | 1 | 393,220 |
 
 Rank can save submissions while doing more pair arithmetic and transferring
 more data. Neither count alone selects the faster or more efficient algorithm.

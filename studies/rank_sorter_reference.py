@@ -1,4 +1,4 @@
-"""Inspectable equation-level reference for the canonical full-matrix sorter.
+"""Inspectable equation-level reference for the canonical full-matrix rank sorter.
 
 Source: Louri, Hatch and Na, Applied Optics 34 (1995), pp. 3088-3090,
 equations (1)-(7), DOI 10.1364/AO.34.003087. Row i is the competing record;
@@ -24,8 +24,9 @@ from qant_sorting.sorters import place_ranks
 def quantize_difference(values, bits, quantization):
     """Apply no quantizer, or the existing matched-step signed quantizer.
 
-    Quantization is BEFORE Louri's bias. This location is deliberate: it
-    lets both algorithms consume the same quantized difference information.
+    Quantization is BEFORE the full-matrix rank sorter's bias. This location is
+    deliberate: it lets both algorithms consume the same quantized difference
+    information.
     The bias, threshold, integer summation and output routing are then exact.
     No-quantizer mode also has no clipping; it is the equation-level control.
     """
@@ -52,8 +53,8 @@ class MatrixRanking:
     result: tuple
 
 
-def louri_matrix_rank(keys, bits, *, errors=None, quantization="none", diagonal="measured"):
-    """Evaluate the full matrix, lower-triangular bias, >=0 threshold and ranks.
+def reference_rank_sort(keys, bits, *, errors=None, quantization="none", diagonal="measured"):
+    """Evaluate the full-matrix rank sorter with bias, >=0 threshold and ranks.
 
     keys: validated here as a nonempty (trials,N) batch of 4/8-bit integers.
     errors: optional finite (trials,N,N) deviations in NORMALIZED signal units,
