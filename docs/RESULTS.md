@@ -51,5 +51,5 @@ future timing comparison. See [HARDWARE.md](HARDWARE.md).
 
 Current evidence is in `results/reference`, `sdk`, `louri`, `ranking_quality`,
 `common_noise`, `resources`, `periodic`, `affine` and `cpu_baseline_20261007`.
-The report's evidence manifest records file hashes. See [METHOD.md](METHOD.md)
+The saved run metadata and validation receipts record provenance and file hashes. See [METHOD.md](METHOD.md)
 for model equations and [THESIS_SCOPE.md](THESIS_SCOPE.md) for the research scope.

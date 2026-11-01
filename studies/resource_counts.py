@@ -15,7 +15,7 @@ These analytical counts need no SDK. --verify-sdk optionally tests chunking
 against the official CPU backend, which still does not measure real hardware.
 """
 
-from qant_sorting.io import write_csv
+from qant_sorting.run import write_csv, ROOT
 
 import argparse
 import json
@@ -23,9 +23,8 @@ from pathlib import Path
 
 import numpy as np
 
-from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.sorters import bitonic_sort, rank_sort
 
-from qant_sorting.paths import ROOT
 # PCIe Gen4 x8: 16 GT/s per lane, eight lanes, 128/130 line coding, 8 bits/byte.
 # This is a directional link ceiling before protocol/driver overhead.
 B_PEAK = 16e9 * 8 * (128 / 130) / 8
@@ -60,7 +59,7 @@ def counts(n, cap):
 def verify_sdk_chunks():
     """Verify submitted shapes/counts, without inferring physical tiling."""
     # Lazy imports keep the analytical accounting and main sweep NumPy-only.
-    from qant_sorting.sdk_mapping import SdkDifference, backend_identity
+    from studies.sdk_adapter import SdkDifference, backend_identity
 
     identity = backend_identity()
     if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):

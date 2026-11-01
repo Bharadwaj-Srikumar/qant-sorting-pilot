@@ -4,10 +4,10 @@ import unittest
 import numpy as np
 
 from qant_sorting.comparison import NoisyDifference, Precision
-from qant_sorting.louri_reference import (
+from studies.louri_equations import (
     louri_matrix_rank, quantize_difference,
 )
-from qant_sorting.sorting_schedules import place_ranks, rank_sort
+from qant_sorting.sorters import place_ranks, rank_sort
 
 
 class LouriReferenceTests(unittest.TestCase):
@@ -109,7 +109,7 @@ class LouriReferenceTests(unittest.TestCase):
             np.testing.assert_array_equal(a,b)
 
     def test_full_matrix_resource_counts(self):
-        from qant_sorting.experiments.hardware_conditions import counts
+        from studies.resource_counts import counts
         self.assertEqual(counts(4,16), (3,6,16,3,1))
         self.assertEqual(counts(16,256), (10,80,256,10,1))
         self.assertEqual(counts(256,65536), (36,4608,65536,36,1))

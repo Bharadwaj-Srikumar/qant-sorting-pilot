@@ -59,7 +59,7 @@ metadata and complete-coverage validation. Every saved flag and accuracy count
 is independently cross-checked.
 
 ```bash
-python -m qant_sorting quality
+python -m studies.ranking_quality
 ```
 
 This writes `results/ranking_quality_reproduced/`. Source outputs remain intact.

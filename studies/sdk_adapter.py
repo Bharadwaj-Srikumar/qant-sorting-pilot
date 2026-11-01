@@ -5,7 +5,7 @@
 # Counters describe buffers visible at the public API, not observed bus traffic.
 # Importing this module requires the optional SDK and ml_dtypes; the pure NumPy
 # reference experiment does not import it. CPU integration checks are in
-# run_sdk_control.py, and backend identity must accompany any reported result.
+# studies/check_sdk.py, and backend identity must accompany any reported result.
 
 """Execute the common pair-difference operation through Q.ANT's official API.
 

@@ -14,7 +14,7 @@ import unittest
 import zipfile
 
 import numpy as np
-from qant_sorting.ranking_quality import prepare_keys, score_saved_order
+from qant_sorting.evaluation import prepare_keys, score_saved_order
 
 
 class RankingQualityTests(unittest.TestCase):

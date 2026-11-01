@@ -49,19 +49,19 @@ We follow the equations and worked matrices, and test those matrices literally.
 
 ## 3. Code and SDK path
 
-[`rank_sort`](../qant_sorting/sorting_schedules.py) packs all pairs in row-major
+[`rank_sort`](../qant_sorting/sorters.py) packs all pairs in row-major
 matrix order into `(trials,N*N)` arrays. The difference callable processes each
 cell separately. Then the host subtracts the lower-triangular bias, thresholds,
 sums columns and validates placement. Invalid ranks produce `-1` records.
 
-[`louri_reference.py`](../qant_sorting/louri_reference.py) exposes intermediate
+[`louri_equations.py`](../studies/louri_equations.py) exposes intermediate
 matrices for explanation and source checking. It implements the same algorithm.
 Its `quantize_difference` helper controls reference quantization. Both paths
-share `place_ranks`, defined beside `rank_sort` in `sorting_schedules.py`, to
+share `place_ranks`, defined beside `rank_sort` in `sorters.py`, to
 reject invalid destinations and route original records. The reference imports
 this helper; the operational sorter does not import the reference module.
 
-With [`SdkDifference`](../qant_sorting/sdk_mapping.py), all N² pair rows are sent
+With [`SdkDifference`](../studies/sdk_adapter.py), all N² pair rows are sent
 to the official `linear_fprop` CPU backend with weights `[1,-1]`. This is tested
 on every saved list. Bias, threshold, ranks and routing remain electronic.
 One logical batch need not equal one physical parallel hardware operation.
@@ -107,9 +107,9 @@ These are checked analytically and by sampling; they are not physical reliabilit
   input family has a valid rank output. See [results](RESULTS.md) for context.
 
 ```bash
-python -m qant_sorting louri
-python -m qant_sorting noise
-python -m qant_sorting sdk
+python -m studies.check_louri
+python -m qant_sorting.run
+python -m studies.check_sdk
 ```
 
 The corresponding current evidence lives in `results/louri`, `results/reference`

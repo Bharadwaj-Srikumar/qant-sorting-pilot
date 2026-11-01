@@ -52,7 +52,7 @@ interval, or complete host-device timing. No physical measurements are claimed.
 
 ## Ready measurement script and completed CPU control
 
-measure_periodic_curve.py records raw samples, BF16 input codes, mean/std,
+studies/measure_curve.py records raw samples, BF16 input codes, mean/std,
 range, timestamps, SDK/backend identity and end-to-end API call durations.
 It rejects a requested hardware mode when only the CPU backend is installed.
 The valid hardware phase/amplitude range must be confirmed by Q.ANT first.
@@ -62,7 +62,7 @@ access. This validates data collection only; it cannot characterize physical
 noise or drift. The following command writes a separate local result:
 
 ```bash
-python -m qant_sorting curve --mode cpu --phase-min 0 --phase-max 3.141592653589793 --points 257 --repeats 20 --output-dir results/curve_reproduced
+python -m studies.measure_curve --mode cpu --phase-min 0 --phase-max 3.141592653589793 --points 257 --repeats 20 --output-dir results/curve_reproduced
 ```
 
 For actual hardware, replace the SDK/driver with the supported hardware

@@ -8,12 +8,11 @@ import argparse
 import json
 from pathlib import Path
 import numpy as np
-from qant_sorting.io import file_hash, source_hashes, write_csv
-from qant_sorting.input_validation import validate_keys
-from qant_sorting.metrics import reference_flags
-from qant_sorting.sdk_mapping import SdkDifference, backend_identity
-from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
-from qant_sorting.paths import ROOT, INPUT_SHA256
+from qant_sorting.run import file_hash, source_hashes, write_csv, ROOT, INPUT_SHA256
+from qant_sorting.comparison import validate_keys
+from qant_sorting.evaluation import reference_flags
+from studies.sdk_adapter import SdkDifference, backend_identity
+from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
 def main():

@@ -1,24 +1,11 @@
-# Reading guide: exact reproduction of the CURRENT matched-step reference.
-# The immutable input archive supplies keys; this runner does not regenerate them.
-# Each dataset is evaluated at six noise levels with both sorting schedules.
-# Noise streams are identified by experimental settings and absolute trial IDs,
-# so batch_size changes memory use/API grouping without changing the experiment.
-# Positive eta values scale paired random draws; architecture streams differ.
-# Outputs include per-trial record indices, three flags, summary rows, and one
-# counterexample per failed case. verify_results checks numerical identity.
-# Existing output directories are rejected. Only a missing reference can be
-# registered; reproductions compare against its saved arrays and counts.
+"""Run the main Bitonic-versus-rank noise experiment.
 
-"""Reproduce the agreed six-level experiment using only NumPy.
-
-Run: python -m qant_sorting noise
-The saved reference is never overwritten. Every result is checked against it.
-No SDK, NPU or digital repair is used. Rank evaluates all N*N cells.
+Start with evaluate_case() to follow one batch, then run() for the full sweep.
+Run from the repository root: python -m qant_sorting.run
 """
 
-from qant_sorting.io import source_hashes, write_csv
-
 import argparse
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -27,22 +14,79 @@ import time
 
 import numpy as np
 
-from qant_sorting.comparison import NoisyDifference, Precision
-from qant_sorting.input_validation import validate_keys
-from qant_sorting.metrics import reference_flags, wilson_interval
-from qant_sorting.experiments.verify_results import REFERENCE, verify_results
-
-from qant_sorting.paths import ROOT, INPUT_SHA256
-from qant_sorting.sorting_schedules import rank_sort
-from qant_sorting.experiments.settings import ETA_VALUES, MASTER_SEED, MAPPINGS
+from qant_sorting.comparison import NoisyDifference, Precision, validate_keys
+from qant_sorting.evaluation import reference_flags, wilson_interval
+from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
-# Inputs specify one dataset/precision/eta/sorter/seed context and batch size.
-# For each chunk use absolute row IDs, run the sorter, independently score flags,
-# and accumulate the comparator's event counters over every active layer.
-# Return (flags, original_indices, totals, first_failure) concatenated in input order.
-# The counterexample stores actual routed keys and indices; the complete index
-# archive plus original inputs suffices to reconstruct every output ordering.
+# These settings define the saved reference experiment.
+ROOT = Path(__file__).resolve().parents[1]
+INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
+REFERENCE = ROOT / "results/reference"
+ETA_VALUES = (0.0, 0.05, 0.10, 0.15, 0.20, 0.25)
+MASTER_SEED = 20260930
+MAPPINGS = {
+    "Pipelined bitonic adaptation": (bitonic_sort, 1),
+    "Louri full-matrix rank": (rank_sort, 2),
+}
+
+
+def file_hash(path):
+    """Return SHA-256 without loading an entire result archive into memory."""
+    with Path(path).open("rb") as handle:
+        return hashlib.file_digest(handle, "sha256").hexdigest()
+
+
+def write_csv(path, rows):
+    """Write nonempty record rows in their original field order, using UTF-8."""
+    if not rows:
+        raise ValueError("Cannot infer CSV columns from an empty record list")
+    with Path(path).open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def source_hashes():
+    """Record the code used by a new run; leave old metadata unchanged."""
+    hashes = {}
+    for directory in ("qant_sorting", "studies", "tools"):
+        for path in sorted((ROOT / directory).rglob("*.py")):
+            hashes[str(path.relative_to(ROOT))] = file_hash(path)
+    return hashes
+
+
+def verify_results(actual_directory, reference_directory=REFERENCE):
+    """Require identical CSV results and per-trial flags/record permutations.
+
+    Metadata may change because code, runtime and batching change. Numerical
+    results, seeds and input hashes must not. Compare NPZ contents rather than
+    ZIP bytes, whose container metadata is irrelevant to the experiment.
+    """
+    with (reference_directory / "accuracy.csv").open(newline="") as handle:
+        expected_rows = list(csv.DictReader(handle))
+    with (actual_directory / "accuracy.csv").open(newline="") as handle:
+        actual_rows = list(csv.DictReader(handle))
+    if actual_rows != expected_rows:
+        raise AssertionError("CSV results differ from the saved reference")
+
+    with np.load(reference_directory / "trial_outcomes.npz") as expected:
+        with np.load(actual_directory / "trial_outcomes.npz") as actual:
+            if set(actual.files) != set(expected.files):
+                raise AssertionError("Saved trial arrays differ in their case names")
+            for name in expected.files:
+                if not np.array_equal(actual[name], expected[name]):
+                    raise AssertionError(f"Changed trial result: {name}")
+            array_count = len(expected.files)
+
+    # Failure examples also identify exactly the same first failing trial.
+    expected_failures = json.loads((reference_directory / "failures.json").read_text())
+    actual_failures = json.loads((actual_directory / "failures.json").read_text())
+    if actual_failures != expected_failures:
+        raise AssertionError("First-failure examples changed")
+    return {"matched_configurations": len(actual_rows), "matched_arrays": array_count}
+
+
 def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
     """Evaluate one width/N/family/noise/mapping condition in small batches."""
     if sort is rank_sort:
@@ -54,8 +98,10 @@ def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
         stop = min(start + batch_size, len(data))
         batch = data[start:stop]
         difference = NoisyDifference(precision, eta, seed_context, range(start, stop))
-        result = (rank_sort(batch, difference, bias_step=precision.delta_in)
-                  if sort is rank_sort else sort(batch, difference))
+        if sort is rank_sort:
+            result = rank_sort(batch, difference, bias_step=precision.delta_in)
+        else:
+            result = sort(batch, difference)
         batch_flags = reference_flags(batch, result)
         flags.append(batch_flags)
         indices.append(result[1])
@@ -76,13 +122,6 @@ def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
     return np.concatenate(flags), np.concatenate(indices), totals, first_failure
 
 
-# Input output Path and positive batch size. Refuse the immutable reference
-# directory and require the registered input archive hash before any experiment.
-# Loop over saved datasets, six eta values and two schedules; verify pair counts
-# from their analytical formulas and require all noiseless flags to pass.
-# Write accuracy, per-trial outcomes, first failures, validation and provenance.
-# verify_results must confirm exact reference outcomes; differing source hashes
-# after comments are expected, but numerical evidence may not silently change.
 def run(output_directory, batch_size):
     """Use saved inputs and seeds, write evidence, and verify exact reproduction."""
     if batch_size < 1:
@@ -157,12 +196,18 @@ def run(output_directory, batch_size):
     (output_directory / "failures.json").write_text(json.dumps(failures, indent=2))
 
     # Refactoring is accepted only if all previously reported outcomes match.
-    validation = (dict(reference_comparison="New full-matrix baseline; eta=0 checked against stable argsort",
-                       configurations=len(rows), noiseless_sort_executions=sum(r["trials"] for r in rows if r["eta"]==0))
-                  if registering else verify_results(output_directory))
+    if registering:
+        validation = dict(
+            reference_comparison="New full-matrix baseline; eta=0 checked against stable argsort",
+            configurations=len(rows),
+            noiseless_sort_executions=sum(r["trials"] for r in rows if r["eta"] == 0),
+        )
+    else:
+        validation = verify_results(output_directory)
     (output_directory / "validation.json").write_text(json.dumps(validation, indent=2))
     metadata = dict(
-        revision="thesis_full_matrix_20261024", rank_algorithm="Louri full N*N matrix including measured diagonal",
+        revision="thesis_full_matrix_20261024",
+        rank_algorithm="Louri full N*N matrix including measured diagonal",
         rank_bias="Subtract delta_in below diagonal AFTER output quantization; exact >=0 threshold and column sum",
         rows=len(rows), executions=sum(row["trials"] for row in rows),
         input_master_seed=MASTER_SEED, eta_values=list(ETA_VALUES),
@@ -170,7 +215,11 @@ def run(output_directory, batch_size):
         python=platform.python_version(), numpy=np.__version__,
         elapsed_seconds=time.perf_counter() - started,
         hardware_executed=False, sdk_noise_model=False,
-        noise="Independent Gaussian draws for every directed matrix cell INCLUDING the diagonal and between mappings; paired streams across positive eta levels. Assumed, not physical calibration.",
+        noise=(
+            "Independent Gaussian draws for every directed matrix cell INCLUDING the diagonal "
+            "and between mappings; paired streams across positive eta levels. "
+            "Assumed, not physical calibration."
+        ),
         timing="Run duration only; not a hardware latency or sorting performance benchmark.",
         source_sha256=source_hashes(),
         **validation,
@@ -180,9 +229,14 @@ def run(output_directory, batch_size):
     print(f"Results: {output_directory}")
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    """Parse the two run options and start the evaluation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     parser.add_argument("--batch-size", type=int, default=64)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     run(args.output_dir, args.batch_size)
+
+
+if __name__ == "__main__":
+    main()

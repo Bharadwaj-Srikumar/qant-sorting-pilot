@@ -1,77 +1,118 @@
-# Hybrid photonic sorting — master's thesis
+# Hybrid photonic sorting - master's thesis
 
-The thesis compares **Bitonic** with **Louri's full N×N rank matrix** on a
-hybrid linear-computing path. Every directed rank comparison and self-comparison
-is evaluated separately. The lower-triangular bias, threshold, column sums and
-record placement are electronic. CPU verification is not evidence of a photonic
-speed or energy advantage.
+This project compares **Bitonic sorting** with **Louri's full-matrix rank sorter**.
+It studies how assumed comparison noise and quantization affect sorting quality.
+The algorithms move original integer keys and record IDs; only their comparison
+scores are disturbed.
 
-## Start here
+## Run the main evaluation
 
-- [Thesis scope and decisions](docs/THESIS_SCOPE.md)
-- [Current complete thesis report, English](reports/Masters_Thesis_Hybrid_Photonic_Sorting.pdf)
-- [Read the code one step at a time](docs/CODE_GUIDE.md)
-- [Comparison model](docs/METHOD.md) and [Louri's equations](docs/LOURI_REFERENCE.md)
-- [Current results](docs/RESULTS.md), [ranking quality](docs/RANKING_QUALITY.md),
-  [noise assumptions](docs/COMMON_NOISE_MODEL.md), and [resource accounting](docs/HARDWARE.md)
-
-## Run from the repository root
-
-Use Python 3.12 and a virtual environment:
+Use Python 3.12. From the repository root:
 
 ```bash
 python -m venv .venv
 # Linux/macOS: source .venv/bin/activate
-# PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install -r requirements/analysis.txt
-python -m unittest discover -s tests -v
-python -m qant_sorting noise
-python -m qant_sorting louri
-python -m qant_sorting quality
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m qant_sorting.run
 ```
 
-`noise` reproduces all **288 current configurations / 288,000 sorts** and compares
-outputs with `results/reference/`. The source-equation check covers **155,328
-noiseless arrays**. Absolute trial IDs preserve the experiment across batch sizes.
-New runs write to separate reproduction directories; existing evidence is protected.
+This loads the fixed inputs from `data/inputs.npz`, runs both sorters at six noise
+levels, and saves results in `results/reproduced/`. It checks all 288 configurations
+and 288,000 sort outcomes against the committed reference. An existing output
+directory is never overwritten. Use `--output-dir` to choose a fresh destination;
+`--batch-size` changes memory use without changing a trial's random stream.
 
-For the official CPU SDK:
+The main outputs are `accuracy.csv`, `trial_outcomes.npz`, `failures.json`,
+`validation.json` and `metadata.json`. The NPZ contains original record IDs and
+valid/correct/stable flags, so outputs can be checked independently.
+
+## Six files to read
+
+| File | Purpose |
+|---|---|
+| [comparison.py](qant_sorting/comparison.py) | Check inputs; normalize key pairs; add the main Gaussian noise; round and clip |
+| [common_noise.py](qant_sorting/common_noise.py) | A separate model for upstream/readout noise, transfer shape and offsets |
+| [sorters.py](qant_sorting/sorters.py) | Bitonic layers, full N² Louri ranking and record placement |
+| [evaluation.py](qant_sorting/evaluation.py) | Validity, correctness, stability, uncertainty and partial ordering metrics |
+| [run.py](qant_sorting/run.py) | Experiment settings, input loading, the main sweep and result files |
+| [controls.py](qant_sorting/controls.py) | Pair-level and complete-sort checks of the common-noise model |
+
+Follow [the short reading guide](docs/CODE_GUIDE.md) for a small worked example.
+The main path is: **inputs → comparison model → sorting → evaluation → saved results**.
+The reference and common models have different clipping contracts; both remain
+explicitly named rather than silently sharing one changed model.
+
+For the common-noise controls:
+
+```bash
+python -m qant_sorting.controls
+```
+
+This separate study writes to `results/common_noise_reproduced/`. Its defaults
+check 28 million pair decisions and 10,800 complete sorts. It uses NumPy/SciPy,
+not the Q.ANT SDK. Use `--help` on either module to see its few options.
+
+## Supporting studies
+
+The core evaluation works without these modules. Run a study when its question
+is relevant to the thesis; the studies do not run automatically.
+
+| Command | Question |
+|---|---|
+| `python -m studies.check_louri` | Does the implementation match the source equations and threshold controls? |
+| `python -m studies.ranking_quality` | How good are the saved orders beyond complete-sort accuracy? |
+| `python -m studies.check_sdk` | Do the mappings work through the official CPU SDK? |
+| `python -m studies.check_periodic` | What does the periodic CPU operation do for every key pair? |
+| `python -m studies.check_affine` | Does the affine phase candidate retain adjacent-key distinctions? |
+| `python -m studies.check_nonlinearity` | Which nonlinear identities and SDK boundaries hold? |
+| `python -m studies.measure_curve --help` | How can repeated API samples be collected with an explicit backend? |
+| `python -m studies.resource_counts` | How many operations, submissions and logical bytes are required? |
+| `python -m studies.cpu_baseline` | How long does stable sorting take on the chosen digital CPU? |
+
+The ranking-quality study reads the committed `results/reference/` outputs; it
+does not run new sorts. The main runner separately verifies each reproduction
+against those same saved outputs.
+
+SDK studies need the optional official CPU toolkit:
 
 ```bash
 python -m pip install -r requirements/sdk.txt
-python -m qant_sorting install-sdk --no-deps
-python -m qant_sorting sdk
-python -m qant_sorting affine
+python -m tools.install_sdk --no-deps
+python -m studies.check_sdk
 ```
 
-The full-matrix/Bitonic integration checks **48,000 complete sorts**. The affine
-periodic candidate is a separate pair feasibility study: it has 40 false 8-bit
-ties and is not the thesis rank implementation. SDK tests skip explicitly if the
-optional dependency is absent; no hardware backend is silently substituted.
+The installer checks the bundled archive before installing its platform wheel.
+An SDK CPU result establishes software integration, not physical noise, optical
+latency or energy efficiency. Keep benchmark environments and their dates explicit.
 
-To rebuild the report:
+## Check the code
 
 ```bash
-python -m pip install -r requirements/report.txt
-python -m qant_sorting report
+python -m unittest discover -s tests -v
 ```
 
-## Repository contents
+Tests cover the equations, quantizer boundaries, invalid inputs, record routing,
+random-stream reproducibility and quality metrics. Five SDK tests explicitly skip
+when the optional toolkit is unavailable.
 
-| Directory | Purpose |
-|---|---|
-| `qant_sorting/` | Current algorithms, comparison models, quality metrics and report builder |
-| `qant_sorting/experiments/` | Reproducible commands; run `python -m qant_sorting --help` |
-| `data/` | One immutable input corpus |
-| `results/` | Current evidence, including output indices required for independent rescoring |
-| `docs/`, `report_assets/` | Explanations, literature, source audits and report text |
-| `reports/` | One current complete PDF |
-| `tests/`, `validation/` | Mathematical/API tests and current validation evidence |
-| `requirements/`, `vendor/` | Environments and licensed, pinned official CPU SDK |
+## Report and research evidence
 
-Superseded prototypes, reduced-rank outputs and earlier reports are absent from
-the current tree. Git history preserves version comparisons. Stored NPZ outputs
-and the SDK ZIP are necessary reproducibility data/dependencies, not old reports.
+- [Read the thesis report (PDF)](reports/Masters_Thesis_Hybrid_Photonic_Sorting.pdf).
+  The repository stores the finished PDF only; it has no PDF-generation code,
+  report template assets or report-rendering dependencies.
+  The PDF retains its original research snapshot; use this README and the reading
+  guide for the simplified layout and current commands.
+- [Research scope](docs/THESIS_SCOPE.md), [model equations](docs/METHOD.md),
+  [noise assumptions](docs/COMMON_NOISE_MODEL.md) and [current results](docs/RESULTS.md).
+- `data/` contains the fixed input corpus; `results/` contains recorded evidence.
+  New runs use separate directories. Existing results, validation receipts and
+  the report retain their original dates and provenance.
+- `studies/` holds the supporting investigations; `tools/` contains the SDK installer.
+  `vendor/` contains the licensed CPU toolkit and its notices.
 
-GPU timing, calibrated physical noise, a confirmed useful internal cascade,
-complete NPU timing and energy measurements remain open.
+Louri evaluates all N² directed cells, including noisy self-comparisons. Its
+bias, threshold, column sums and placement are exact host operations. Invalid
+rank outputs are retained as failures. Physical noise calibration, a useful
+internal optical cascade, GPU comparison, and complete NPU timing/energy remain
+open questions.

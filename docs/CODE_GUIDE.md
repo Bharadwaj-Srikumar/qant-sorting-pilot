@@ -1,76 +1,95 @@
 # Reading the thesis code
 
-Start with one workload at a time:
+The main implementation has six Python modules. Start with one four-key example,
+then follow the same operations inside the experiment runner. Supporting SDK and
+hardware studies are in `studies/` and can be read later.
 
-1. `input_validation.py`: valid integer keys, shapes and unsigned-key ranges.
-2. `comparison.py`: normalization, Gaussian noise, nearest-even rounding and clipping.
-3. `sorting_schedules.py`: read `rank_sort` with the [Louri worked example](LOURI_REFERENCE.md),
-   then `place_ranks` immediately below it to follow validation and record placement.
-   Read Bitonic's layers and record exchanges in the same file.
-4. `metrics.py`: separate validity, sorted keys and stable record order.
-5. `ranking_quality.py`: inversions, Kendall-τ-b and Recall@k on valid outputs.
-6. `sdk_mapping.py`: pack every requested pair into the official linear API.
+## 1. Follow one complete sort
 
-The inspectable matrices in `louri_reference.py` are a reference for the same
-full-matrix algorithm, not a competing rank adaptation. In particular, `rank_sort`
-submits **N² entries**, keeps both directions separate, and does not restore noisy
-diagonals. `bias_step` is required explicitly and must match the difference units.
+Run this from the repository root after installing `requirements.txt`:
 
-Both `rank_sort` and the equation-level reference use `place_ranks` from
-`sorting_schedules.py`. The operational sorter therefore has no dependency on
-`louri_reference.py`. The reference's `quantize_difference` stays alongside its
-matrix equations: it selects no quantization or the matched quantizer. In the
-operational sorter, the supplied `difference` callable owns quantization;
-`rank_sort` does not apply a second quantizer.
+```python
+from qant_sorting.comparison import validate_keys, Precision, NoisyDifference
+from qant_sorting.sorters import bitonic_sort
+from qant_sorting.evaluation import reference_flags
 
-## Commands
+keys = validate_keys([[3, 1, 3, 0]], key_bits=4)
+precision = Precision(4, 4, 4)
+difference = NoisyDifference(precision, eta=0)
+result = bitonic_sort(keys, difference)
+flags = reference_flags(keys, result)
 
-Run `python -m qant_sorting COMMAND --help` from the repository root.
-Implementations are under `qant_sorting/experiments/` except `report`.
+print(result[0])  # [[0, 1, 3, 3]]: sorted keys
+print(result[1])  # [[3, 1, 0, 2]]: original record IDs
+print(flags)      # [[True, True, True]]: valid, correct, stable
+```
 
-| Command | Purpose |
-|---|---|
-| `noise` / `verify` | Reproduce / verify the complete current Bitonic–Louri reference |
-| `louri` | Verify source matrices, noiseless ranks and analytic threshold controls |
-| `quality` | Independently score the complete saved reference outputs |
-| `common-noise` | Compare declared signal stages and quantization assumptions |
-| `sdk` | Official CPU integration of both complete sorters |
-| `resources` | Count N² rank cells, calls and logical BF16 buffers |
-| `cpu` | Measure a stable digital CPU baseline |
-| `periodic-pairs` / `affine` | Separate nonlinear comparison feasibility studies |
-| `nonlinearity` | CPU ReLU/min-max identities and source boundaries |
-| `curve` | Acquire repeated API samples with explicit backend selection |
-| `install-sdk` | Install the checksum-verified vendor CPU wheel |
-| `report` | Build the sole current PDF from hash-checked evidence |
+One row is one independent sort. The comparison object returns measured scores;
+the sorter moves original keys and IDs according to those scores. The evaluation
+code checks the completed output against an independent stable digital reference.
 
-## Contracts
+## 2. Read the main model and algorithms
 
-- Keys have shape `(trials,N)`; matrix pair inputs have shape `(trials,N*N)`.
-- Flags are `[valid,correct,stable]`; invalid rank records have `-1` indices/values.
-- No digital re-sort, rank clipping or silent fallback repairs invalid outputs.
-- Conditional tau/recall require valid permutations; report the denominator.
-- Recall means the largest k keys. Stable-ID and tie-neutral variants are distinct.
-- Absolute trial IDs determine RNG streams, regardless of memory batching.
-- `common_noise_model.py` is a Float64 sensitivity model. `sdk_mapping.py` executes
-  official BF16 CPU arithmetic. Neither is measured physical analog precision.
-- A periodic score is not in difference units and cannot be passed unchanged to
-  the full-matrix rank implementation. Current nonlinear controls are pair-only.
+1. **`qant_sorting/comparison.py`**: read `validate_keys`, `Precision`, then
+   `NoisyDifference.__call__`. For matched b-bit settings, delta = 2**(-b).
+   Subtract normalized inputs, add Gaussian noise with sigma = eta * delta,
+   round to the nearest-even code and clip to [-1/2, 1/2-delta].
+2. **`qant_sorting/sorters.py`**: read `bitonic_sort` and its layer generator,
+   then `rank_sort` and `place_ranks`. Both receive the same kind of comparison
+   callable. Bitonic evaluates dependent layers; Louri evaluates N² directed
+   cells, including the diagonal.
+3. **`qant_sorting/evaluation.py`**: start with `reference_flags`. Validity,
+   sortedness and stability are separate questions. Read `prepare_keys` and
+   `score_saved_order` when studying inversions, Kendall metrics and Recall@k.
+4. **`qant_sorting/run.py`**: parameters are near the top. `evaluate_case` runs
+   batches of one setting; `run` loops over datasets, noise levels and sorters,
+   saves outputs, then verifies them against the recorded reference. File helpers
+   stay in this module so the full evaluation needs no separate utility package.
 
-## Equations and saved evidence
+For Louri's matrix orientation and worked example, use [LOURI_REFERENCE.md](LOURI_REFERENCE.md).
+Cell (i,j) measures the normalized difference delta * (keys[j]-keys[i]). The host subtracts
+one normalized key step below the diagonal, thresholds at >=0, sums columns and
+subtracts one to obtain zero-based destinations. Collisions and invalid ranks
+produce -1 markers; no hidden digital repair is applied.
 
-Use fenced `math` blocks for display equations in guides, with blank lines around
-them. Use `\mathrm`, not GitHub-blocked `\operatorname`. The PDF source uses its
-supported single-line dollar-delimited math and `\lbrace` / `\rbrace` for visible
-braces. Check rendered output when changing formulas.
+## 3. Read the extended noise controls
 
-`paths.py` pins the corpus. `io.py` hashes files and writes CSV. Per-run metadata
-identify code as it existed during execution; subsequent documentation edits do
-not retroactively rewrite those snapshots. The current report checks all evidence
-against `report_assets/evidence.json`.
+5. **`qant_sorting/common_noise.py`**: read `NoiseConfig`, `evaluate_difference`,
+   then `CommonNoiseComparison`. The signal passes through upstream noise/offset,
+   optional rounding, clipping, direct or normalized-sine transfer, readout
+   noise/offset, and output rounding. This model clips to [-1,1], so it is a
+   separate study from the main reference channel.
+6. **`qant_sorting/controls.py`**: `SETTINGS` defines the cases.
+   `analytic_probabilities` gives theoretical sign/zero probabilities where
+   supported; `run_pair_controls` checks sampled frequencies. `run_sort_controls`
+   applies selected settings to complete sorts. `run` coordinates these two
+   stages and saves their results. The analytical probabilities validate the
+   model; they do not choose swaps or ranks.
 
-## Documentation language
+## 4. Run only the question you are studying
 
-Maintain project documentation, code comments, report text, generated labels,
-and inquiry templates in English. Use decimal points and commas for thousands
-in report prose and tables. Preserve original author names, source filenames,
-URLs, checksums, and third-party legal notices as provenance identifiers.
+```bash
+python -m qant_sorting.run       # full registered reference sweep
+python -m qant_sorting.controls  # separate common-channel sensitivity controls
+python -m studies.check_louri   # independent equation-level checks
+python -m studies.ranking_quality  # rescore saved reference outputs
+```
+
+Each module supports `--help`. The optional commands and SDK setup are listed in
+the [README](../README.md). The direct module commands replace the old command
+dispatcher and `qant_sorting/experiments/` layout.
+
+## Assumptions to remember
+
+- Input arrays have shape `(trials, N)`; pair arrays have shape `(trials, pairs)`.
+- Original IDs travel with records; a measured zero invokes the stated tie rule.
+- Absolute trial IDs preserve random streams when a batch is split.
+- Conditional ordering metrics require valid permutations. Report that denominator.
+- Top-k means the largest k keys; stable-ID and tie-neutral recall are distinct.
+- The shared Float64 noise model, official BF16 CPU SDK and physical hardware
+  are separate sources of evidence. Synthetic noise levels are assumptions.
+- Stored metadata describe the code at the time of a run. The consolidation does
+  not rewrite historical hashes, measurements or results.
+
+The report is stored as a PDF in `reports/`; report-generation code is outside
+this repository. Keep code comments and research documentation in English.

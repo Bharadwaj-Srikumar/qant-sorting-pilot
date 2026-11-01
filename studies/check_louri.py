@@ -12,11 +12,10 @@ from pathlib import Path
 import platform
 import numpy as np
 from qant_sorting.comparison import NoisyDifference, Precision
-from qant_sorting.io import file_hash, source_hashes, write_csv
-from qant_sorting.louri_reference import louri_matrix_rank
-from qant_sorting.metrics import reference_flags
-from qant_sorting.paths import ROOT, INPUT_SHA256
-from qant_sorting.sorting_schedules import rank_sort
+from qant_sorting.run import file_hash, source_hashes, write_csv, ROOT, INPUT_SHA256
+from studies.louri_equations import louri_matrix_rank
+from qant_sorting.evaluation import reference_flags
+from qant_sorting.sorters import rank_sort
 
 SEED = 20261024
 

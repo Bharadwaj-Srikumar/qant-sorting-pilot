@@ -8,10 +8,10 @@
 from dataclasses import replace
 import unittest
 import numpy as np
-from qant_sorting.common_noise_model import (NoiseConfig, CommonNoiseComparison, evaluate_difference,
+from qant_sorting.common_noise import (NoiseConfig, CommonNoiseComparison, evaluate_difference,
                                 quantize, projected_variance, receiver_current_variance,
                                 ELEMENTARY_CHARGE_C)
-from qant_sorting.sorting_schedules import bitonic_sort, rank_sort
+from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
 class CommonNoiseTests(unittest.TestCase):
@@ -50,7 +50,7 @@ class CommonNoiseTests(unittest.TestCase):
     # deviation, and check the same result through Jacobian variance propagation.
     def test_gain_normalization_does_not_create_free_noise_reduction(self):
         # First-order variance: raw sin gain alpha scales both signal and upstream noise.
-        from qant_sorting.common_noise_model import ALPHA
+        from qant_sorting.common_noise import ALPHA
         sigma = .25 / 256
         self.assertAlmostEqual((ALPHA / 256)/(ALPHA * sigma), (1/256)/sigma)
         self.assertAlmostEqual(projected_variance([ALPHA], [[sigma**2]]), (ALPHA*sigma)**2)

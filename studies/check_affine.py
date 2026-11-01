@@ -10,7 +10,7 @@ overwritten. Candidate errors are research results, not repaired comparisons.
 The direct-difference and existing host-phase controls must remain correct.
 """
 
-from qant_sorting.io import file_hash, source_hashes
+from qant_sorting.run import file_hash, source_hashes, ROOT, INPUT_SHA256
 
 import argparse
 import importlib.metadata
@@ -22,10 +22,9 @@ import numpy as np
 from ml_dtypes import bfloat16
 import qant_native_computing_toolkit as qant
 
-from qant_sorting.periodic_comparison import ALPHA, U0, calibration_reference, periodic_values, require_cpu_backend
-from qant_sorting.sdk_mapping import SdkDifference
+from studies.periodic import ALPHA, U0, calibration_reference, periodic_values, require_cpu_backend
+from studies.sdk_adapter import SdkDifference
 
-from qant_sorting.paths import ROOT, INPUT_SHA256
 SDK_ARCHIVE_SHA256 = "99b4669d3256d92cc35efc1a2d6d59deef7a033d78397d71150333011eb93898"
 
 

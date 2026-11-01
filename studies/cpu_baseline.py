@@ -13,7 +13,7 @@ Measures an application call returning sorted keys AND original indices.
 No Q.ANT SDK, simulated noise, or photonic timing is involved.
 """
 
-from qant_sorting.io import source_hashes, write_csv
+from qant_sorting.run import source_hashes, write_csv, ROOT, INPUT_SHA256
 
 import argparse
 from datetime import datetime, timezone
@@ -30,7 +30,6 @@ import time
 
 import numpy as np
 
-from qant_sorting.paths import ROOT, INPUT_SHA256
 
 
 # Input one key array or batch, with records along the last axis.

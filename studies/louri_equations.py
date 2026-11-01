@@ -17,9 +17,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from qant_sorting.comparison import Precision
-from qant_sorting.input_validation import validate_keys
-from qant_sorting.sorting_schedules import place_ranks
+from qant_sorting.comparison import Precision, validate_keys
+from qant_sorting.sorters import place_ranks
 
 
 def quantize_difference(values, bits, quantization):
