@@ -1,10 +1,10 @@
 # Current evaluation results
 
-The canonical architectures are **Bitonic** and **Louri full-matrix rank sorting**. Each rank run evaluates N² directed cells, including the diagonal. Reverse decisions are not inferred.
+The canonical architectures are **Bitonic** and **full-matrix rank sorting**. Each rank run evaluates N² directed cells, including the diagonal. Reverse decisions are not inferred.
 
 ## Whole-array correctness
 
-Each cell is **Bitonic / Louri** (%), from 1,000 saved inputs per setting.
+Each cell is **Bitonic / Rank** (%), from 1,000 saved inputs per setting.
 
 | Setting | η=0 | 0.05 | 0.10 | 0.15 | 0.20 | 0.25 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -16,10 +16,10 @@ Each cell is **Bitonic / Louri** (%), from 1,000 saved inputs per setting.
 The complete sweep contains **288 configurations and 288,000 sorts**. At η=0,
 all 48,000 sorts are correct and stable. Each matrix cell receives independent
 Gaussian difference noise with σ=ηΔ, followed by the specified signed quantizer;
-Louri's exact host bias and inclusive threshold follow quantization. These are
+The rank sorter's exact host bias and inclusive threshold follow quantization. These are
 simulation assumptions, not measured Q.ANT noise.
 
-At 8 bits, N=256 and η=0.25, Louri has **no valid rank permutations** in either
+At 8 bits, N=256 and η=0.25, the rank sorter has **no valid rank permutations** in either
 input regime. Such failures are retained and are not repaired electronically.
 Conditional Kendall-τ and recall are undefined when no valid outputs exist;
 recall utility that assigns zero to invalid outputs is zero. Bitonic always
@@ -35,7 +35,7 @@ made because outcomes also depend on the keys, thresholds and rank constraints.
 
 | Evidence | Current scope | Result |
 |---|---|---|
-| Literal Louri equations and stable argsort | 155,328 noiseless arrays | Agreement, including ties and rank offset |
+| Source rank equations and stable argsort | 155,328 noiseless arrays | Agreement, including ties and rank offset |
 | Official CPU SDK | 65,792 pairs; 48,000 full sorts | Exact differences and correct stable orders |
 | Rerun with different batch size | 288,000 main-sort outcomes | All CSV rows, flags, indices and failure examples identical |
 | Ranking quality | All 288,000 main-sort outcomes | Complete coverage; τ, distance errors and Recall@k |

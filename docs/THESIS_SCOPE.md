@@ -1,7 +1,7 @@
 # Scope and implementation decision
 
-The two evaluated architectures are **Bitonic** and **Louri's full matrix rank
-sorter**. The full matrix is the canonical rank implementation throughout code,
+The two evaluated architectures are **Bitonic** and **full-matrix rank
+sorting**. The full matrix is the canonical rank implementation throughout code,
 SDK integration, experiments, complexity/resource descriptions and the report.
 
 The decision prioritizes traceability to the source architecture. Reducing rank
@@ -12,7 +12,7 @@ tree; they are not presented as another active thesis architecture.
 
 ## Exact boundary
 
-- Louri: N² directed difference observations, including self-comparisons;
+- Rank sorter: N² directed difference observations, including self-comparisons;
   normalized lower-triangular unit bias; threshold >=0; column sums; one-based
   source ranks converted to zero-based output positions.
 - Main sensitivity model: independent Gaussian cell errors, including diagonal;

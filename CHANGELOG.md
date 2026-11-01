@@ -1,5 +1,13 @@
 # 2026-11-01 - simpler thesis implementation
 
+## 2026-11-01 — Descriptive rank-sorter names
+
+- Renamed the equation reference, validation command, tests and guide to
+  `rank_sorter` terminology, and updated their imports and links.
+- Renamed the reference function to `reference_rank_sort`; calculations and
+  scientific assertions are unchanged.
+- Retained source attribution and historical result archives and labels.
+
 - Consolidated the main evaluation into six readable modules, with direct module
   commands and shared settings/file handling in `qant_sorting/run.py`.
 - Moved SDK, source-equation, periodic, resource and CPU investigations to

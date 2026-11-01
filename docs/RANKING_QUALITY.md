@@ -1,7 +1,7 @@
 # Quality of current saved sorting outputs
 
 The evaluator reads all **288 configurations / 288,000 outputs** from the current
-Bitonic and full-matrix Louri reference. There are no missing cases and no sorter
+Bitonic and full-matrix rank reference. There are no missing cases and no sorter
 is rerun. Original record IDs reconstruct keys from the immutable input corpus.
 
 ## Validity comes first
@@ -18,7 +18,7 @@ Conditional ranking metrics are undefined for invalid output, not zero or perfec
 
 Let C=N(N−1)/2 be the number of **unordered pairs used to evaluate an output**,
 M the number with unequal keys, and I their inversions. This metric pair count
-is separate from Louri's N² internal comparison cells.
+is separate from the rank sorter's N² internal comparison cells.
 
 ```math
 \tau_b=\frac{M-2I}{\sqrt{CM}},\qquad
@@ -50,7 +50,7 @@ both coverage and conditional quality; they answer different questions.
 
 At 8-bit N=256, distinct keys and η=.25, Bitonic has 1,000 valid outputs but only
 59 fully correct sorts. Ranking quality can still be high because most errors
-are near-neighbour swaps. Louri has **zero valid outputs** under this condition;
+are near-neighbour swaps. The rank sorter has **zero valid outputs** under this condition;
 its conditional tau and recall are therefore blank, and its all-trial utility
 recall is zero. This is the declared independent-cell noise model, not a device test.
 

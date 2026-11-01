@@ -1,19 +1,19 @@
-"""Source fixtures and controls for the equation-level Louri reference."""
+"""Source fixtures and controls for the equation-level full-matrix rank sorter."""
 import unittest
 
 import numpy as np
 
 from qant_sorting.comparison import NoisyDifference, Precision
-from studies.louri_equations import (
-    louri_matrix_rank, quantize_difference,
+from studies.rank_sorter_reference import (
+    reference_rank_sort, quantize_difference,
 )
 from qant_sorting.sorters import place_ranks, rank_sort
 
 
-class LouriReferenceTests(unittest.TestCase):
+class RankSorterReferenceTests(unittest.TestCase):
     def test_published_matrices_and_one_based_ranks(self):
         """Literal fixture transcribed from p. 3089, not another rank algorithm."""
-        ref = louri_matrix_rank([[7, 8, 2, 8, 5]], 4)
+        ref = reference_rank_sort([[7, 8, 2, 8, 5]], 4)
         np.testing.assert_array_equal(ref.difference[0] * 16, [
             [0, 1, -5, 1, -2], [-1, 0, -6, 0, -3], [5, 6, 0, 6, 3],
             [-1, 0, -6, 0, -3], [2, 3, -3, 3, 0]])
@@ -29,11 +29,11 @@ class LouriReferenceTests(unittest.TestCase):
     def test_all_equal_keys_keep_original_order(self):
         for bits in (4, 8):
             for quantization in ("none", "matched"):
-                ref = louri_matrix_rank([[3, 3, 3, 3]], bits, quantization=quantization)
+                ref = reference_rank_sort([[3, 3, 3, 3]], bits, quantization=quantization)
                 np.testing.assert_array_equal(ref.ranks_one_based, [[1, 2, 3, 4]])
 
     def test_singleton_includes_its_self_vote(self):
-        ref = louri_matrix_rank([[15]], 4)
+        ref = reference_rank_sort([[15]], 4)
         np.testing.assert_array_equal(ref.ranks_one_based, [[1]])
         self.assertTrue(ref.result[2][0])
 
@@ -41,15 +41,15 @@ class LouriReferenceTests(unittest.TestCase):
         keys = np.indices((16, 16)).reshape(2, -1).T
         expected = np.argsort(keys, axis=1, kind="stable")
         for quantization in ("none", "matched"):
-            ref = louri_matrix_rank(keys, 4, quantization=quantization)
+            ref = reference_rank_sort(keys, 4, quantization=quantization)
             np.testing.assert_array_equal(ref.result[1], expected)
 
     def test_zero_margin_of_literal_unit_bias(self):
         """An arbitrarily small negative error flips a biased adjacent-key cell."""
         errors = np.zeros((1, 2, 2))
         errors[0, 1, 0] = -1e-10
-        raw = louri_matrix_rank([[1, 0]], 4, errors=errors, diagonal="exact")
-        rounded = louri_matrix_rank([[1, 0]], 4, errors=errors,
+        raw = reference_rank_sort([[1, 0]], 4, errors=errors, diagonal="exact")
+        rounded = reference_rank_sort([[1, 0]], 4, errors=errors,
                                     diagonal="exact", quantization="matched")
         self.assertFalse(raw.result[2][0])
         self.assertTrue(rounded.result[2][0])
@@ -57,8 +57,8 @@ class LouriReferenceTests(unittest.TestCase):
 
     def test_measured_diagonal_can_create_zero_rank(self):
         errors = np.array([[[-1e-10]]])
-        measured = louri_matrix_rank([[3]], 4, errors=errors)
-        exact = louri_matrix_rank([[3]], 4, errors=errors, diagonal="exact")
+        measured = reference_rank_sort([[3]], 4, errors=errors)
+        exact = reference_rank_sort([[3]], 4, errors=errors, diagonal="exact")
         self.assertEqual(measured.ranks_one_based[0, 0], 0)
         self.assertFalse(measured.result[2][0])
         self.assertEqual(measured.result[1][0, 0], -1)
@@ -103,7 +103,7 @@ class LouriReferenceTests(unittest.TestCase):
         ids, context, sigma = range(20), (91, 4), .25/16
         errors = np.stack([np.random.default_rng(np.random.SeedSequence([*context,i]))
                            .normal(0, sigma, (9,9)) for i in ids])
-        ref = louri_matrix_rank(keys, 4, errors=errors, quantization="matched", diagonal="measured")
+        ref = reference_rank_sort(keys, 4, errors=errors, quantization="matched", diagonal="measured")
         actual = rank_sort(keys, NoisyDifference(Precision(4,4,4), .25, context, ids), bias_step=1/16)
         for a,b in zip(actual, ref.result):
             np.testing.assert_array_equal(a,b)
@@ -118,9 +118,9 @@ class LouriReferenceTests(unittest.TestCase):
         for kwargs in ({"errors": np.zeros((2, 2))}, {"errors": np.full((1, 2, 2), np.nan)},
                        {"diagonal": "unknown"}, {"quantization": "unknown"}):
             with self.assertRaises(ValueError):
-                louri_matrix_rank([[1, 0]], 4, **kwargs)
+                reference_rank_sort([[1, 0]], 4, **kwargs)
         with self.assertRaises(ValueError):
-            louri_matrix_rank([[16, 0]], 4)
+            reference_rank_sort([[16, 0]], 4)
 
 
 if __name__ == "__main__":

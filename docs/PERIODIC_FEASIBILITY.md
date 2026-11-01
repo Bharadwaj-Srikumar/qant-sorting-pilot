@@ -97,9 +97,9 @@ recover information that has already been lost.
 ## Role in the thesis
 
 The periodic variants are evaluated as pair-level feasibility studies. They do
-not replace the difference matrix of the canonical Louri implementation: its
+not replace the difference matrix of the canonical rank-sorter implementation: its
 position-dependent bias is defined in linear difference units. The complete
-Louri sorter uses the direct channel and has been checked separately through
+rank sorter uses the direct channel and has been checked separately through
 the official CPU SDK. Earlier reduced-rank runs are not presented as results
 for the full matrix.
 

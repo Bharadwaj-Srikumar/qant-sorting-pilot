@@ -1,4 +1,4 @@
-"""Validate the canonical full-matrix rank implementation against source equations.
+"""Validate the canonical full-matrix rank sorter against source equations.
 
 No reduced unordered-pair sorter is retained. Stable argsort is the independent
 noiseless oracle. Adjacent-key controls expose the original unit bias's zero
@@ -13,7 +13,7 @@ import platform
 import numpy as np
 from qant_sorting.comparison import NoisyDifference, Precision
 from qant_sorting.run import file_hash, source_hashes, write_csv, ROOT, INPUT_SHA256
-from studies.louri_equations import louri_matrix_rank
+from studies.rank_sorter_reference import reference_rank_sort
 from qant_sorting.evaluation import reference_flags
 from qant_sorting.sorters import rank_sort
 
@@ -38,7 +38,7 @@ def verify_noiseless(corpus):
             if not reference_flags(keys,actual).all():
                 raise AssertionError('Canonical noiseless rank failed')
             for quantization in ('none','matched'):
-                source=louri_matrix_rank(keys,bits,quantization=quantization)
+                source=reference_rank_sort(keys,bits,quantization=quantization)
                 np.testing.assert_array_equal(source.ranks_one_based,ranks)
                 for a,b in zip(actual,source.result): np.testing.assert_array_equal(a,b)
         counts[name]=len(raw)
@@ -62,7 +62,7 @@ def boundary_controls():
         for quantization in ('none','matched'):
             correct=.5*phi(1/eta) if quantization=='none' else phi(.5/eta)**2
             reversed_order=.5*phi(-1/eta) if quantization=='none' else phi(-.5/eta)**2
-            ref=louri_matrix_rank(keys,bits,errors=errors,quantization=quantization,diagonal='exact')
+            ref=reference_rank_sort(keys,bits,errors=errors,quantization=quantization,diagonal='exact')
             flags=reference_flags(keys,ref.result)
             valid_count,correct_count,_=flags.sum(axis=0).tolist()
             for observed,expected in ((correct_count/samples,correct),(valid_count/samples,correct+reversed_order)):
@@ -77,7 +77,7 @@ def boundary_controls():
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output-dir',type=Path,default=ROOT/'results/louri_reproduced')
+    parser.add_argument('--output-dir',type=Path,default=ROOT/'results/rank_sorter_reproduced')
     out=parser.parse_args().output_dir.resolve()
     if file_hash(ROOT/'data/inputs.npz')!=INPUT_SHA256: raise ValueError('Unexpected input corpus')
     out.mkdir(parents=True,exist_ok=True)

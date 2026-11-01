@@ -74,7 +74,7 @@ tie rule; it does not consult the original keys to correct that decision.
 
 ## 5. Use differences in the two architectures
 
-| Step | Bitonic | Full Louri rank matrix |
+| Step | Bitonic | Full rank matrix |
 |---|---|---|
 | Pairs | N/2 pairs in each dependent layer | Every directed cell (i,j), including i=j: N² |
 | Arithmetic | Normalized difference | D[i,j] = Δ(x[j]−x[i]) |
@@ -83,7 +83,7 @@ tie rule; it does not consult the original keys to correct that decision.
 | Output | Final record permutation | Place only if all ranks uniquely cover 0..N−1 |
 | Failure | Valid records can be incorrectly ordered | Rank collisions/out-of-range positions invalidate the output |
 
-The [Louri guide](LOURI_REFERENCE.md) shows all 16 entries for N=4. Both directions
+The [rank-sorter guide](RANK_SORTER.md) shows all 16 entries for N=4. Both directions
 are measured separately. Noisy self-comparisons are not restored. The unit bias
 resolves noiseless equality; it cannot repair contradictory noisy votes.
 
@@ -95,7 +95,7 @@ explicitly. A cosine/sine score cannot be substituted without a new derivation.
 
 For N=2**m, Bitonic uses K=m(m+1)/2 dependent layers and N/2 comparisons per
 layer: C_B=NK/2 and total scalar work Θ(N log²N). Parallel depth is distinct.
-Louri evaluates C_R=N² difference/threshold cells and sums N columns of N
+The rank sorter evaluates C_R=N² difference/threshold cells and sums N columns of N
 entries: total scalar work Θ(N²), with Θ(N²) materialized matrix/pair storage
 per trial. Final validity/placement work is Θ(N).
 

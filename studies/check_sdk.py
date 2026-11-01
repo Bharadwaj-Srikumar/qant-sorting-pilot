@@ -1,4 +1,4 @@
-"""CPU-SDK integration for Bitonic and Louri's full difference matrix.
+"""CPU-SDK integration for Bitonic and the full rank difference matrix.
 
 Every N*N rank cell, including both directions and the diagonal, is submitted
 through linear_fprop. Bias, threshold, column sums and placement run on the

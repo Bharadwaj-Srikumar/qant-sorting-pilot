@@ -53,9 +53,9 @@ The existing saturating comparator cannot supply exact min/max magnitudes.
 At 8 bits, (255,0) produces d=255/256, clipped to 127/256. Substituting that
 clipped value into the identity gives key values (128,127), not (0,255).
 Bitonic avoids this problem by routing original records from the sign. The
-full Louri matrix uses the measured difference followed by an explicit bias,
+full rank matrix uses the measured difference followed by an explicit bias,
 threshold and column sum; it also routes original records. See
-[LOURI_REFERENCE.md](LOURI_REFERENCE.md) for its quantization conditions.
+[RANK_SORTER.md](RANK_SORTER.md) for its quantization conditions.
 
 ## 3. Separate, executed CPU check
 
@@ -75,7 +75,7 @@ noise or fixed-point clipping. This is not another full-sort experiment.
 ## 4. Assumptions and next decisions
 
 No native ReLU, native threshold, all-optical C&E, measured noise level or
-regeneration interval is newly assumed. The six-level Gaussian sweep uses the full directed Louri matrix. Its eta is tied to the difference-output step and cannot be carried
+regeneration interval is newly assumed. The six-level Gaussian sweep uses the full directed rank matrix. Its eta is tied to the difference-output step and cannot be carried
 over to a nonlinear output without a new scale/noise definition.
 
 The periodic pair construction and affine phase control have now been tested
@@ -83,7 +83,7 @@ in the official CPU backend; see [PERIODIC_FEASIBILITY.md](PERIODIC_FEASIBILITY.
 The host-phase construction is numerically correct for the tested pairs; the
 BF16 affine construction produces 40 false ties among the 8-bit pairs. Neither
 establishes a host-free cascade. Periodic scores are not passed directly into
-Louri's difference-bias equation: that requires a new threshold derivation.
+the rank sorter's difference-bias equation: that requires a new threshold derivation.
 The periodic work therefore remains a bounded pair-feasibility study. A native
 hardware sorter would require supported transfer and routing boundaries first.
 
