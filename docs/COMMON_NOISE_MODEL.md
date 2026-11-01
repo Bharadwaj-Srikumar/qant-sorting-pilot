@@ -259,5 +259,5 @@ A periodic transfer function must not be inserted into the Louri matrix without
 re-deriving the bias/threshold relationship. Equality of signs for two transfer
 functions alone does not prove that relationship.
 
-Reproduction: `python -m qant_sorting common-noise`. The default output directory
+Reproduction: `python -m qant_sorting.controls`. The default output directory
 is `results/common_noise_reproduced/`. The run does not modify saved evidence.

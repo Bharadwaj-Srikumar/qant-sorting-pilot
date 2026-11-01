@@ -13,7 +13,7 @@ has a hardware-driver entry point, but this script exercises only its cosine
 CPU stand-in. No Gaussian noise or sign-only output clipping is added here.
 """
 
-from qant_sorting.io import source_hashes
+from qant_sorting.run import source_hashes, ROOT
 
 import argparse
 import json
@@ -23,9 +23,8 @@ import numpy as np
 from ml_dtypes import bfloat16
 import qant_native_computing_toolkit as qant
 
-from qant_sorting.sdk_mapping import SdkDifference, backend_identity
+from studies.sdk_adapter import SdkDifference, backend_identity
 
-from qant_sorting.paths import ROOT
 SDK_COMMIT = "72a2d99f10240b6df3c6d0f636dfa0e2b5d38902"
 
 

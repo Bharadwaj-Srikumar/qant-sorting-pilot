@@ -12,9 +12,8 @@ import json
 from pathlib import Path
 import platform
 import numpy as np
-from qant_sorting.io import file_hash, source_hashes, write_csv
-from qant_sorting.paths import ROOT, INPUT_SHA256
-from qant_sorting.ranking_quality import prepare_keys, score_saved_order
+from qant_sorting.run import file_hash, source_hashes, write_csv, ROOT, INPUT_SHA256
+from qant_sorting.evaluation import prepare_keys, score_saved_order
 
 
 def statistics(values,prefix):

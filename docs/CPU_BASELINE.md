@@ -75,7 +75,7 @@ python -m venv .venv-baseline
 # Activate the environment, then run:
 python -m pip install -r requirements/cpu.txt
 python -m unittest discover -s tests -p test_cpu_baseline.py -v
-python -m qant_sorting cpu --output-dir results/cpu_baseline_reproduced
+python -m studies.cpu_baseline --output-dir results/cpu_baseline_reproduced
 ```
 
 The output directory must be empty. The corpus SHA-256 is checked before the

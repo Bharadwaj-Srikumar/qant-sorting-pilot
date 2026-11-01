@@ -13,7 +13,6 @@ not need it; install only to run the separate SDK integration control.
 """
 
 import argparse
-from qant_sorting.paths import ROOT
 
 import hashlib
 from pathlib import Path
@@ -22,6 +21,9 @@ import subprocess
 import sys
 import tempfile
 import zipfile
+
+# Keep the installer independent of numerical packages during initial setup.
+ROOT = Path(__file__).resolve().parents[1]
 
 
 # Require Python 3.12 and an active virtual environment, then choose a wheel
@@ -63,7 +65,7 @@ def main():
                         ["-r", str(ROOT / "requirements/sdk.txt")])
         subprocess.run([sys.executable, "-m", "pip", "install", str(wheel),
                         *dependencies], check=True)
-    print("Installed the official CPU backend. Run python -m qant_sorting sdk")
+    print("Installed the official CPU backend. Run python -m studies.check_sdk")
 
 
 if __name__ == "__main__":

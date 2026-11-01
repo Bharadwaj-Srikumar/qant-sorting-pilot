@@ -73,7 +73,7 @@ change in optical depth D would require separate evidence.
 
 ## Reproducible pair check
 
-`check_affine_periodic.py` checks every ordered 4-/8-bit pair and saves scores
+`studies/check_affine.py` checks every ordered 4-/8-bit pair and saves scores
 and affine phases. There is no added noise, additional fixed-point rounding,
 tolerance band, or repair based on the correct answer.
 
@@ -118,7 +118,7 @@ sha256sum vendor/qant-native-computing-toolkit-wheels-cpu-backend-v2.3.1.zip
 wheel_dir=$(mktemp -d)
 python -m zipfile -e vendor/qant-native-computing-toolkit-wheels-cpu-backend-v2.3.1.zip "$wheel_dir"
 python -m pip install --no-deps "$wheel_dir/qant_native_computing_toolkit-2.3.1-cp312-cp312-linux_x86_64.whl"
-python -m qant_sorting affine --output-dir results/affine_periodic_reproduced
+python -m studies.check_affine --output-dir results/affine_periodic_reproduced
 ```
 
 The ZIP hash must be

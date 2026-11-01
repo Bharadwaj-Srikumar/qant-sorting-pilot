@@ -2,8 +2,8 @@
 import unittest
 import numpy as np
 try:
-    from qant_sorting.periodic_comparison import periodic_values, calibration_reference, require_cpu_backend
-    from qant_sorting.sdk_mapping import SdkDifference
+    from studies.periodic import periodic_values, calibration_reference, require_cpu_backend
+    from studies.sdk_adapter import SdkDifference
 except ImportError:
     periodic_values = None
 
@@ -18,7 +18,7 @@ class PeriodicTests(unittest.TestCase):
             np.testing.assert_array_equal(np.sign(score),np.sign(a-b))
 
     def test_full_matrix_sdk_submits_diagonal_and_both_directions(self):
-        from qant_sorting.sorting_schedules import rank_sort
+        from qant_sorting.sorters import rank_sort
         require_cpu_backend()
         model=SdkDifference(4)
         result=rank_sort(np.array([[3,1,3,0]]),model,bias_step=1/16)

@@ -7,7 +7,7 @@
 
 import unittest
 import numpy as np
-from qant_sorting.experiments.run_cpu_baseline import stable_records, validate_records
+from studies.cpu_baseline import stable_records, validate_records
 
 
 class CpuBaselineTests(unittest.TestCase):

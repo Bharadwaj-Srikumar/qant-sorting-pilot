@@ -1,3 +1,14 @@
+# 2026-11-01 - simpler thesis implementation
+
+- Consolidated the main evaluation into six readable modules, with direct module
+  commands and shared settings/file handling in `qant_sorting/run.py`.
+- Moved SDK, source-equation, periodic, resource and CPU investigations to
+  `studies/`; the SDK installer is in `tools/`.
+- Kept the noise models, full N² rank semantics and recorded scientific evidence.
+- Retained the finished thesis PDF and removed its generator, template assets,
+  fonts and report-only dependencies from the current repository.
+- Updated the reading guide and tests for the simpler entry points.
+
 # 26 October 2026 - English thesis documentation
 
 - Translated the remaining technical guides, inquiry draft, complete report,

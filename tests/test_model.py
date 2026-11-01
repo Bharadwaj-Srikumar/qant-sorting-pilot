@@ -16,10 +16,9 @@ import unittest
 
 import numpy as np
 
-from qant_sorting.comparison import NoisyDifference, Precision
-from qant_sorting.input_validation import validate_keys
-from qant_sorting.metrics import reference_flags
-from qant_sorting.sorting_schedules import bitonic_sort, compact_bitonic_layers, rank_sort
+from qant_sorting.comparison import NoisyDifference, Precision, validate_keys
+from qant_sorting.evaluation import reference_flags
+from qant_sorting.sorters import bitonic_sort, compact_bitonic_layers, rank_sort
 
 
 class ModelTests(unittest.TestCase):

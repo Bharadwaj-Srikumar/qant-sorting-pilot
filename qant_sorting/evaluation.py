@@ -1,34 +1,63 @@
-# Reading guide: evaluate existing output orders without rerunning a sorter.
-# prepare_keys caches reference orders and original-key distance denominators.
-# score_saved_order reconstructs the output from original record identities.
-# Three different questions stay separate: are records valid, are keys ordered,
-# and are equal-key records stable? Ranking metrics only use valid permutations.
-# NaN means undefined, not zero quality; callers must report the valid denominator.
-# Top-k means the LARGEST keys, hence the suffix of an ascending output.
-# The returned key-normalized tau is explicitly distinct from standard tau-b.
-# No metric in this module can establish measured photonic speed or PRISM recall.
+"""Whole-sort correctness and partial ranking quality.
 
-"""Quality of saved ascending output permutations; no sorter is executed.
-
-Kendall tau-b compares true keys with output positions of the same records.
-Equal keys are ties in the truth, while output positions are distinct. Thus
-even a perfect order has ceiling sqrt(M / C), where M counts unequal pairs
-and C counts all pairs. The additional normalized value 1-2I/M removes that
-ceiling; it is explicitly not relabelled as standard tau-b.
+All reference calculations happen after sorting. Top-k means the largest
+keys, at the end of an ascending output. Invalid outputs have undefined
+conditional quality; runners report any zero-failure recall utility separately.
 """
 
 from dataclasses import dataclass
+import math
+
 import numpy as np
 
 
-# Reference/cache container shared across scores for one input dataset.
-# data holds signed keys; expected_order and sorted_keys define the stable truth.
-# distances has shape (trials,2**bits), counting ORIGINAL unordered pairs at
-# each absolute integer key distance, including zero for true equalities.
-# left/right enumerate all unordered record pairs; levels is the key-domain size.
-# This cached truth is only used for evaluation, never to repair sorter output.
+def reference_flags(data, result):
+    """Return per-trial [valid, correct, stable] flags.
+
+    Validity checks a complete ID permutation and unchanged key-ID pairs.
+    Correct additionally requires sorted keys; stable requires the exact
+    stable-reference IDs. The reference never guides noisy decisions.
+    """
+    values, indices, reported_valid = result
+    expected_indices = np.argsort(data, axis=1, kind="stable")
+    expected_values = np.take_along_axis(data, expected_indices, axis=1)
+    permutation = np.all(np.sort(indices, axis=1) == np.arange(data.shape[1]), axis=1)
+
+    # Safe lookup only: the separate permutation check still rejects -1 IDs.
+    safe_indices = np.clip(indices, 0, data.shape[1] - 1)
+    records_preserved = np.all(
+        values == np.take_along_axis(data, safe_indices, axis=1), axis=1
+    )
+    valid = reported_valid & permutation & records_preserved
+    correct = valid & np.all(values == expected_values, axis=1)
+    stable = correct & np.all(indices == expected_indices, axis=1)
+    return np.stack((valid, correct, stable), axis=1)
+
+
+def wilson_interval(successes, trials):
+    """Return a two-sided 95% Wilson interval for successes/trials.
+
+    Callers supply a positive trial count. The interval describes sampling
+    uncertainty, not hardware uncertainty or universal correctness.
+    Observed 100% success still has a lower confidence bound below one.
+    """
+    z = 1.959963984540054
+    p = successes / trials
+    denominator = 1 + z * z / trials
+    midpoint = (p + z * z / (2 * trials)) / denominator
+    half_width = z * math.sqrt(
+        p * (1 - p) / trials + z * z / (4 * trials * trials)
+    ) / denominator
+    return max(0.0, midpoint - half_width), min(1.0, midpoint + half_width)
+
+
 @dataclass
 class PreparedKeys:
+    """Cached truth and unordered-pair gap counts for one input dataset.
+
+    Data/order/value arrays have shape (trials,N); distances has shape
+    (trials,2**bits). left/right list each unordered record pair once.
+    """
     data: np.ndarray
     expected_order: np.ndarray
     sorted_keys: np.ndarray
@@ -38,19 +67,20 @@ class PreparedKeys:
     levels: int
 
 
-# Validate a nonempty 2-D 4/8-bit integer corpus and build PreparedKeys.
-# Cast to signed int16 before subtraction to prevent uint8 distance wraparound.
-# Count pair distances in blocks of 32 trial rows to bound temporary memory;
-# row-offset encoding lets one bincount accumulate all histograms in a block.
-# Return the reference order, sorted keys, pair indices and per-row denominators.
-# These denominators later include only trials whose output permutation is valid.
 def prepare_keys(data, bits):
+    """Validate a 4/8-bit corpus and prepare reusable scoring information.
+
+    Use signed keys before subtraction, then count original pair distances
+    in blocks of 32 trials. Row offsets let one bincount build separate
+    histograms. The stable reference is used only to evaluate outputs.
+    """
     data = np.asarray(data)
     if bits not in (4, 8) or data.ndim != 2 or data.shape[1] < 1 or len(data) < 1:
         raise ValueError("Expected a nonempty 2-D 4/8-bit key corpus")
     if data.dtype.kind not in "iu" or np.any(data < 0) or np.any(data >= 2**bits):
         raise ValueError("Keys must be integers within the declared range")
-    data = data.astype(np.int16)  # signed subtraction must not wrap at uint8
+    # Subtract signed values: uint8 would wrap negative key differences.
+    data = data.astype(np.int16)
     n = data.shape[1]
     left, right = np.triu_indices(n, 1)
     levels = 2**bits
@@ -66,25 +96,20 @@ def prepare_keys(data, bits):
                         distances, left, right, levels)
 
 
-# Return sorted, unique predeclared cutoffs {1,5,10,32} that fit N, plus N.
-# k=N is a full-set preservation control: every valid permutation has recall 1
-# there, even when its order is completely wrong. It is not a useful top-k claim.
 def selected_k(n):
-    """Predeclared cutoffs; k=N is a labelled full-set control."""
+    """Return applicable cutoffs {1,5,10,32,N}; N checks preservation only."""
     return sorted({k for k in (1, 5, 10, 32, n) if k <= n})
 
 
-# Input PreparedKeys, saved original-index rows of the same shape, and optional
-# k cutoffs. Return per-trial flags/inversion counts/tau values/recall plus pooled
-# inversion and denominator histograms by exact integer key distance.
-# Invalid permutations receive NaN ranking metrics and inversion sentinel -1;
-# all-equal valid arrays also have undefined tau because no strict pair exists.
-# For C=N(N-1)/2, M unequal pairs, I inversions: tau_b=(M-2I)/sqrt(C*M).
-# Its perfect-order ceiling is sqrt(M/C); tau_key=1-2I/M is reported separately.
-# Stable-ID recall compares exact record identities. Tie-neutral recall accepts
-# equivalent boundary-key choices, but full credit still requires recovering all
-# true keys strictly above that boundary. Report invalid-output coverage too.
 def score_saved_order(prepared, indices, ks=None):
+    """Score saved original IDs without executing a sorter.
+
+    Return validity/order flags, inversions, tau metrics, gap histograms and
+    largest-key Recall@k. Invalid permutations have NaN conditional metrics
+    and inversion marker -1. All-equal arrays also have undefined tau.
+    Stable-ID recall requires exact reference records; tie-neutral recall
+    allows equivalent boundary ties while still requiring larger keys.
+    """
     data = prepared.data
     indices = np.asarray(indices)
     trials, n = data.shape
@@ -93,9 +118,8 @@ def score_saved_order(prepared, indices, ks=None):
     ks = selected_k(n) if ks is None else list(ks)
     if not ks or any(not isinstance(k, (int, np.integer)) or k < 1 or k > n for k in ks):
         raise ValueError("Recall cutoffs must lie between 1 and N")
-    # Stage 1: validate record identity before any output lookup. Duplicate, negative
-    # or out-of-domain indices cannot be interpreted as a ranked version of the
-    # input. Subsequent arrays named order/values contain VALID rows only.
+
+    # Validate IDs before gathering keys; later order/values contain valid rows only.
     valid = np.all(np.sort(indices, axis=1) == np.arange(n), axis=1)
     valid_rows = np.flatnonzero(valid)
     order = indices[valid]
@@ -109,10 +133,8 @@ def score_saved_order(prepared, indices, ks=None):
     inversions = np.full(trials, -1, dtype=np.int64)
     inversions[valid] = 0
     inverted_by_gap = np.zeros(prepared.levels, dtype=np.int64)
-    # Correctly sorted key sequences have no inversions, irrespective of tie order.
-    # Stage 2: count inversions only for key-incorrect valid rows; correct rows
-    # contribute zero errors but still contribute all their pair denominators.
-    # An inversion is a final-output ordering error, not an internal comparator event.
+
+    # Only misordered valid rows need inversion counting; all valid rows add denominators.
     bad = np.flatnonzero(~correct[valid])
     for start in range(0, len(bad), 32):
         local = bad[start:start+32]
@@ -122,7 +144,8 @@ def score_saved_order(prepared, indices, ks=None):
         inversions[valid_rows[local]] = np.count_nonzero(inverted, axis=1)
         inverted_by_gap += np.bincount(difference[inverted], minlength=prepared.levels)
     available_by_gap = prepared.distances[valid].sum(axis=0)
-    available_by_gap[0] = 0  # equal-key pairs do not have a correct strict order
+    # Equal-key pairs have no required strict order.
+    available_by_gap[0] = 0
     if np.any(inverted_by_gap > available_by_gap):
         raise AssertionError("Inversion count exceeds the number of comparable pairs")
     if int(inverted_by_gap.sum()) != int(inversions[valid].sum()):
@@ -130,9 +153,7 @@ def score_saved_order(prepared, indices, ks=None):
     if not np.array_equal(inversions[valid] == 0, correct[valid]):
         raise AssertionError("Zero inversions and key-sort correctness disagree")
 
-    # Stage 3: equal-key pairs do not have a required strict order. Remove them
-    # from M but retain them in total-pair count C for standard tau-b normalization.
-    # This is why a correct order with duplicates can have tau-b below one.
+    # For C total pairs, M unequal pairs and I inversions: tau_b=(M-2I)/sqrt(C*M).
     comparable = prepared.distances[:, 1:].sum(axis=1)
     all_pairs = n * (n - 1) // 2
     defined = valid & (comparable > 0)
@@ -142,22 +163,22 @@ def score_saved_order(prepared, indices, ks=None):
     if all_pairs:
         m = comparable[defined].astype(np.float64)
         tau_b[defined] = (m - 2*inversions[defined]) / np.sqrt(m * all_pairs)
+        # Ties lower standard tau-b's ceiling; tau_key uses a separate normalization.
         ceiling[defined] = np.sqrt(m / all_pairs)
         normalized[defined] = 1 - 2*inversions[defined] / m
 
-    # Stage 4: invert the stable reference permutation so each original record ID
-    # can be tested for membership in the true top-k suffix without sorting output.
+    # Invert the stable permutation to map each record ID to its true rank.
     truth_position = np.argsort(prepared.expected_order[valid], axis=1)
     recall = {}
     for k in ks:
-        # Top-k means the k largest keys: the suffix of an ascending output.
+
+        # The suffix selects the largest k keys.
         chosen = order[:, -k:]
         truth_ranks = np.take_along_axis(truth_position, chosen, axis=1)
         strict = np.sum(truth_ranks >= n-k, axis=1) / k
         threshold = prepared.sorted_keys[valid, n-k]
-        # All keys strictly above the kth-key threshold are required; the remaining
-        # slots can be filled by any records equal to that threshold. Limit their credit
-        # to tie_slots so repeated boundary values cannot hide missed larger keys.
+
+        # Cap boundary-tie credit so ties cannot hide a missing strictly larger key.
         mandatory = np.sum(data[valid] > threshold[:, None], axis=1)
         tie_slots = k - mandatory
         chosen_values = values[:, -k:]

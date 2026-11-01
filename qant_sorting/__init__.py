@@ -1,1 +1,1 @@
-"""Photonic sorting research: import a model explicitly; SDK use is optional."""
+"""Comparison models, sorting algorithms and evaluation for the master's thesis."""

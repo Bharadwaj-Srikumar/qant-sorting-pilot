@@ -60,10 +60,10 @@ threshold and column sum; it also routes original records. See
 ## 3. Separate, executed CPU check
 
 After installing `requirements/sdk.txt` in a Python 3.12 virtual environment
-and running `python -m qant_sorting install-sdk --no-deps`, run:
+and running `python -m tools.install_sdk --no-deps`, run:
 
 ```bash
-python -m qant_sorting nonlinearity
+python -m studies.check_nonlinearity
 ```
 
 Output: `results/nonlinearity_reproduced/checks.json`.
