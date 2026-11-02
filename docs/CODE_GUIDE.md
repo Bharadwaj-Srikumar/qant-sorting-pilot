@@ -43,8 +43,9 @@ code checks the completed output against an independent stable digital reference
    `score_saved_order` when studying inversions, Kendall metrics and Recall@k.
 4. **`qant_sorting/run.py`**: parameters are near the top. `evaluate_case` runs
    batches of one setting; `run` loops over datasets, noise levels and sorters,
-   saves outputs, then verifies them against the recorded reference. File helpers
-   stay in this module so the full evaluation needs no separate utility package.
+   evaluates outputs and saves the results. `validation.json` records the current
+   run's comparison-count checks and noiseless validity, correctness and stability
+   checks. File helpers stay in this module, without a separate utility package.
 
 For the rank matrix orientation and worked example, use [RANK_SORTER.md](RANK_SORTER.md).
 Cell (i,j) measures the normalized difference delta * (keys[j]-keys[i]). The host subtracts
@@ -69,11 +70,13 @@ produce -1 markers; no hidden digital repair is applied.
 ## 4. Run only the question you are studying
 
 ```bash
-python -m qant_sorting.run       # full registered reference sweep
+python -m qant_sorting.run       # full main experiment
 python -m qant_sorting.controls  # separate common-channel sensitivity controls
 python -m studies.check_rank_sorter   # independent equation-level checks
-python -m studies.ranking_quality  # rescore saved reference outputs
+python -m studies.ranking_quality  # score recorded simulation outputs
 ```
+
+The ranking-quality command reads recorded simulations in `results/reference/`.
 
 Each module supports `--help`. The optional commands and SDK setup are listed in
 the [README](../README.md). The direct module commands replace the old command
