@@ -21,14 +21,16 @@ python -m qant_sorting.run
 ```
 
 This loads the fixed inputs from `data/inputs.npz`, runs both sorters at six noise
-levels, and saves results in `results/reproduced/`. It checks all 288 configurations
-and 288,000 sort outcomes against the committed reference. An existing output
+levels, and saves results in `results/reproduced/`. The sweep evaluates 288
+configurations and 288,000 sorting trials. An existing output
 directory is never overwritten. Use `--output-dir` to choose a fresh destination;
 `--batch-size` changes memory use without changing a trial's random stream.
 
 The main outputs are `accuracy.csv`, `trial_outcomes.npz`, `failures.json`,
 `validation.json` and `metadata.json`. The NPZ contains original record IDs and
 valid/correct/stable flags, so outputs can be checked independently.
+`validation.json` records the current run's comparison-count checks and confirms
+that noiseless outputs are valid, correctly sorted and stable.
 
 ## Six files to read
 
@@ -73,9 +75,9 @@ is relevant to the thesis; the studies do not run automatically.
 | `python -m studies.resource_counts` | How many operations, submissions and logical bytes are required? |
 | `python -m studies.cpu_baseline` | How long does stable sorting take on the chosen digital CPU? |
 
-The ranking-quality study reads the committed `results/reference/` outputs; it
-does not run new sorts. The main runner separately verifies each reproduction
-against those same saved outputs.
+The ranking-quality study reads the recorded simulation outputs in
+`results/reference/`, including noisy outcomes. It computes further quality
+metrics without running new sorts.
 
 SDK studies need the optional official CPU toolkit:
 
