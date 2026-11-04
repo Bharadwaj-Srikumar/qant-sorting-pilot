@@ -197,12 +197,65 @@ def run(output_directory, batch_size):
 
 
 def main(argv=None):
-    """Parse the two run options and start the evaluation."""
+    """Run the experiment, or run the checks stored in the seven core modules."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--self-test", action="store_true",
+                        help="Run all built-in checks without starting the experiment")
     args = parser.parse_args(argv)
-    run(args.output_dir, args.batch_size)
+    if args.self_test:
+        modules = [
+            "qant_sorting.comparison", "qant_sorting.sorters", "qant_sorting.evaluation",
+            "qant_sorting.run", "qant_sorting.quality", "qant_sorting.sdk",
+            "qant_sorting.resources",
+        ]
+        unittest.main(module=None, argv=["self-test", "-v", *modules])
+    else:
+        run(args.output_dir, args.batch_size)
+
+
+# Self-tests: python -m unittest qant_sorting.run -v
+# Run all seven modules' checks with: python -m qant_sorting.run --self-test
+import subprocess
+import sys
+import tempfile
+import unittest
+
+
+class RunTests(unittest.TestCase):
+    def test_main_commands_explain_their_options(self):
+        """Every documented command explains its options without loading the SDK."""
+        commands = (
+            ("qant_sorting.run", "--batch-size"),
+            ("qant_sorting.quality", "--results-dir"),
+            ("qant_sorting.sdk", "--output-dir"),
+            ("qant_sorting.resources", "--output-dir"),
+        )
+        for module, option in commands:
+            with self.subTest(module=module):
+                result = subprocess.run(
+                    [sys.executable, "-m", module, "--help"],
+                    cwd=ROOT, capture_output=True, text=True,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("--output-dir", result.stdout)
+                self.assertIn(option, result.stdout)
+
+    def test_existing_results_are_not_overwritten(self):
+        """Refuse both the committed reference and a nonempty output directory."""
+        reference_hash = file_hash(REFERENCE / "trial_outcomes.npz")
+        with self.assertRaises(ValueError):
+            run(REFERENCE, batch_size=1)
+        self.assertEqual(file_hash(REFERENCE / "trial_outcomes.npz"), reference_hash)
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            marker = output / "existing.txt"
+            marker.write_text("Keep the previous run.")
+            with self.assertRaises(ValueError):
+                run(output, batch_size=1)
+            self.assertEqual(marker.read_text(), "Keep the previous run.")
 
 
 if __name__ == "__main__":

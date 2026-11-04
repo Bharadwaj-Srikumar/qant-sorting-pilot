@@ -37,6 +37,17 @@ the output; it never supplies sorting decisions.
 The first four files explain the main experiment. The final three produce its
 detailed quality analysis, software mapping evidence and resource comparison.
 
+## Checks in the same files
+
+Each core module ends with a **Self-tests** section containing its mathematical
+examples and implementation checks. Read the main functions first, then use the
+test names and comments to see which behaviours are checked. Normal experiment
+commands do not execute these tests.
+
+Run all checks with `python -m qant_sorting.run --self-test`. To check only one
+module, use e.g. `python -m unittest qant_sorting.comparison -v`. The SDK checks
+skip when its separate dependencies are not installed.
+
 ## Keep these conventions in mind
 
 - Keys use 4 or 8 bits. The matched input/output step is delta = 2**(-bits).
