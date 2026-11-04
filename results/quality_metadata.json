@@ -43,5 +43,14 @@
   "recall": "Largest k; stable-ID and tie-neutral boundary conventions; k=N is only a full-set control",
   "invalid_policy": "Undefined conditional quality; mean_all_invalid_zero explicitly assigns zero utility",
   "scope": "Synthetic sorting quality, not hardware performance or PRISM task quality",
-  "input_dependence": "The same 24000 input arrays are reused across noise levels and architectures"
+  "input_dependence": "The same 24000 input arrays are reused across noise levels and architectures",
+  "validation": {
+    "evaluated_cases": 288,
+    "evaluated_outputs": 288000,
+    "complete_coverage": true,
+    "missing_cases": [],
+    "saved_flags_and_counts_reproduced": true,
+    "distance_rows": 49058,
+    "new_sorter_executions": 0
+  }
 }

@@ -111,7 +111,7 @@ def run(output_directory, batch_size):
         raise ValueError("Choose a separate output directory; the reference is immutable")
     output_directory = prepare_output_directory(output_directory, (
         "simulation_accuracy.csv", "simulation_trial_outcomes.npz",
-        "simulation_failures.json", "simulation_validation.json", "simulation_metadata.json",
+        "simulation_metadata.json",
     ))
     input_path = ROOT / "data/inputs.npz"
     if hashlib.sha256(input_path.read_bytes()).hexdigest() != INPUT_SHA256:
@@ -173,7 +173,6 @@ def run(output_directory, batch_size):
 
     write_csv(output_directory / "simulation_accuracy.csv", rows)
     np.savez_compressed(output_directory / "simulation_trial_outcomes.npz", **saved)
-    (output_directory / "simulation_failures.json").write_text(json.dumps(failures, indent=2))
 
     # These checks were performed above using this run's inputs and outputs.
     validation = dict(
@@ -182,7 +181,6 @@ def run(output_directory, batch_size):
         noiseless_outputs_valid_correct_stable=True,
         noiseless_sort_executions=sum(r["trials"] for r in rows if r["eta"] == 0),
     )
-    (output_directory / "simulation_validation.json").write_text(json.dumps(validation, indent=2))
     metadata = dict(
         revision="thesis_full_matrix_20261024",
         rank_algorithm="Full N*N rank matrix including measured diagonal",
@@ -201,6 +199,7 @@ def run(output_directory, batch_size):
         timing="Run duration only; not a hardware latency or sorting performance benchmark.",
         source_sha256=source_hashes(),
         **validation,
+        failure_examples=failures,
     )
     (output_directory / "simulation_metadata.json").write_text(json.dumps(metadata, indent=2))
     print(f"Completed {len(rows)} configurations, {metadata['executions']:,} executions.")
