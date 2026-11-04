@@ -1,11 +1,3 @@
-"""Map both sorters to the official Q.ANT linear CPU backend.
-
-Each pair becomes one BF16 row [a/2**bits, b/2**bits] with weights [1,-1].
-The SDK returns the difference; decisions and record routing stay on the host.
-Run python -m qant_sorting.sdk to check every pair and the saved input corpus.
-CPU integration does not establish optical noise, hardware speed or a cascade.
-"""
-
 import argparse
 from dataclasses import dataclass
 import json
@@ -20,7 +12,6 @@ from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
 def _load_sdk():
-    """Load the optional toolkit only when an SDK operation is needed."""
     from ml_dtypes import bfloat16
     import qant_native_computing_toolkit as qant
 
@@ -29,8 +20,6 @@ def _load_sdk():
 
 @dataclass
 class CallCounts:
-    """Count logical API buffers and calls, not measured bus traffic."""
-
     api_calls: int = 0
     pair_differences: int = 0
     feature_bytes: int = 0
@@ -40,14 +29,6 @@ class CallCounts:
 
 
 class SdkDifference:
-    """Adapt equally shaped key arrays to X=(pairs,2), W=(1,2), Y=X@W.T.
-
-    The official CPU backend uses BF16 products, FP32 accumulation and BF16
-    output. Key multiples of 1/16 or 1/256 are exactly representable in BF16.
-    Only linear_fprop runs here; swaps, thresholds and rank sums stay on host.
-    Accepted CPU batch shapes do not establish a physical device's capacity.
-    """
-
     def __init__(self, key_bits, device_id=0):
         if key_bits not in (4, 8):
             raise ValueError("This registered pilot accepts 4-bit or 8-bit key domains")
@@ -59,7 +40,6 @@ class SdkDifference:
         self.counts = CallCounts()
 
     def __call__(self, a, b):
-        """Normalize and pack pairs, call the SDK, then restore the pair shape."""
         if a.shape != b.shape:
             raise ValueError("The two pair arrays must have the same shape")
         features = np.empty((a.size, 2), dtype=self._bfloat16)
@@ -79,13 +59,11 @@ class SdkDifference:
 
 
 def backend_identity():
-    """Report the installed SDK and driver; a device ID alone proves neither."""
     qant, _ = _load_sdk()
     return {"sdk_version": qant.__version__, "driver_info": qant.info.get_driver_info()}
 
 
 def run(output_directory):
-    """Verify all 4/8-bit pairs and both full sorters through the pinned CPU SDK."""
     identity = backend_identity()
     if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
         raise RuntimeError("This control requires the pinned official 2.3.1 CPU backend")
@@ -151,7 +129,7 @@ def run(output_directory):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Evaluate the Q.ANT CPU SDK mapping.")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)
@@ -176,7 +154,6 @@ class SdkTests(unittest.TestCase):
             raise RuntimeError("SDK tests require the pinned official 2.3.1 CPU backend")
 
     def test_all_pairs_match_the_declared_normalization(self):
-        """Test ties, adjacent keys and both extremes in both complete domains."""
         for bits in (4, 8):
             a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
             a.flags.writeable = b.flags.writeable = False
@@ -209,7 +186,6 @@ class SdkTests(unittest.TestCase):
                 np.testing.assert_array_equal(keys, original)
 
     def test_strided_inputs_and_accumulated_counts(self):
-        """Pack read-only views and keep accounting across different shapes."""
         for bits in (4, 8):
             keys = np.arange(24).reshape(4, 6) % 2**bits
             original = keys.copy()

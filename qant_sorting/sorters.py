@@ -1,21 +1,7 @@
-"""Bitonic and full-matrix rank sorting with replaceable arithmetic.
-
-Original integer keys and IDs stay exact. The supplied difference(a,b)
-callback models arithmetic; swaps, bias, thresholds and sums run on the host.
-Both sorters return (values, indices, valid), with array shapes (trials,N),
-(trials,N) and (trials,). Logical layers are not measured optical stages.
-"""
-
 import numpy as np
 
 
 def compact_bitonic_layers(n):
-    """Build the fixed layers for N=2**m, N>=2.
-
-    Each of m(m+1)/2 layers has N/2 disjoint pairs. XOR selects partner
-    wires; visiting only the lower address avoids duplicate pairs.
-    Increasing merge sizes and decreasing distances build the network.
-    """
     if n < 2 or n & (n - 1):
         raise ValueError("n must be a power of two and at least 2")
     layers = []
@@ -33,13 +19,6 @@ def compact_bitonic_layers(n):
 
 
 def bitonic_sort(keys, difference):
-    """Sort a validated (trials, N) batch using measured pair scores.
-
-    Positive means the left record is larger; measured zero compares
-    original IDs, including false ties. Ascending/descending layers swap
-    keys and IDs together. Return values, IDs and a (trials,) validity mask;
-    swaps always preserve records but noisy outputs may be misordered.
-    """
     values = keys.copy()
     indices = np.broadcast_to(np.arange(keys.shape[1]), keys.shape).copy()
     for left, right, ascending in compact_bitonic_layers(keys.shape[1]):
@@ -60,14 +39,6 @@ def bitonic_sort(keys, difference):
 
 
 def rank_sort(keys, difference, *, bias_step):
-    """Evaluate the full N*N rank difference matrix, including the diagonal.
-
-    Cell (i,j) measures x[j]-x[i]; both directions are separate observations.
-    The callback receives (trials,N*N) pairs and must return finite differences
-    in the units of bias_step. Subtract that step below the diagonal,
-    threshold >=0 and sum columns. Source ranks start at one, so placement
-    uses ranks minus one. Sine scores cannot replace these difference units.
-    """
     if not np.isfinite(bias_step) or bias_step <= 0:
         raise ValueError("bias_step must be finite and positive")
     keys = np.asarray(keys)
@@ -86,12 +57,6 @@ def rank_sort(keys, difference, *, bias_step):
 
 
 def place_ranks(keys, zero_based_ranks):
-    """Route records only when ranks uniquely fill positions 0..N-1.
-
-    Reject out-of-range destinations before indexing. A collision or missing
-    position invalidates the whole trial, leaving -1 values and IDs.
-    No digital re-sorting, diagonal restoration or rank repair is performed.
-    """
     keys = np.asarray(keys)
     ranks = np.asarray(zero_based_ranks)
     if ranks.shape != keys.shape or ranks.dtype.kind not in "iu" or keys.ndim != 2:
@@ -119,8 +84,6 @@ from qant_sorting.evaluation import reference_flags
 
 
 class SorterTests(unittest.TestCase):
-    """Network structure, stable records and batch-invariant noise."""
-
     def test_network_layers_and_work(self):
         for n in (2, 4, 8, 16, 32, 64, 128, 256):
             layers = compact_bitonic_layers(n)
@@ -169,10 +132,7 @@ class SorterTests(unittest.TestCase):
 
 
 class RankSorterTests(unittest.TestCase):
-    """Source equations, directed comparisons and invalid rank placement."""
-
     def test_published_matrix_example(self):
-        """Literal matrices from Applied Optics 34 (1995), p. 3089."""
         keys = np.array([[7, 8, 2, 8, 5]])
         difference = keys[:, None, :] - keys[:, :, None]
         biased = difference - np.tril(np.ones((5, 5), dtype=int), k=-1)

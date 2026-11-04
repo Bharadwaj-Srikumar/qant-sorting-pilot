@@ -1,10 +1,3 @@
-"""Whole-sort correctness and partial ranking quality.
-
-All reference calculations happen after sorting. Top-k means the largest
-keys, at the end of an ascending output. Invalid outputs have undefined
-conditional quality; runners report any zero-failure recall utility separately.
-"""
-
 from dataclasses import dataclass
 import math
 
@@ -12,13 +5,6 @@ import numpy as np
 
 
 def reference_flags(data, result):
-    """Return per-trial [valid, correct, stable] flags.
-
-    Validity checks a complete ID permutation and unchanged key-ID pairs.
-    Correct additionally requires sorted keys; stable requires increasing
-    original IDs within each equal-key group. These checks happen after
-    sorting and never guide noisy decisions.
-    """
     values, indices, reported_valid = result
     permutation = np.all(np.sort(indices, axis=1) == np.arange(data.shape[1]), axis=1)
 
@@ -36,12 +22,6 @@ def reference_flags(data, result):
 
 
 def wilson_interval(successes, trials):
-    """Return a two-sided 95% Wilson interval for successes/trials.
-
-    Callers supply a positive trial count. The interval describes sampling
-    uncertainty, not hardware uncertainty or universal correctness.
-    Observed 100% success still has a lower confidence bound below one.
-    """
     z = 1.959963984540054
     p = successes / trials
     denominator = 1 + z * z / trials
@@ -54,11 +34,6 @@ def wilson_interval(successes, trials):
 
 @dataclass
 class PreparedKeys:
-    """Cached truth and unordered-pair gap counts for one input dataset.
-
-    Data/order/value arrays have shape (trials,N); distances has shape
-    (trials,2**bits). left/right list each unordered record pair once.
-    """
     data: np.ndarray
     expected_order: np.ndarray
     sorted_keys: np.ndarray
@@ -69,12 +44,6 @@ class PreparedKeys:
 
 
 def prepare_keys(data, bits):
-    """Validate a 4/8-bit corpus and prepare reusable scoring information.
-
-    Use signed keys before subtraction, then count original pair distances
-    in blocks of 32 trials. Row offsets let one bincount build separate
-    histograms. The stable reference is used only to evaluate outputs.
-    """
     data = np.asarray(data)
     if bits not in (4, 8) or data.ndim != 2 or data.shape[1] < 1 or len(data) < 1:
         raise ValueError("Expected a nonempty 2-D 4/8-bit key corpus")
@@ -97,19 +66,10 @@ def prepare_keys(data, bits):
 
 
 def selected_k(n):
-    """Return applicable cutoffs {1,5,10,32,N}; N checks preservation only."""
     return sorted({k for k in (1, 5, 10, 32, n) if k <= n})
 
 
 def score_saved_order(prepared, indices, ks=None):
-    """Score saved original IDs without executing a sorter.
-
-    Return validity/order flags, inversions, tau metrics, gap histograms and
-    largest-key Recall@k. Invalid permutations have NaN conditional metrics
-    and inversion marker -1. All-equal arrays also have undefined tau.
-    Stable-ID recall requires exact reference records; tie-neutral recall
-    allows equivalent boundary ties while still requiring larger keys.
-    """
     data = prepared.data
     indices = np.asarray(indices)
     trials, n = data.shape

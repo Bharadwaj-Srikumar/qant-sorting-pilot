@@ -1,10 +1,3 @@
-"""Input validation and the main matched-step comparison model.
-
-For registered width b, keys become x/2**b and sigma = eta/2**b.
-Output rounding uses the same step but a signed range [-1/2, 1/2-step].
-This is an assumed sensitivity model, not measured Q.ANT device noise.
-"""
-
 from dataclasses import dataclass
 import numbers
 
@@ -12,13 +5,6 @@ import numpy as np
 
 
 def validate_keys(keys, key_bits):
-    """Return an independent int64 array of valid whole-number keys.
-
-    Accept a nonempty 1-D list or 2-D batch in [0, 2**key_bits - 1].
-    Integral floats are allowed; booleans, strings, fractions and nonfinite
-    values are rejected with their zero-based position. Widths 1..30 are
-    valid here; the registered experiment separately restricts precision.
-    """
     if (
         not isinstance(key_bits, int)
         or isinstance(key_bits, bool)
@@ -46,18 +32,11 @@ def validate_keys(keys, key_bits):
 
 @dataclass(frozen=True)
 class Precision:
-    """Record the registered key, input and output widths.
-
-    Only (4,4,4) and (8,8,8) are supported. Keeping separate fields makes
-    the matched-width assumption explicit.
-    """
-
     key_bits: int
     input_bits: int
     output_bits: int
 
     def __post_init__(self):
-        """Reject mixed widths and non-integer width declarations."""
         widths = (self.key_bits, self.input_bits, self.output_bits)
         if any(type(width) is not int for width in widths):
             raise ValueError("Bit widths must be integers")
@@ -66,34 +45,20 @@ class Precision:
 
     @property
     def delta_in(self):
-        """Normalized spacing between input keys: 2**(-input_bits)."""
         return 1 / 2**self.input_bits
 
     @property
     def delta_out(self):
-        """Output spacing; signed codes cover [-1/2, 1/2 - delta_out]."""
         return 1 / 2**self.output_bits
 
 
 class NoisyDifference:
-    """Normalize key pairs, add Gaussian noise, then round and saturate.
-
-    The callable returns measured differences shaped like its inputs.
-    Generators and diagnostic counts persist across calls, including the
-    successive layers of a Bitonic sort. Raw keys must be validated first.
-    """
-
     counter_names = (
         "comparisons", "saturations", "false_ties", "sign_reversals",
         "broken_true_ties",
     )
 
     def __init__(self, precision, eta=0.0, seed_context=(), trial_ids=()):
-        """Set sigma = eta * delta_out and create one stream per trial.
-
-        Keep absolute trial IDs when splitting batches. eta=0 creates no
-        generators; positive eta consumes fresh samples on every call.
-        """
         if not np.isfinite(eta) or eta < 0:
             raise ValueError("eta must be finite and nonnegative")
         self.precision = precision
@@ -108,12 +73,6 @@ class NoisyDifference:
             setattr(self, name, 0)
 
     def __call__(self, a, b):
-        """Measure equally shaped key pairs, normally (trials, pairs).
-
-        With noise enabled, each row uses its configured trial generator.
-        The signed quantizer preserves noiseless sign but can lose magnitude.
-        Diagnostics observe errors without correcting the returned scores.
-        """
         if a.shape != b.shape:
             raise ValueError("Both pair arrays must have the same shape")
         delta_in = self.precision.delta_in
@@ -151,8 +110,6 @@ import unittest
 
 
 class ComparisonTests(unittest.TestCase):
-    """Independent controls for the assumed comparison sensitivity model."""
-
     def test_every_noiseless_pair_has_the_correct_sign(self):
         for bits in (4, 8):
             a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
