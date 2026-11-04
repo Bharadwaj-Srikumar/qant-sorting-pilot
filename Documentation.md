@@ -55,9 +55,9 @@ when you want to use the official CPU SDK. It is not part of the sorting flow.
 
 ### Checks in the same files
 
-Each core module ends with a **Self-tests** section containing its mathematical
+Each core module contains `unittest` classes near the end for its mathematical
 examples and implementation checks. Read the main functions first, then use the
-test names and comments to see which behaviours are checked. Normal experiment
+test names and assertions to see which behaviours are checked. Normal experiment
 commands do not execute these tests.
 
 Run all checks with `python -m qant_sorting.run --self-test`. To check only one

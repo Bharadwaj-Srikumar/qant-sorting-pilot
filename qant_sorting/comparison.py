@@ -26,7 +26,6 @@ def validate_keys(keys, key_bits):
     ):
         raise ValueError('key_bits must be an integer from 1 to 30')
 
-    # Preserve bool/string types until validation; convert only afterward.
     a = np.asarray(keys, dtype=object)
     if a.ndim not in (1, 2) or 0 in a.shape:
         raise ValueError('keys must be a nonempty array or a rectangular batch of arrays')
@@ -120,8 +119,6 @@ class NoisyDifference:
         delta_in = self.precision.delta_in
         delta_out = self.precision.delta_out
 
-        # Validated integer keys already lie exactly on the input grid.
-        # Scale before subtracting so unsigned inputs cannot wrap around.
         qa = a * delta_in
         qb = b * delta_in
         noisy = qa - qb
@@ -133,13 +130,11 @@ class NoisyDifference:
                 rng.normal(0, self.sigma, a.shape[1:]) for rng in self.rngs
             ])
 
-        # Nearest-even rounding, then saturation of signed integer codes.
         codes = np.rint(noisy / delta_out)
         half_levels = 2 ** (self.precision.output_bits - 1)
         low, high = -half_levels, half_levels - 1
         measured = np.clip(codes, low, high) * delta_out
 
-        # True-key checks only count errors; they never repair measured.
         self.comparisons += a.size
         self.saturations += int(np.count_nonzero((codes < low) | (codes > high)))
         self.false_ties += int(np.count_nonzero((a != b) & (measured == 0)))
@@ -150,9 +145,6 @@ class NoisyDifference:
         return measured
 
 
-# Self-tests
-# Matched-step mathematical controls, input validation and seeded noise checks.
-# Run with: python -m unittest qant_sorting.comparison -v
 
 import math
 import unittest
@@ -161,8 +153,6 @@ import unittest
 class ComparisonTests(unittest.TestCase):
     """Independent controls for the assumed comparison sensitivity model."""
 
-    # Exhaustively prove the current matched-step model preserves all 4/8-bit signs,
-    # including equal pairs, even though some large magnitudes saturate.
     def test_every_noiseless_pair_has_the_correct_sign(self):
         for bits in (4, 8):
             a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
@@ -172,8 +162,6 @@ class ComparisonTests(unittest.TestCase):
             self.assertEqual(model.false_ties, 0)
             self.assertGreater(model.saturations, 0)
 
-    # Check explicit 8-bit adjacent, positive/negative extreme and equality outputs.
-    # Include unsigned keys to catch subtraction before float normalization.
     def test_adjacent_example_and_saturation(self):
         for dtype in (np.int64, np.uint8):
             model = NoisyDifference(Precision(8, 8, 8))
@@ -181,8 +169,6 @@ class ComparisonTests(unittest.TestCase):
             b = np.array([[9, 0, 255, 9]], dtype=dtype)
             np.testing.assert_array_equal(model(a, b), [[1 / 256, 127 / 256, -0.5, 0]])
 
-    # Reject malformed keys before normalization, and retain a useful array/key
-    # location in the error message so an invalid dataset can be corrected.
     def test_invalid_keys_report_the_location_and_range(self):
         with self.assertRaisesRegex(ValueError, r"array index 1, key index 0.*\[0, 15\]"):
             validate_keys([[1, 2], [16, 0]], 4)
@@ -190,24 +176,16 @@ class ComparisonTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 validate_keys([invalid], 4)
 
-    # Require unsupported mixed precision to fail instead of quietly changing
-    # the agreed matched-width quantization/noise experiment.
     def test_unequal_widths_are_not_silently_assumed(self):
         with self.assertRaises(ValueError):
             Precision(4, 4, 8)
 
-    # Check negative, NaN and infinite eta values are rejected before RNG use.
-    # Otherwise a malformed parameter could yield uninterpretable comparison scores.
     def test_invalid_noise_is_rejected(self):
         for eta in (-0.1, np.nan, np.inf):
             with self.assertRaises(ValueError):
                 NoisyDifference(Precision(4, 4, 4), eta)
 
-    # Compare seeded Monte Carlo with an independently written Gaussian-tail formula.
-    # The false-tie interval is [-1.5,-0.5] output steps for a +1-step difference.
     def test_adjacent_false_tie_probability_uses_half_step_boundary(self):
-        # An independent units check: 1 + noise rounds to zero for noise
-        # between -1.5 and -0.5 output steps. This is NOT a hardware fit.
         noise = np.random.default_rng(20261004).normal(0, 0.25, 200000)
         observed = np.mean(np.rint(1 + noise) == 0)
         expected = 0.5 * (math.erfc(2 / math.sqrt(2)) - math.erfc(6 / math.sqrt(2)))
