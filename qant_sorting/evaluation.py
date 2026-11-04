@@ -15,12 +15,11 @@ def reference_flags(data, result):
     """Return per-trial [valid, correct, stable] flags.
 
     Validity checks a complete ID permutation and unchanged key-ID pairs.
-    Correct additionally requires sorted keys; stable requires the exact
-    stable-reference IDs. The reference never guides noisy decisions.
+    Correct additionally requires sorted keys; stable requires increasing
+    original IDs within each equal-key group. These checks happen after
+    sorting and never guide noisy decisions.
     """
     values, indices, reported_valid = result
-    expected_indices = np.argsort(data, axis=1, kind="stable")
-    expected_values = np.take_along_axis(data, expected_indices, axis=1)
     permutation = np.all(np.sort(indices, axis=1) == np.arange(data.shape[1]), axis=1)
 
     # Safe lookup only: the separate permutation check still rejects -1 IDs.
@@ -29,8 +28,13 @@ def reference_flags(data, result):
         values == np.take_along_axis(data, safe_indices, axis=1), axis=1
     )
     valid = reported_valid & permutation & records_preserved
-    correct = valid & np.all(values == expected_values, axis=1)
-    stable = correct & np.all(indices == expected_indices, axis=1)
+    # For unchanged record permutations, adjacent order checks are equivalent
+    # to comparing with a stable reference sort, without sorting the input again.
+    correct = valid & np.all(values[:, :-1] <= values[:, 1:], axis=1)
+    stable_ties = np.all(
+        (values[:, :-1] != values[:, 1:]) | (indices[:, :-1] < indices[:, 1:]), axis=1
+    )
+    stable = correct & stable_ties
     return np.stack((valid, correct, stable), axis=1)
 
 
@@ -123,7 +127,8 @@ def score_saved_order(prepared, indices, ks=None):
     valid = np.all(np.sort(indices, axis=1) == np.arange(n), axis=1)
     valid_rows = np.flatnonzero(valid)
     order = indices[valid]
-    values = np.take_along_axis(data[valid], order, 1)
+    valid_data = data[valid]
+    values = np.take_along_axis(valid_data, order, 1)
     correct = np.zeros(trials, dtype=bool)
     stable = np.zeros(trials, dtype=bool)
     correct[valid] = np.all(values == prepared.sorted_keys[valid], axis=1)
@@ -179,7 +184,7 @@ def score_saved_order(prepared, indices, ks=None):
         threshold = prepared.sorted_keys[valid, n-k]
 
         # Cap boundary-tie credit so ties cannot hide a missing strictly larger key.
-        mandatory = np.sum(data[valid] > threshold[:, None], axis=1)
+        mandatory = np.sum(valid_data > threshold[:, None], axis=1)
         tie_slots = k - mandatory
         chosen_values = values[:, -k:]
         greater = np.sum(chosen_values > threshold[:, None], axis=1)
@@ -271,6 +276,8 @@ class RankingQualityTests(unittest.TestCase):
             permutations = np.array(list(itertools.permutations(range(5))))
             p = prepare_keys(np.tile(keys, (len(permutations), 1)), 4)
             result = score_saved_order(p, permutations, [1, 2, 3, 5])
+            values = np.take_along_axis(p.data, permutations, axis=1)
+            flags = reference_flags(p.data, (values, permutations, np.ones(len(values), dtype=bool)))
             expected_hist = np.zeros(16, dtype=int)
             for row, order in enumerate(permutations):
                 values = [keys[i] for i in order]
@@ -282,6 +289,9 @@ class RankingQualityTests(unittest.TestCase):
                             expected_hist[values[a]-values[b]] += 1
                 self.assertEqual(result["inversions"][row], inversion_count)
                 truth = sorted(range(5), key=lambda i: (keys[i], i))
+                expected_flags = [True, values == sorted(keys), list(order) == truth]
+                np.testing.assert_array_equal(flags[row], expected_flags)
+                np.testing.assert_array_equal(result["flags"][row], expected_flags)
                 for k in (1, 2, 3, 5):
                     expected = len(set(order[-k:]) & set(truth[-k:])) / k
                     self.assertEqual(result["recall"][k]["stable"][row], expected)
@@ -293,9 +303,19 @@ class RankingQualityTests(unittest.TestCase):
                     self.assertEqual(result["recall"][k]["tie_neutral"][row], neutral)
             np.testing.assert_array_equal(result["distance_inversions"], expected_hist)
 
-    # Present duplicated/lost record identities despite a claimed valid flag.
-    # The independent scorer must reject them rather than trusting the sorter.
+    # Sorted-looking keys are insufficient: reject missing/duplicated IDs,
+    # changed key-ID pairs and outputs the sorter reports as invalid.
     def test_record_checks_detect_lost_or_changed_keys(self):
         data = np.array([[1, 2]])
-        bad = (np.array([[1, 1]]), np.array([[0, 0]]), np.array([True]))
-        self.assertFalse(reference_flags(data, bad).any())
+        cases = (
+            ([1, 1], [0, 0], True),
+            ([1, 2], [1, 0], True),
+            ([1, 3], [0, 1], True),
+            ([1, 2], [0, -1], True),
+            ([1, 2], [0, 2], True),
+            ([1, 2], [0, 1], False),
+        )
+        for values, indices, reported_valid in cases:
+            with self.subTest(values=values, indices=indices, reported_valid=reported_valid):
+                result = np.array([values]), np.array([indices]), np.array([reported_valid])
+                self.assertFalse(reference_flags(data, result).any())

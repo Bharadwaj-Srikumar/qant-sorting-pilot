@@ -47,7 +47,9 @@ def bitonic_sort(keys, difference):
         # Advanced indexing copies both sides before either is overwritten.
         a, b = values[:, left], values[:, right]
         ai, bi = indices[:, left], indices[:, right]
-        measured = difference(a, b)
+        measured = np.asarray(difference(a, b), dtype=np.float64)
+        if measured.shape != a.shape or not np.isfinite(measured).all():
+            raise ValueError("difference must return finite scores with the pair-array shape")
         greater = (measured > 0) | ((measured == 0) & (ai > bi))
         exchange = np.where(ascending, greater, ~greater)
         values[:, left] = np.where(exchange, b, a)
@@ -80,9 +82,11 @@ def rank_sort(keys, difference, *, bias_step):
     measured = np.asarray(difference(a, b), dtype=np.float64)
     if measured.shape != a.shape or not np.isfinite(measured).all():
         raise ValueError("difference must return finite scores with the pair-array shape")
-    biased = measured.reshape(shape) - bias_step * np.tril(np.ones((n, n)), k=-1)
+    # measured - bias >= 0 is equivalent to measured >= bias. Using a
+    # 2-D threshold avoids a full (trials,N,N) floating-point temporary.
+    threshold = bias_step * np.tri(n, k=-1)
     # Sum competitor rows to get column ranks; remove the noiseless self-vote.
-    ranks = np.sum(biased >= 0, axis=1, dtype=np.int64) - 1
+    ranks = np.sum(measured.reshape(shape) >= threshold, axis=1, dtype=np.int64) - 1
     return place_ranks(keys, ranks)
 
 
@@ -149,6 +153,15 @@ class SorterTests(unittest.TestCase):
             for sorter in (bitonic_sort, rank_sort):
                 model = NoisyDifference(Precision(4, 4, 4))
                 self.assertTrue(reference_flags(data, sorter(data, model, **({"bias_step": 1/16} if sorter is rank_sort else {}))).all())
+
+    # Bad callback outputs must fail before broadcasting or NaN comparisons
+    # can silently produce an apparently valid sorting result.
+    def test_bitonic_rejects_malformed_comparison_scores(self):
+        keys = np.array([[0, 1]])
+        for scores in (np.array(0.0), np.zeros((1, 2)),
+                       np.array([[np.nan]]), np.array([[np.inf]])):
+            with self.assertRaisesRegex(ValueError, "finite scores with the pair-array shape"):
+                bitonic_sort(keys, lambda a, b: scores)
 
     # Inject a cyclic three-way relation with no consistent total order. Require
     # invalid output and -1 markers, proving collisions are not hidden by digital repair.

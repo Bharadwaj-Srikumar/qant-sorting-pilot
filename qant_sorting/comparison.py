@@ -32,15 +32,15 @@ def validate_keys(keys, key_bits):
         raise ValueError('keys must be a nonempty array or a rectangular batch of arrays')
     maximum = 2**key_bits - 1
     for index, value in np.ndenumerate(a):
-        location = (
-            'input index %d' % index[0] if a.ndim == 1
-            else 'array index %d, key index %d' % index
-        )
         ok = not isinstance(value, (bool, np.bool_)) and (
             isinstance(value, numbers.Integral) or
             (isinstance(value, numbers.Real) and np.isfinite(float(value))
              and float(value).is_integer()))
         if not ok or not 0 <= value <= maximum:
+            location = (
+                'input index %d' % index[0] if a.ndim == 1
+                else 'array index %d, key index %d' % index
+            )
             raise ValueError(f'{location}: key {value!r} must be a finite whole number in range [0, {maximum}]')
     return a.astype(np.int64)
 
@@ -120,9 +120,10 @@ class NoisyDifference:
         delta_in = self.precision.delta_in
         delta_out = self.precision.delta_out
 
-        # Registered integer keys already lie exactly on the input grid.
-        qa = np.rint((a * delta_in) / delta_in) * delta_in
-        qb = np.rint((b * delta_in) / delta_in) * delta_in
+        # Validated integer keys already lie exactly on the input grid.
+        # Scale before subtracting so unsigned inputs cannot wrap around.
+        qa = a * delta_in
+        qb = b * delta_in
         noisy = qa - qb
 
         if self.eta:
@@ -172,12 +173,13 @@ class ComparisonTests(unittest.TestCase):
             self.assertGreater(model.saturations, 0)
 
     # Check explicit 8-bit adjacent, positive/negative extreme and equality outputs.
-    # These numerical fixtures catch wrong step size or asymmetric signed endpoints.
+    # Include unsigned keys to catch subtraction before float normalization.
     def test_adjacent_example_and_saturation(self):
-        model = NoisyDifference(Precision(8, 8, 8))
-        a = np.array([[10, 255, 0, 9]])
-        b = np.array([[9, 0, 255, 9]])
-        np.testing.assert_array_equal(model(a, b), [[1 / 256, 127 / 256, -0.5, 0]])
+        for dtype in (np.int64, np.uint8):
+            model = NoisyDifference(Precision(8, 8, 8))
+            a = np.array([[10, 255, 0, 9]], dtype=dtype)
+            b = np.array([[9, 0, 255, 9]], dtype=dtype)
+            np.testing.assert_array_equal(model(a, b), [[1 / 256, 127 / 256, -0.5, 0]])
 
     # Reject malformed keys before normalization, and retain a useful array/key
     # location in the error message so an invalid dataset can be corrected.
