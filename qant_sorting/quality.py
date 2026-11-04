@@ -1,9 +1,3 @@
-"""Evaluate saved sorting outputs without running the sorters again.
-
-Run from the repository root: python -m qant_sorting.quality
-Use --results-dir to score the directory written by a new main experiment.
-"""
-
 import argparse
 import csv
 import gzip
@@ -21,7 +15,6 @@ from qant_sorting.run import (
 
 
 def statistics(values, prefix):
-    """Summarize finite scores; leave undefined conditional scores blank."""
     values = values[np.isfinite(values)]
     if not len(values):
         return {prefix + suffix: None for suffix in ("_mean", "_median", "_min", "_p05")}
@@ -32,7 +25,6 @@ def statistics(values, prefix):
 
 
 def run(results_dir, output_dir):
-    """Score every case in the chosen results, checking saved flags and counts."""
     results_dir, output_dir = results_dir.resolve(), output_dir.resolve()
     inputs = ROOT / "data/inputs.npz"
     sources = [inputs, results_dir / "simulation_accuracy.csv", results_dir / "simulation_trial_outcomes.npz"]
@@ -139,7 +131,7 @@ def run(results_dir, output_dir):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Score saved sorting outputs.")
     parser.add_argument("--results-dir", type=Path, default=ROOT / "results")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
@@ -155,7 +147,6 @@ from unittest.mock import patch
 
 class QualityRunnerTests(unittest.TestCase):
     def write_fixture(self, directory, extra_member=False):
-        """Create a tiny saved run outside its project, with one invalid output."""
         project, results = directory / "project", directory / "new_run"
         (project / "data").mkdir(parents=True)
         results.mkdir()

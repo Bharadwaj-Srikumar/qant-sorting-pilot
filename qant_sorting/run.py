@@ -1,9 +1,3 @@
-"""Run the main Bitonic-versus-rank noise experiment.
-
-Start with evaluate_case() to follow one batch, then run() for the full sweep.
-Run from the repository root: python -m qant_sorting.run
-"""
-
 import argparse
 import csv
 import hashlib
@@ -31,13 +25,11 @@ MAPPINGS = {
 
 
 def file_hash(path):
-    """Return SHA-256 without loading an entire result archive into memory."""
     with Path(path).open("rb") as handle:
         return hashlib.file_digest(handle, "sha256").hexdigest()
 
 
 def write_csv(path, rows):
-    """Write nonempty record rows in their original field order, using UTF-8."""
     if not rows:
         raise ValueError("Cannot infer CSV columns from an empty record list")
     with Path(path).open("w", newline="", encoding="utf-8") as handle:
@@ -47,7 +39,6 @@ def write_csv(path, rows):
 
 
 def prepare_output_directory(directory, filenames):
-    """Allow result groups to share a folder without overwriting their files."""
     directory = Path(directory).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     existing = [name for name in filenames if (directory / name).exists()]
@@ -58,7 +49,6 @@ def prepare_output_directory(directory, filenames):
 
 
 def source_hashes():
-    """Record the code used by a new run; leave old metadata unchanged."""
     hashes = {}
     for path in sorted((ROOT / "qant_sorting").rglob("*.py")):
         hashes[str(path.relative_to(ROOT))] = file_hash(path)
@@ -66,7 +56,6 @@ def source_hashes():
 
 
 def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
-    """Evaluate one width/N/family/noise/mapping condition in small batches."""
     if sort is rank_sort:
         batch_size = min(batch_size, max(1, 1_000_000 // data.shape[1]**2))
     totals = dict.fromkeys(NoisyDifference.counter_names, 0)
@@ -99,7 +88,6 @@ def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
 
 
 def run(output_directory, batch_size):
-    """Evaluate the saved inputs, check each run, and write the results."""
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
     output_directory = output_directory.resolve()
@@ -198,8 +186,7 @@ def run(output_directory, batch_size):
 
 
 def main(argv=None):
-    """Run the experiment, or run the checks stored in the seven core modules."""
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Run the sorting noise evaluation.")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--self-test", action="store_true",
@@ -224,7 +211,6 @@ import unittest
 
 class RunTests(unittest.TestCase):
     def test_main_commands_explain_their_options(self):
-        """Every documented command explains its options without loading the SDK."""
         commands = (
             ("qant_sorting.run", "--batch-size"),
             ("qant_sorting.quality", "--results-dir"),
@@ -242,7 +228,6 @@ class RunTests(unittest.TestCase):
                 self.assertIn(option, result.stdout)
 
     def test_existing_results_are_not_overwritten(self):
-        """Allow other result groups, but preserve existing simulation outputs."""
         reference_hash = file_hash(REFERENCE / "simulation_trial_outcomes.npz")
         with self.assertRaises(ValueError):
             run(REFERENCE, batch_size=1)

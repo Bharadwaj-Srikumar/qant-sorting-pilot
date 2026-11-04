@@ -1,10 +1,3 @@
-"""Count pair operations, API calls and logical BF16 bytes for both sorters.
-
-Run python -m qant_sorting.resources to write the resource tables.
-The pair cap limits software submissions; it is not a physical tile size.
-Bandwidth floors and timing thresholds are conditional, not hardware results.
-"""
-
 import argparse
 import json
 from pathlib import Path
@@ -16,12 +9,6 @@ B_PEAK = 16e9 * 8 * (128 / 130) / 8
 
 
 def counts(n, cap):
-    """Return layers, Bitonic/rank pairs and Bitonic/rank calls for one sort.
-
-    Each Bitonic layer must finish before the next begins, so split its N/2
-    pairs separately. All N*N rank pairs are independent submissions.
-    Counts exclude batching across multiple input arrays.
-    """
     if n < 2 or n & (n - 1):
         raise ValueError("n must be a power of two and at least 2")
     if type(cap) is not int or cap < 1:
@@ -36,7 +23,6 @@ def counts(n, cap):
 
 
 def run(output=None):
-    """Write resource rows and call-cap sensitivity without requiring the SDK."""
     output = prepare_output_directory(output or ROOT / "results/reproduced", (
         "resources_counts.csv", "resources_batch_sensitivity.csv", "resources_metadata.json",
     ))
@@ -77,7 +63,7 @@ def run(output=None):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Calculate sorting resource costs.")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)

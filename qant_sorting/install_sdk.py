@@ -1,9 +1,3 @@
-"""Install the bundled official CPU SDK into a Python 3.12 virtual environment.
-
-The vendor archive is unmodified and checksum-checked. The Gaussian sweep does
-not need it; install only to run the separate SDK integration control.
-"""
-
 import argparse
 
 import hashlib
@@ -18,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Install the bundled Q.ANT CPU SDK.")
     parser.add_argument("--no-deps", action="store_true",
                         help="Keep the environment already installed from requirements.txt")
     args = parser.parse_args()
