@@ -2,9 +2,13 @@ import argparse
 import csv
 import hashlib
 import json
-from pathlib import Path
 import platform
+import subprocess
+import sys
+import tempfile
 import time
+import unittest
+from pathlib import Path
 
 import numpy as np
 
@@ -201,12 +205,6 @@ def main(argv=None):
         unittest.main(module=None, argv=["self-test", "-v", *modules])
     else:
         run(args.output_dir, args.batch_size)
-
-
-import subprocess
-import sys
-import tempfile
-import unittest
 
 
 class RunTests(unittest.TestCase):

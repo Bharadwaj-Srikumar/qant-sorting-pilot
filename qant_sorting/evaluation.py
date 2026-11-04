@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+import itertools
 import math
+import unittest
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -151,11 +153,6 @@ def score_saved_order(prepared, indices, ks=None):
                 tau_b=tau_b, tau_b_ceiling=ceiling, tau_key_normalized=normalized,
                 distance_pairs=available_by_gap, distance_inversions=inverted_by_gap,
                 recall=recall)
-
-
-
-import itertools
-import unittest
 
 
 class RankingQualityTests(unittest.TestCase):

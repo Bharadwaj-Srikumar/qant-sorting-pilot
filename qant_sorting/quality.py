@@ -3,8 +3,12 @@ import csv
 import gzip
 import io
 import json
-from pathlib import Path
 import platform
+import tempfile
+import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 
@@ -136,13 +140,6 @@ def main(argv=None):
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.results_dir, args.output_dir)
-
-
-
-from contextlib import redirect_stdout
-import tempfile
-import unittest
-from unittest.mock import patch
 
 
 class QualityRunnerTests(unittest.TestCase):
