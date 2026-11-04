@@ -51,7 +51,7 @@ def write_csv(path, rows):
 def source_hashes():
     """Record the code used by a new run; leave old metadata unchanged."""
     hashes = {}
-    for directory in ("qant_sorting", "studies", "tools"):
+    for directory in ("qant_sorting", "tools"):
         for path in sorted((ROOT / directory).rglob("*.py")):
             hashes[str(path.relative_to(ROOT))] = file_hash(path)
     return hashes

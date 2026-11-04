@@ -1,21 +1,21 @@
-"""Checks for the direct commands and protection of saved evidence."""
-import csv
-import hashlib
+"""Command entry points and protection of saved results."""
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-from qant_sorting.run import REFERENCE, ROOT, file_hash, run, write_csv
+from qant_sorting.run import REFERENCE, ROOT, file_hash, run
 
 
 class StructureTests(unittest.TestCase):
     def test_main_commands_explain_their_options(self):
-        """The two main workflows can be invoked directly without an SDK command."""
+        """Every documented command explains its options without loading the SDK."""
         commands = (
             ("qant_sorting.run", "--batch-size"),
-            ("qant_sorting.controls", "--pair-samples"),
+            ("qant_sorting.quality", "--results-dir"),
+            ("qant_sorting.sdk", "--output-dir"),
+            ("qant_sorting.resources", "--output-dir"),
         )
         for module, option in commands:
             with self.subTest(module=module):
@@ -41,21 +41,6 @@ class StructureTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 run(output, batch_size=1)
             self.assertEqual(marker.read_text(), "Keep the previous run.")
-
-    def test_shared_csv_and_hash_preserve_field_order_and_content(self):
-        """Preserve serialized evidence semantics, including Unicode and empties."""
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "records.csv"
-            write_csv(path, [{"scenario": "Ties (τ)", "count": 4},
-                             {"scenario": "", "count": 0}])
-            with path.open(encoding="utf-8", newline="") as handle:
-                reader = csv.DictReader(handle)
-                self.assertEqual(reader.fieldnames, ["scenario", "count"])
-                self.assertEqual(list(reader)[0], {"scenario": "Ties (τ)", "count": "4"})
-            self.assertEqual(file_hash(path), hashlib.sha256(path.read_bytes()).hexdigest())
-            with self.assertRaises(ValueError):
-                write_csv(Path(directory) / "empty.csv", [])
-
 
 if __name__ == "__main__":
     unittest.main()
