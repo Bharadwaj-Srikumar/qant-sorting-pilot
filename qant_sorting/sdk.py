@@ -15,7 +15,7 @@ import numpy as np
 
 from qant_sorting.comparison import validate_keys
 from qant_sorting.evaluation import reference_flags
-from qant_sorting.run import INPUT_SHA256, ROOT, file_hash, source_hashes, write_csv
+from qant_sorting.run import INPUT_SHA256, ROOT, file_hash, prepare_output_directory, source_hashes, write_csv
 from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
@@ -91,10 +91,9 @@ def run(output_directory):
         raise RuntimeError("This control requires the pinned official 2.3.1 CPU backend")
     if file_hash(ROOT / "data/inputs.npz") != INPUT_SHA256:
         raise ValueError("Unexpected input corpus")
-    output = output_directory.resolve()
-    output.mkdir(parents=True, exist_ok=True)
-    if any(output.iterdir()):
-        raise ValueError("Use an empty output directory")
+    output = prepare_output_directory(output_directory, (
+        "sdk_accuracy.csv", "sdk_trial_outcomes.npz", "sdk_metadata.json",
+    ))
     before = source_hashes()
     for bits in (4, 8):
         a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
@@ -142,22 +141,22 @@ def run(output_directory):
                 ))
             print(f"{dataset}: SDK CPU verified", flush=True)
 
-    write_csv(output / "accuracy.csv", rows)
-    np.savez_compressed(output / "trial_outcomes.npz", **outcomes)
+    write_csv(output / "sdk_accuracy.csv", rows)
+    np.savez_compressed(output / "sdk_trial_outcomes.npz", **outcomes)
     metadata = dict(
         **identity, hardware_executed=False, added_noise=False, extra_quantizer=False,
         executions=sum(r["trials"] for r in rows), inputs_sha256=INPUT_SHA256,
         rank="N*N SDK differences including diagonal; host subtracts delta*U, thresholds >=0 and sums columns",
         scope="CPU software integration; no NPU timing, optical noise or measured bus traffic",
-        source_sha256=before, outputs_sha256=file_hash(output / "trial_outcomes.npz"),
+        source_sha256=before, outputs_sha256=file_hash(output / "sdk_trial_outcomes.npz"),
     )
-    (output / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    (output / "sdk_metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     print(f"Verified {metadata['executions']:,} complete SDK CPU sorts.")
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/sdk_reproduced")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)
 

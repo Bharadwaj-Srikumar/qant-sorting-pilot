@@ -22,7 +22,7 @@ from qant_sorting.sorters import bitonic_sort, rank_sort
 # These settings define the saved reference experiment.
 ROOT = Path(__file__).resolve().parents[1]
 INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
-REFERENCE = ROOT / "results/reference"
+REFERENCE = ROOT / "results"
 ETA_VALUES = (0.0, 0.05, 0.10, 0.15, 0.20, 0.25)
 MASTER_SEED = 20260930
 MAPPINGS = {
@@ -46,6 +46,17 @@ def write_csv(path, rows):
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
+
+
+def prepare_output_directory(directory, filenames):
+    """Allow result groups to share a folder without overwriting their files."""
+    directory = Path(directory).resolve()
+    directory.mkdir(parents=True, exist_ok=True)
+    existing = [name for name in filenames if (directory / name).exists()]
+    if existing:
+        raise ValueError("Output files already exist: " + ", ".join(existing)
+                         + ". Choose a different --output-dir.")
+    return directory
 
 
 def source_hashes():
@@ -98,9 +109,10 @@ def run(output_directory, batch_size):
     output_directory = output_directory.resolve()
     if output_directory == REFERENCE.resolve() and REFERENCE.exists():
         raise ValueError("Choose a separate output directory; the reference is immutable")
-    output_directory.mkdir(parents=True, exist_ok=True)
-    if any(output_directory.iterdir()):
-        raise ValueError("Use an empty output directory")
+    output_directory = prepare_output_directory(output_directory, (
+        "simulation_accuracy.csv", "simulation_trial_outcomes.npz",
+        "simulation_failures.json", "simulation_validation.json", "simulation_metadata.json",
+    ))
     input_path = ROOT / "data/inputs.npz"
     if hashlib.sha256(input_path.read_bytes()).hexdigest() != INPUT_SHA256:
         raise ValueError("Saved input corpus checksum differs from the agreed experiment")
@@ -159,9 +171,9 @@ def run(output_directory, batch_size):
                     rows.append(row)
             print(f"{dataset}: complete", flush=True)
 
-    write_csv(output_directory / "accuracy.csv", rows)
-    np.savez_compressed(output_directory / "trial_outcomes.npz", **saved)
-    (output_directory / "failures.json").write_text(json.dumps(failures, indent=2))
+    write_csv(output_directory / "simulation_accuracy.csv", rows)
+    np.savez_compressed(output_directory / "simulation_trial_outcomes.npz", **saved)
+    (output_directory / "simulation_failures.json").write_text(json.dumps(failures, indent=2))
 
     # These checks were performed above using this run's inputs and outputs.
     validation = dict(
@@ -170,7 +182,7 @@ def run(output_directory, batch_size):
         noiseless_outputs_valid_correct_stable=True,
         noiseless_sort_executions=sum(r["trials"] for r in rows if r["eta"] == 0),
     )
-    (output_directory / "validation.json").write_text(json.dumps(validation, indent=2))
+    (output_directory / "simulation_validation.json").write_text(json.dumps(validation, indent=2))
     metadata = dict(
         revision="thesis_full_matrix_20261024",
         rank_algorithm="Full N*N rank matrix including measured diagonal",
@@ -190,7 +202,7 @@ def run(output_directory, batch_size):
         source_sha256=source_hashes(),
         **validation,
     )
-    (output_directory / "metadata.json").write_text(json.dumps(metadata, indent=2))
+    (output_directory / "simulation_metadata.json").write_text(json.dumps(metadata, indent=2))
     print(f"Completed {len(rows)} configurations, {metadata['executions']:,} executions.")
     print(f"Results: {output_directory}")
 
@@ -242,19 +254,25 @@ class RunTests(unittest.TestCase):
                 self.assertIn(option, result.stdout)
 
     def test_existing_results_are_not_overwritten(self):
-        """Refuse both the committed reference and a nonempty output directory."""
-        reference_hash = file_hash(REFERENCE / "trial_outcomes.npz")
+        """Allow other result groups, but preserve existing simulation outputs."""
+        reference_hash = file_hash(REFERENCE / "simulation_trial_outcomes.npz")
         with self.assertRaises(ValueError):
             run(REFERENCE, batch_size=1)
-        self.assertEqual(file_hash(REFERENCE / "trial_outcomes.npz"), reference_hash)
+        self.assertEqual(file_hash(REFERENCE / "simulation_trial_outcomes.npz"), reference_hash)
 
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
-            marker = output / "existing.txt"
+            other_group = output / "sdk_accuracy.csv"
+            other_group.write_text("Keep the SDK results.")
+            self.assertEqual(
+                prepare_output_directory(output, ("simulation_accuracy.csv",)), output.resolve()
+            )
+            marker = output / "simulation_accuracy.csv"
             marker.write_text("Keep the previous run.")
             with self.assertRaises(ValueError):
                 run(output, batch_size=1)
             self.assertEqual(marker.read_text(), "Keep the previous run.")
+            self.assertEqual(other_group.read_text(), "Keep the SDK results.")
 
 
 if __name__ == "__main__":

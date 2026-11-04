@@ -15,7 +15,9 @@ import platform
 import numpy as np
 
 from qant_sorting.evaluation import prepare_keys, score_saved_order
-from qant_sorting.run import INPUT_SHA256, ROOT, file_hash, source_hashes, write_csv
+from qant_sorting.run import (
+    INPUT_SHA256, ROOT, file_hash, prepare_output_directory, source_hashes, write_csv,
+)
 
 
 def statistics(values, prefix):
@@ -33,13 +35,14 @@ def run(results_dir, output_dir):
     """Score every case in the chosen results, checking saved flags and counts."""
     results_dir, output_dir = results_dir.resolve(), output_dir.resolve()
     inputs = ROOT / "data/inputs.npz"
-    sources = [inputs, results_dir / "accuracy.csv", results_dir / "trial_outcomes.npz"]
+    sources = [inputs, results_dir / "simulation_accuracy.csv", results_dir / "simulation_trial_outcomes.npz"]
     hashes = {path.name: file_hash(path) for path in sources}
     if hashes["inputs.npz"] != INPUT_SHA256:
         raise ValueError("Unexpected input corpus")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    if any(output_dir.iterdir()):
-        raise ValueError("Use an empty output directory")
+    output_dir = prepare_output_directory(output_dir, (
+        "quality_summary.csv", "quality_recall.csv", "quality_distance.csv.gz",
+        "quality_validation.json", "quality_metadata.json",
+    ))
     with sources[1].open(newline="") as handle:
         rows = list(csv.DictReader(handle))
     if not rows:
@@ -102,11 +105,11 @@ def run(results_dir, output_dir):
         if set(outputs.files) != expected_members or len(outputs.files) != len(expected_members):
             raise ValueError("Saved output cases do not match the accuracy CSV")
 
-    write_csv(output_dir / "summary.csv", summaries)
-    write_csv(output_dir / "recall.csv", recalls)
+    write_csv(output_dir / "quality_summary.csv", summaries)
+    write_csv(output_dir / "quality_recall.csv", recalls)
     distance_fields = ["dataset", "key_bits", "n", "family", "eta", "mapping", "key_distance",
                        "valid_outputs", "pairs_at_distance", "inverted_pairs", "inversion_rate"]
-    with (output_dir / "distance.csv.gz").open("wb") as raw:
+    with (output_dir / "quality_distance.csv.gz").open("wb") as raw:
         with gzip.GzipFile(filename="", fileobj=raw, mode="wb", mtime=0) as compressed:
             with io.TextIOWrapper(compressed, encoding="utf-8", newline="") as handle:
                 writer = csv.DictWriter(handle, fieldnames=distance_fields)
@@ -125,15 +128,15 @@ def run(results_dir, output_dir):
         invalid_policy="Undefined conditional quality; mean_all_invalid_zero assigns zero utility",
         coverage="All cases in the chosen accuracy CSV and output archive are scored",
         scope="Synthetic sorting quality; saved inputs are reused across noise levels and algorithms")
-    for name, contents in (("validation.json", validation), ("metadata.json", metadata)):
+    for name, contents in (("quality_validation.json", validation), ("quality_metadata.json", metadata)):
         (output_dir / name).write_text(json.dumps(contents, indent=2, allow_nan=False) + "\n")
     print(json.dumps(validation, indent=2))
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--results-dir", type=Path, default=ROOT / "results/reference")
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/ranking_quality_reproduced")
+    parser.add_argument("--results-dir", type=Path, default=ROOT / "results")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.results_dir, args.output_dir)
 
@@ -162,35 +165,37 @@ class QualityRunnerTests(unittest.TestCase):
         }
         if extra_member:
             members["unlisted_case_flags"] = np.array([[True, True, True]])
-        np.savez(results / "trial_outcomes.npz", **members)
+        np.savez(results / "simulation_trial_outcomes.npz", **members)
         row = dict(key_bits=4, n=4, family="duplicates", eta=.25, mapping="rank",
                    trials=2, valid_outputs=1, correct_sorts=1, stable_sorts=1)
-        write_csv(results / "accuracy.csv", [row])
+        write_csv(results / "simulation_accuracy.csv", [row])
         return project, results, file_hash(inputs)
 
     def test_results_directory_and_invalid_zero_recall(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             project, results, checksum = self.write_fixture(directory)
-            output = directory / "quality"
+            output = results
             with patch(__name__ + ".ROOT", project), \
                  patch(__name__ + ".INPUT_SHA256", checksum), \
                  patch(__name__ + ".source_hashes", return_value={}), \
                  redirect_stdout(io.StringIO()):
                 main(["--results-dir", str(results), "--output-dir", str(output)])
-            with (output / "summary.csv").open(newline="") as handle:
+                with self.assertRaisesRegex(ValueError, "Output files already exist"):
+                    run(results, output)
+            with (output / "quality_summary.csv").open(newline="") as handle:
                 summary = list(csv.DictReader(handle))[0]
             self.assertEqual((summary["valid_outputs"], summary["invalid_outputs"]), ("1", "1"))
             self.assertEqual(float(summary["whole_sort_accuracy"]), .5)
-            with (output / "recall.csv").open(newline="") as handle:
+            with (output / "quality_recall.csv").open(newline="") as handle:
                 recall = next(row for row in csv.DictReader(handle) if row["k"] == "1")
             for variant in ("stable", "tie_neutral"):
                 self.assertEqual(float(recall[variant + "_mean_valid"]), 1)
                 self.assertEqual(float(recall[variant + "_mean_all_invalid_zero"]), .5)
-            with gzip.open(output / "distance.csv.gz", "rt", newline="") as handle:
+            with gzip.open(output / "quality_distance.csv.gz", "rt", newline="") as handle:
                 distances = list(csv.DictReader(handle))
             self.assertEqual(sum(int(row["pairs_at_distance"]) for row in distances), 5)
-            validation = json.loads((output / "validation.json").read_text())
+            validation = json.loads((output / "quality_validation.json").read_text())
             self.assertEqual(validation["evaluated_outputs"], 2)
             self.assertTrue(validation["complete_coverage"])
 

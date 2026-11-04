@@ -212,7 +212,7 @@ the algorithm finishes. The reference never guides a noisy decision.
 
 The reported accuracy is the fraction of **entire arrays** correctly sorted.
 For s successful arrays out of n trials, p=s/n. The two-sided 95% Wilson interval
-saved in `accuracy.csv` is
+saved in `simulation_accuracy.csv` is
 
 ```math
 \frac{p+z^2/(2n)\ \pm\ z\sqrt{p(1-p)/n+z^2/(4n^2)}}{1+z^2/n},
@@ -250,7 +250,7 @@ can have standard τ-b below one; `tau_b_ceiling` records that limit.
 are undefined when M=0, including all-equal arrays. Summaries use only defined
 outputs and report their count, mean, median, minimum and fifth percentile.
 
-For each integer gap g=|a−b|>0, `distance.csv.gz` pools inversions and available
+For each integer gap g=|a−b|>0, `quality_distance.csv.gz` pools inversions and available
 pairs across valid outputs. Their ratio shows which key separations are
 misordered. Equal-key pairs are excluded. Inversion counts are also summarized
 per valid array.
@@ -291,16 +291,22 @@ From the repository root, after the setup in the [README](README.md):
 
 ```bash
 python -m qant_sorting.run --output-dir results/reproduced
-python -m qant_sorting.quality --results-dir results/reproduced --output-dir results/ranking_quality_reproduced
+python -m qant_sorting.quality --results-dir results/reproduced
 ```
 
 The sweep runs 24 datasets × 6 noise levels × 2 algorithms: 288 configurations
 and 288,000 sorts. It checks comparison counts and every noiseless output.
-`accuracy.csv` holds aggregate results and diagnostics; `trial_outcomes.npz`
-holds all IDs and flags; `failures.json` holds example failures. Metadata and
-validation record inputs, code hashes, settings and checks. Quality adds
-`summary.csv`, `recall.csv` and `distance.csv.gz` with its own metadata and
-validation. Use a fresh output directory for each reproduction.
+`simulation_accuracy.csv` holds aggregate results and diagnostics;
+`simulation_trial_outcomes.npz` holds all IDs and flags; `simulation_failures.json`
+holds example failures. The matching `simulation_metadata.json` and
+`simulation_validation.json` record inputs, code hashes, settings and checks.
+Quality adds `quality_summary.csv`, `quality_recall.csv` and
+`quality_distance.csv.gz`, with its own `quality_metadata.json` and
+`quality_validation.json`.
+
+Both commands write to `results/reproduced/` by default. Different output groups
+can share this directory, but a command stops if any of its output files already
+exists. Choose a new `--output-dir` when repeating a group.
 
 The recorded findings are in [recorded results](#4-results). The independent official
 CPU SDK check and conditional hardware accounting are explained in
@@ -344,8 +350,10 @@ python -m qant_sorting.sdk
 ```
 
 The installer checks the bundled toolkit archive. Vendor notices remain in
-[`vendor/`](vendor/). Saved integration evidence is in
-[`results/sdk/`](results/sdk/); a new run uses `results/sdk_reproduced/`.
+[`vendor/`](vendor/). Saved integration evidence includes
+[`results/sdk_accuracy.csv`](results/sdk_accuracy.csv), with matching
+`sdk_trial_outcomes.npz` and `sdk_metadata.json`. A new run writes these `sdk_`
+files to `results/reproduced/`.
 
 ### 3.2 Native nonlinearity is an execution-boundary question
 
@@ -409,10 +417,13 @@ fewer submissions while doing more arithmetic and moving more data.
 python -m qant_sorting.resources
 ```
 
-[`results/resources/`](results/resources/) contains recorded counts and cap
-sensitivity; new files go to `results/resources_reproduced/`. The recorded
-payload-floor columns use the declared link ceiling in `validation.json` and
-exclude protocol, software, arithmetic and host costs.
+Recorded counts and cap sensitivity are in
+[`resources_counts.csv`](results/resources_counts.csv) and
+[`resources_batch_sensitivity.csv`](results/resources_batch_sensitivity.csv).
+New files use the `resources_` prefix in `results/reproduced/`. The recorded
+payload-floor columns use the declared link ceiling in
+[`resources_validation.json`](results/resources_validation.json) and exclude
+protocol, software, arithmetic and host costs.
 
 ### 3.4 Keep latency and energy conditional
 
@@ -466,7 +477,7 @@ quantization are declared assumptions, detailed in [method and noise model](#2-m
 ### 4.1 Whole-array correctness
 
 Each cell is **Bitonic / Rank** (%), from 1,000 saved inputs per setting.
-Source: [`results/reference/accuracy.csv`](results/reference/accuracy.csv).
+Source: [`results/simulation_accuracy.csv`](results/simulation_accuracy.csv).
 
 | Setting | η=0 | .05 | .10 | .15 | .20 | .25 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -506,8 +517,8 @@ For the same condition, Bitonic's means over valid outputs are:
 Mean inversion counts are 2.847 and 2.584, respectively. High partial ordering
 quality can coexist with low whole-sort accuracy. Standard τ-b has a lower
 ceiling with tied keys; the separately reported normalization makes this
-explicit. Sources: [`summary.csv`](results/ranking_quality/summary.csv)
-and [`recall.csv`](results/ranking_quality/recall.csv).
+explicit. Sources: [`quality_summary.csv`](results/quality_summary.csv)
+and [`quality_recall.csv`](results/quality_recall.csv).
 
 Rank has no valid outputs in either of these settings, so its conditional τ and
 recall are undefined, shown as blank CSV fields. Both recall variants with
@@ -518,16 +529,20 @@ Recall@N checks record preservation only. The formulas and denominators are in
 
 ### 4.3 Evidence and reproduction
 
-| Recorded directory | What it supports | Command |
+All retained files are directly in [`results/`](results/), grouped by prefix:
+
+| Filename prefix | What it supports | Command |
 |---|---|---|
-| [`results/reference/`](results/reference/) | 288,000 synthetic full-sort outcomes, counts and uncertainty | `python -m qant_sorting.run` |
-| [`results/ranking_quality/`](results/ranking_quality/) | Independent rescoring of every saved outcome; τ, inversions, key-distance errors and both Recall@k variants | `python -m qant_sorting.quality` |
-| [`results/sdk/`](results/sdk/) | Official CPU SDK check: 65,792 ordered pairs and 48,000 correct, stable full sorts | `python -m qant_sorting.sdk` |
-| [`results/resources/`](results/resources/) | Pair/call counts, logical bytes and conditional capacity trade-offs | `python -m qant_sorting.resources` |
+| `simulation_` | 288,000 synthetic full-sort outcomes, counts and uncertainty | `python -m qant_sorting.run` |
+| `quality_` | Independent rescoring of every saved outcome; τ, inversions, key-distance errors and both Recall@k variants | `python -m qant_sorting.quality` |
+| `sdk_` | Official CPU SDK check: 65,792 ordered pairs and 48,000 correct, stable full sorts | `python -m qant_sorting.sdk` |
+| `resources_` | Pair/call counts, logical bytes and conditional capacity trade-offs | `python -m qant_sorting.resources` |
 
 Quality evaluation performs no new sorts. Its validation checks complete
-coverage and agreement with every saved flag and accuracy count. To score a
-fresh main run, use `--results-dir results/reproduced` and a fresh `--output-dir`.
+coverage and agreement with every saved flag and accuracy count. By default,
+it reads the retained `simulation_` files in `results/`. To score a fresh main
+run, use `--results-dir results/reproduced`; its `quality_` output files can
+share that directory with the simulation files.
 The SDK control adds neither Gaussian noise nor the simulation's extra signed
 quantizer; setup and its execution boundary are in [hardware mapping and resource costs](#3-hardware-mapping-and-resource-costs).
 
@@ -537,7 +552,8 @@ Capacity, data movement and electronic work therefore matter to any physical
 comparison. These logical counts and the SDK CPU check establish no measured
 photonic speed or energy advantage.
 
-New runs write to separate reproduction directories. Retained metadata keeps
-its original generation environment and source hashes; historical source paths
-can differ from the simplified code layout. The main-run duration records
-simulation execution time, not a hardware latency benchmark.
+New runs default to `results/reproduced/` and use the same filename prefixes.
+Retained metadata keeps its original generation environment, source hashes and
+recorded filenames and paths, which can differ from the current layout. The
+main-run duration records simulation execution time, not a hardware latency
+benchmark.
