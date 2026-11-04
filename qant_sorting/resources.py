@@ -39,7 +39,7 @@ def counts(n, cap):
 def run(output=None):
     """Write resource rows and call-cap sensitivity without requiring the SDK."""
     output = prepare_output_directory(output or ROOT / "results/reproduced", (
-        "resources_counts.csv", "resources_batch_sensitivity.csv", "resources_validation.json",
+        "resources_counts.csv", "resources_batch_sensitivity.csv", "resources_metadata.json",
     ))
     resources, sensitivity = [], []
     for n in (2, 4, 8, 16, 32, 64, 128, 256):
@@ -75,7 +75,7 @@ def run(output=None):
         limitations="Logical payload only; no measured latency, throughput or energy verdict.",
         checks=[],
     )
-    (output / "resources_validation.json").write_text(json.dumps(metadata, indent=2))
+    (output / "resources_metadata.json").write_text(json.dumps(metadata, indent=2))
     print(f"Saved {len(resources)} resource rows and {len(sensitivity):,} conditional sensitivity rows.")
 
 

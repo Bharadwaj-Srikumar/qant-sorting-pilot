@@ -297,12 +297,12 @@ python -m qant_sorting.quality --results-dir results/reproduced
 The sweep runs 24 datasets × 6 noise levels × 2 algorithms: 288 configurations
 and 288,000 sorts. It checks comparison counts and every noiseless output.
 `simulation_accuracy.csv` holds aggregate results and diagnostics;
-`simulation_trial_outcomes.npz` holds all IDs and flags; `simulation_failures.json`
-holds example failures. The matching `simulation_metadata.json` and
-`simulation_validation.json` record inputs, code hashes, settings and checks.
+`simulation_trial_outcomes.npz` holds all IDs and flags. The single
+`simulation_metadata.json` records inputs, code hashes, settings and checks,
+plus example failures under `failure_examples`.
 Quality adds `quality_summary.csv`, `quality_recall.csv` and
-`quality_distance.csv.gz`, with its own `quality_metadata.json` and
-`quality_validation.json`.
+`quality_distance.csv.gz`. Its `quality_metadata.json` also includes the
+rescoring checks under `validation`.
 
 Both commands write to `results/reproduced/` by default. Different output groups
 can share this directory, but a command stops if any of its output files already
@@ -422,7 +422,7 @@ Recorded counts and cap sensitivity are in
 [`resources_batch_sensitivity.csv`](results/resources_batch_sensitivity.csv).
 New files use the `resources_` prefix in `results/reproduced/`. The recorded
 payload-floor columns use the declared link ceiling in
-[`resources_validation.json`](results/resources_validation.json) and exclude
+[`resources_metadata.json`](results/resources_metadata.json) and exclude
 protocol, software, arithmetic and host costs.
 
 ### 3.4 Keep latency and energy conditional
@@ -537,6 +537,26 @@ All retained files are directly in [`results/`](results/), grouped by prefix:
 | `quality_` | Independent rescoring of every saved outcome; τ, inversions, key-distance errors and both Recall@k variants | `python -m qant_sorting.quality` |
 | `sdk_` | Official CPU SDK check: 65,792 ordered pairs and 48,000 correct, stable full sorts | `python -m qant_sorting.sdk` |
 | `resources_` | Pair/call counts, logical bytes and conditional capacity trade-offs | `python -m qant_sorting.resources` |
+
+The 13 retained files comprise seven tables, two raw archives and four metadata
+files:
+
+| File in `results/` | Purpose |
+|---|---|
+| `simulation_accuracy.csv` | One row per setting: full-sort accuracy, validity/stability counts, confidence intervals and comparison diagnostics |
+| `simulation_trial_outcomes.npz` | Record IDs and validity/correctness/stability flags for every simulation trial; used for rescoring |
+| `quality_summary.csv` | One row per setting: validity, correctness, stability, Kendall metrics and inversion statistics |
+| `quality_recall.csv` | One row per setting and k: both recall conventions, valid-output statistics and all-trial utility |
+| `quality_distance.csv.gz` | One row per setting and key gap: pair counts, inversions and inversion rate |
+| `sdk_accuracy.csv` | One row per setting: SDK correctness/stability, pair/API-call counts and logical bytes |
+| `sdk_trial_outcomes.npz` | Record IDs and validity/correctness/stability flags for every SDK trial |
+| `resources_counts.csv` | One row per mapping and N: pair/call counts, logical bytes and conditional transfer floors |
+| `resources_batch_sensitivity.csv` | One row per N and pair cap: calls per mapping and conditional overhead threshold |
+| Four `*_metadata.json` files | One per command: settings, recorded provenance and assumptions; checks and failure examples where applicable |
+
+The tables use different row units: summaries describe one setting, recall adds
+k, and key-gap statistics add the distance. Separate tables avoid repeating
+summary values for every cutoff or key gap.
 
 Quality evaluation performs no new sorts. Its validation checks complete
 coverage and agreement with every saved flag and accuracy count. By default,

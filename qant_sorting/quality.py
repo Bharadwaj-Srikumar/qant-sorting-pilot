@@ -41,7 +41,7 @@ def run(results_dir, output_dir):
         raise ValueError("Unexpected input corpus")
     output_dir = prepare_output_directory(output_dir, (
         "quality_summary.csv", "quality_recall.csv", "quality_distance.csv.gz",
-        "quality_validation.json", "quality_metadata.json",
+        "quality_metadata.json",
     ))
     with sources[1].open(newline="") as handle:
         rows = list(csv.DictReader(handle))
@@ -127,9 +127,9 @@ def run(results_dir, output_dir):
         recall="Largest k; stable-ID and tie-neutral conventions; k=N checks record preservation",
         invalid_policy="Undefined conditional quality; mean_all_invalid_zero assigns zero utility",
         coverage="All cases in the chosen accuracy CSV and output archive are scored",
-        scope="Synthetic sorting quality; saved inputs are reused across noise levels and algorithms")
-    for name, contents in (("quality_validation.json", validation), ("quality_metadata.json", metadata)):
-        (output_dir / name).write_text(json.dumps(contents, indent=2, allow_nan=False) + "\n")
+        scope="Synthetic sorting quality; saved inputs are reused across noise levels and algorithms",
+        validation=validation)
+    (output_dir / "quality_metadata.json").write_text(json.dumps(metadata, indent=2, allow_nan=False) + "\n")
     print(json.dumps(validation, indent=2))
 
 
@@ -195,7 +195,7 @@ class QualityRunnerTests(unittest.TestCase):
             with gzip.open(output / "quality_distance.csv.gz", "rt", newline="") as handle:
                 distances = list(csv.DictReader(handle))
             self.assertEqual(sum(int(row["pairs_at_distance"]) for row in distances), 5)
-            validation = json.loads((output / "quality_validation.json").read_text())
+            validation = json.loads((output / "quality_metadata.json").read_text())["validation"]
             self.assertEqual(validation["evaluated_outputs"], 2)
             self.assertTrue(validation["complete_coverage"])
 

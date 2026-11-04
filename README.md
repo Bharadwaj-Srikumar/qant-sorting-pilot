@@ -102,11 +102,13 @@ the evaluation that produced them.
 | `results/resources_*` | Logical operation, submission and transfer counts |
 | `vendor/` | Pinned SDK distribution and required license notices |
 
+Each command has one `*_metadata.json` file for its run details, including
+checks and failure examples where applicable.
+
 The [results section](Documentation.md#4-results) summarizes the retained findings.
-Saved results retain their original metadata and hashes; recorded filenames and
-source paths describe the layout when those runs were produced. The cleanup does
-not relabel them as new measurements. Earlier exploratory code and drafts remain
-in Git history.
+Recorded metadata values and hashes are preserved; historical filenames and
+source paths describe the original runs. The cleanup does not relabel them as
+new measurements. Earlier exploratory code and drafts remain in Git history.
 
 Each of the seven core files ends with a clearly marked **Self-tests** section.
 These checks run only when requested. Run them all with:

@@ -1,5 +1,0 @@
-{
-  "reference_comparison": "New full-matrix baseline; eta=0 checked against stable argsort",
-  "configurations": 288,
-  "noiseless_sort_executions": 48000
-}
