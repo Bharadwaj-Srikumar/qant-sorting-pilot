@@ -19,7 +19,6 @@ from qant_sorting.evaluation import reference_flags, wilson_interval
 from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
-# These settings define the saved reference experiment.
 ROOT = Path(__file__).resolve().parents[1]
 INPUT_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
 REFERENCE = ROOT / "results"
@@ -27,7 +26,6 @@ ETA_VALUES = (0.0, 0.05, 0.10, 0.15, 0.20, 0.25)
 MASTER_SEED = 20260930
 MAPPINGS = {
     "Pipelined bitonic adaptation": (bitonic_sort, 1),
-    # Keep the label used by the saved experiment.
     "Louri full-matrix rank": (rank_sort, 2),
 }
 
@@ -88,8 +86,6 @@ def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
         for name in totals:
             totals[name] += getattr(difference, name)
 
-        # Save a concrete counterexample without storing every output twice:
-        # all record indices are retained in NPZ; the original keys are saved.
         if first_failure is None and np.any(~batch_flags[:, 1]):
             i = int(np.flatnonzero(~batch_flags[:, 1])[0])
             first_failure = {
@@ -129,9 +125,6 @@ def run(output_directory, batch_size):
             family_id = 0 if family == "distinct" else 1
             for eta in ETA_VALUES:
                 for name, (sort, stream_id) in MAPPINGS.items():
-                    # Keep the original streams. Positive eta values reuse
-                    # the same draws, scaled in strength. Between mappings,
-                    # stream_id provides independent random streams.
                     mode_id = 1 if eta == 0 else 2
                     context = [MASTER_SEED, bits, bits, bits, n, family_id, mode_id, stream_id]
                     flags, indices, totals, first = evaluate_case(
@@ -153,7 +146,6 @@ def run(output_directory, batch_size):
                         input_sha256=input_hash,
                     )
 
-                    # Counts independently check the active comparison schedule.
                     m = n.bit_length() - 1
                     expected_pairs = n * m * (m + 1) // 4 if stream_id == 1 else n * n
                     if totals["comparisons"] != len(data) * expected_pairs:
@@ -165,7 +157,6 @@ def run(output_directory, batch_size):
                     mapping_tag = "bitonic" if stream_id == 1 else "rank"
                     case = f"{dataset}_{noise_tag}_{mapping_tag}"
                     saved[case + "_flags"] = flags
-                    # -1 is the invalid marker; all valid indices fit in int16.
                     saved[case + "_indices"] = indices.astype(np.int16)
                     if first:
                         failures.append(dict(case=case, **first))
@@ -175,7 +166,6 @@ def run(output_directory, batch_size):
     write_csv(output_directory / "simulation_accuracy.csv", rows)
     np.savez_compressed(output_directory / "simulation_trial_outcomes.npz", **saved)
 
-    # These checks were performed above using this run's inputs and outputs.
     validation = dict(
         configurations=len(rows),
         comparison_counts_checked=True,
@@ -226,8 +216,6 @@ def main(argv=None):
         run(args.output_dir, args.batch_size)
 
 
-# Self-tests: python -m unittest qant_sorting.run -v
-# Run all seven modules' checks with: python -m qant_sorting.run --self-test
 import subprocess
 import sys
 import tempfile

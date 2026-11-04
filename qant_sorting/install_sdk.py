@@ -14,7 +14,6 @@ import sys
 import tempfile
 import zipfile
 
-# Keep the installer independent of numerical packages during initial setup.
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -41,8 +40,6 @@ def main():
     if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
         raise SystemExit("Official SDK archive checksum mismatch")
 
-    # Extract only the matching wheel by its basename. Other archive paths
-    # are never written; the license files are provided alongside the archive.
     with tempfile.TemporaryDirectory() as directory:
         with zipfile.ZipFile(archive) as bundle:
             name = next(name for name in bundle.namelist() if name.endswith(tag + ".whl"))

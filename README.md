@@ -115,7 +115,7 @@ passed all 34 self-tests and repeated the full simulation, quality, SDK and
 resource evaluations. All seven numerical tables and both output archives
 matched the retained files exactly after the optimizations.
 
-Each of the seven core files ends with a clearly marked **Self-tests** section.
+Each of the seven core files contains `unittest` classes near the end.
 These checks run only when requested. Run them all with:
 
 ```bash

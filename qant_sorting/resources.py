@@ -12,7 +12,6 @@ from pathlib import Path
 from qant_sorting.run import ROOT, prepare_output_directory, write_csv
 
 
-# PCIe Gen4 x8 directional ceiling, after line coding but before other overhead.
 B_PEAK = 16e9 * 8 * (128 / 130) / 8
 
 
@@ -45,8 +44,6 @@ def run(output=None):
     for n in (2, 4, 8, 16, 32, 64, 128, 256):
         _, cb, cr, qb, qr = counts(n, n * n)
         for name, pairs, calls in (("Bitonic", cb, qb), ("Rank", cr, qr)):
-            # Two BF16 inputs and one output cost 4+2 bytes per pair. Reloading
-            # [1,-1] adds 4 bytes per call; resident weights are a separate case.
             up, down = 4 * pairs + 4 * calls, 2 * pairs
             resources.append(dict(
                 n=n, mapping=name, pairs=pairs, calls=calls,
@@ -86,7 +83,6 @@ def main(argv=None):
     run(args.output_dir)
 
 
-# Self-tests
 
 import unittest
 

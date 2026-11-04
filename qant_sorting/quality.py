@@ -60,7 +60,6 @@ def run(results_dir, output_dir):
             if dataset not in prepared:
                 prepared[dataset] = prepare_keys(corpus[dataset], bits)
             label = row["mapping"].strip().lower()
-            # Accept short names and the exact labels in the retained experiment.
             if label in ("bitonic", "pipelined bitonic adaptation"):
                 mapping = "bitonic"
             elif label in ("rank", "louri full-matrix rank"):
@@ -147,7 +146,6 @@ def main(argv=None):
     run(args.results_dir, args.output_dir)
 
 
-# Self-tests
 
 from contextlib import redirect_stdout
 import tempfile
@@ -215,8 +213,6 @@ class QualityRunnerTests(unittest.TestCase):
                     run(results, directory / "quality")
 
     def test_ambiguous_case_labels_are_rejected(self):
-        # Rounding eta must not silently attach a different condition's archive;
-        # a mapping name containing "rank" is not necessarily the rank sorter.
         for field, value, message in (
             ("eta", "0.249", "Unknown noise level"),
             ("eta", "nan", "Unknown noise level"),

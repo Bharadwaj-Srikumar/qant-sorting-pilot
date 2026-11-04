@@ -62,7 +62,6 @@ class SdkDifference:
         """Normalize and pack pairs, call the SDK, then restore the pair shape."""
         if a.shape != b.shape:
             raise ValueError("The two pair arrays must have the same shape")
-        # Fill the BF16 buffer directly to avoid a stacked integer temporary.
         features = np.empty((a.size, 2), dtype=self._bfloat16)
         features[:, 0] = a.ravel() / self.denominator
         features[:, 1] = b.ravel() / self.denominator
@@ -76,7 +75,6 @@ class SdkDifference:
         c.weight_bytes += self.weights.nbytes
         c.output_bytes += result.nbytes
         c.largest_pair_batch = max(c.largest_pair_batch, a.size)
-        # Widen the returned score for host decisions; do not recompute it.
         return result.astype(np.float32).reshape(a.shape)
 
 
@@ -110,7 +108,6 @@ def run(output_directory):
             for name in ("bitonic", "rank"):
                 flags, indices = [], []
                 difference = SdkDifference(bits)
-                # Bound the full-matrix temporary without changing trial order.
                 batch_size = min(64, max(1, 1_000_000 // (n*n)))
                 for start in range(0, len(data), batch_size):
                     batch = data[start:start+batch_size]
@@ -160,7 +157,6 @@ def main(argv=None):
     run(args.output_dir)
 
 
-# Self-tests
 
 from importlib.util import find_spec
 import unittest

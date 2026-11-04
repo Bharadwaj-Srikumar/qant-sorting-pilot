@@ -44,7 +44,6 @@ def bitonic_sort(keys, difference):
     indices = np.broadcast_to(np.arange(keys.shape[1]), keys.shape).copy()
     for left, right, ascending in compact_bitonic_layers(keys.shape[1]):
 
-        # Advanced indexing copies both sides before either is overwritten.
         a, b = values[:, left], values[:, right]
         ai, bi = indices[:, left], indices[:, right]
         measured = np.asarray(difference(a, b), dtype=np.float64)
@@ -76,16 +75,12 @@ def rank_sort(keys, difference, *, bias_step):
         raise ValueError("keys must be a nonempty (trials,N) array")
     trials, n = keys.shape
     shape = (trials, n, n)
-    # Row i is the competitor; column j is the record whose rank is counted.
     a = np.broadcast_to(keys[:, None, :], shape).reshape(trials, n*n)
     b = np.broadcast_to(keys[:, :, None], shape).reshape(trials, n*n)
     measured = np.asarray(difference(a, b), dtype=np.float64)
     if measured.shape != a.shape or not np.isfinite(measured).all():
         raise ValueError("difference must return finite scores with the pair-array shape")
-    # measured - bias >= 0 is equivalent to measured >= bias. Using a
-    # 2-D threshold avoids a full (trials,N,N) floating-point temporary.
     threshold = bias_step * np.tri(n, k=-1)
-    # Sum competitor rows to get column ranks; remove the noiseless self-vote.
     ranks = np.sum(measured.reshape(shape) >= threshold, axis=1, dtype=np.int64) - 1
     return place_ranks(keys, ranks)
 
@@ -105,7 +100,6 @@ def place_ranks(keys, zero_based_ranks):
     in_range = np.all((ranks >= 0) & (ranks < n), axis=1)
     rows = np.flatnonzero(in_range)
     occupied = np.zeros((trials, n), dtype=np.int64)
-    # add.at counts repeated destinations correctly, exposing collisions.
     np.add.at(occupied, (rows[:, None], ranks[rows]), 1)
     valid = in_range & np.all(occupied == 1, axis=1)
     values = np.full(keys.shape, -1, dtype=np.int64)
@@ -116,9 +110,6 @@ def place_ranks(keys, zero_based_ranks):
     return values, indices, valid
 
 
-# Self-tests
-# Exhaustive stable-routing controls, seeded noise and literal rank equations.
-# Run with: python -m unittest qant_sorting.sorters -v
 
 import itertools
 import unittest
@@ -130,8 +121,6 @@ from qant_sorting.evaluation import reference_flags
 class SorterTests(unittest.TestCase):
     """Network structure, stable records and batch-invariant noise."""
 
-    # Check layer-count formulas and that every wire belongs to exactly one pair
-    # per layer. Also reject non-power-of-two N rather than generating invalid wiring.
     def test_network_layers_and_work(self):
         for n in (2, 4, 8, 16, 32, 64, 128, 256):
             layers = compact_bitonic_layers(n)
@@ -143,19 +132,13 @@ class SorterTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             compact_bitonic_layers(3)
 
-    # Enumerate all binary arrays at N=2,4,8 and compare against a separate stable
-    # reference. Binary inputs stress duplicate routing and both bitonic directions.
     def test_all_small_binary_inputs_sort_stably(self):
-        # Exhaustive binary inputs exercise repeated keys and both directions
-        # in the bitonic network, using an independent stable digital oracle.
         for n in (2, 4, 8):
             data = np.array(list(itertools.product((0, 1), repeat=n)))
             for sorter in (bitonic_sort, rank_sort):
                 model = NoisyDifference(Precision(4, 4, 4))
                 self.assertTrue(reference_flags(data, sorter(data, model, **({"bias_step": 1/16} if sorter is rank_sort else {}))).all())
 
-    # Bad callback outputs must fail before broadcasting or NaN comparisons
-    # can silently produce an apparently valid sorting result.
     def test_bitonic_rejects_malformed_comparison_scores(self):
         keys = np.array([[0, 1]])
         for scores in (np.array(0.0), np.zeros((1, 2)),
@@ -163,17 +146,12 @@ class SorterTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "finite scores with the pair-array shape"):
                 bitonic_sort(keys, lambda a, b: scores)
 
-    # Inject a cyclic three-way relation with no consistent total order. Require
-    # invalid output and -1 markers, proving collisions are not hidden by digital repair.
     def test_rank_cycles_fail_without_repair(self):
-        # 0 beats 1, 1 beats 2, 2 beats 0: each gets rank 1, so placement fails.
         data = np.array([[3, 1, 2]])
         result = rank_sort(data, lambda a, b: np.array([[0, -1, 1, 1, 0, -1, -1, 1, 0]]), bias_step=1)
         self.assertFalse(result[2][0])
         np.testing.assert_array_equal(result[0], [[-1, -1, -1]])
 
-    # Run identical trial IDs as one batch and several chunks for both schedules.
-    # Exact tuple equality verifies memory batching does not redefine the noise process.
     def test_noise_is_invariant_to_batch_partition(self):
         data = np.random.default_rng(47).integers(0, 256, (23, 16))
         precision = Precision(8, 8, 8)
