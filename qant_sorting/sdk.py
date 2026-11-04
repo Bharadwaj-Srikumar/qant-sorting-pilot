@@ -1,6 +1,8 @@
 import argparse
-from dataclasses import dataclass
 import json
+import unittest
+from dataclasses import dataclass
+from importlib.util import find_spec
 from pathlib import Path
 
 import numpy as np
@@ -133,11 +135,6 @@ def main(argv=None):
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)
-
-
-
-from importlib.util import find_spec
-import unittest
 
 
 SDK_AVAILABLE = all(find_spec(name) is not None for name in (

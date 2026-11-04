@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+import math
 import numbers
+import unittest
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -102,11 +104,6 @@ class NoisyDifference:
         ))
         self.broken_true_ties += int(np.count_nonzero((a == b) & (measured != 0)))
         return measured
-
-
-
-import math
-import unittest
 
 
 class ComparisonTests(unittest.TestCase):

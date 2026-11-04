@@ -1,5 +1,6 @@
 import argparse
 import json
+import unittest
 from pathlib import Path
 
 from qant_sorting.run import ROOT, prepare_output_directory, write_csv
@@ -67,10 +68,6 @@ def main(argv=None):
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)
-
-
-
-import unittest
 
 
 class ResourceTests(unittest.TestCase):

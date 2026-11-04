@@ -1,4 +1,10 @@
+import itertools
+import unittest
+
 import numpy as np
+
+from qant_sorting.comparison import NoisyDifference, Precision
+from qant_sorting.evaluation import reference_flags
 
 
 def compact_bitonic_layers(n):
@@ -73,14 +79,6 @@ def place_ranks(keys, zero_based_ranks):
     values[rows[:, None], ranks[rows]] = keys[rows]
     indices[rows[:, None], ranks[rows]] = np.arange(n)
     return values, indices, valid
-
-
-
-import itertools
-import unittest
-
-from qant_sorting.comparison import NoisyDifference, Precision
-from qant_sorting.evaluation import reference_flags
 
 
 class SorterTests(unittest.TestCase):
