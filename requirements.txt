@@ -1,5 +1,5 @@
 # Shared dependencies for the simulation and Q.ANT CPU SDK integration.
-# Install the bundled SDK wheel with: python -m tools.install_sdk --no-deps
+# Install the bundled SDK wheel with: python -m qant_sorting.install_sdk --no-deps
 numpy==2.3.5
 ml-dtypes==0.6.0
 cffi==1.17.1

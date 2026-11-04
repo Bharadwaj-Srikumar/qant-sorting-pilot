@@ -54,6 +54,10 @@ committed results directly, run `python -m qant_sorting.quality`.
 | 6 | [sdk.py](qant_sorting/sdk.py) | Map differences to the official Q.ANT CPU SDK and evaluate both sorters |
 | 7 | [resources.py](qant_sorting/resources.py) | Count operations, submissions and logical data movement |
 
+The setup helper [install_sdk.py](qant_sorting/install_sdk.py) is in the same
+folder. It installs the bundled Q.ANT SDK and is separate from the seven
+evaluation modules above.
+
 Start with the four-key example in [CODE_GUIDE.md](docs/CODE_GUIDE.md).
 The main flow is **inputs → noisy comparisons → sorting → quality metrics → results**.
 There is one retained simulation noise model, in `comparison.py`.
@@ -66,7 +70,7 @@ single `requirements.txt`. Add the bundled SDK wheel in the same Python 3.12
 virtual environment:
 
 ```bash
-python -m tools.install_sdk --no-deps
+python -m qant_sorting.install_sdk --no-deps
 python -m qant_sorting.sdk
 ```
 
@@ -86,7 +90,7 @@ resource formulas and unresolved physical parameters.
 | `results/ranking_quality/` | Kendall metrics, inversion distances, Recall@k and their denominators |
 | `results/sdk/` | Official CPU SDK integration results |
 | `results/resources/` | Logical operation, submission and transfer counts |
-| `tools/`, `vendor/` | Pinned SDK installer, distribution and required license notices |
+| `vendor/` | Pinned SDK distribution and required license notices |
 
 [RESULTS.md](docs/RESULTS.md) summarizes the retained findings. Saved results
 retain their original metadata and hashes; historical source paths describe the

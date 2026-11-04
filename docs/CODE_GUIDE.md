@@ -37,6 +37,10 @@ the output; it never supplies sorting decisions.
 The first four files explain the main experiment. The final three produce its
 detailed quality analysis, software mapping evidence and resource comparison.
 
+`qant_sorting/install_sdk.py` is a setup helper in the same folder. Run it as
+`python -m qant_sorting.install_sdk --no-deps` after installing `requirements.txt`
+when you want to use the official CPU SDK. It is not part of the sorting flow.
+
 ## Checks in the same files
 
 Each core module ends with a **Self-tests** section containing its mathematical
