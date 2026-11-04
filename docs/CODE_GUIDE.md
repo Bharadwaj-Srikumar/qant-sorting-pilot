@@ -46,7 +46,7 @@ commands do not execute these tests.
 
 Run all checks with `python -m qant_sorting.run --self-test`. To check only one
 module, use e.g. `python -m unittest qant_sorting.comparison -v`. The SDK checks
-skip when its separate dependencies are not installed.
+skip when the official toolkit is not installed.
 
 ## Keep these conventions in mind
 
