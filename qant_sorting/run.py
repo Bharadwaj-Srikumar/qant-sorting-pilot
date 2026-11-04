@@ -114,7 +114,7 @@ def run(output_directory, batch_size):
         "simulation_metadata.json",
     ))
     input_path = ROOT / "data/inputs.npz"
-    if hashlib.sha256(input_path.read_bytes()).hexdigest() != INPUT_SHA256:
+    if file_hash(input_path) != INPUT_SHA256:
         raise ValueError("Saved input corpus checksum differs from the agreed experiment")
 
     started = time.perf_counter()
@@ -125,6 +125,7 @@ def run(output_directory, batch_size):
             bits, n = int(bit_tag[1:]), int(n_tag[1:])
             precision = Precision(key_bits=bits, input_bits=bits, output_bits=bits)
             data = validate_keys(corpus[dataset], bits)
+            input_hash = hashlib.sha256(data.tobytes()).hexdigest()
             family_id = 0 if family == "distinct" else 1
             for eta in ETA_VALUES:
                 for name, (sort, stream_id) in MAPPINGS.items():
@@ -149,7 +150,7 @@ def run(output_directory, batch_size):
                         ci95_low=low, ci95_high=high,
                         invalid_outputs=int(len(data) - counts[0]), **totals,
                         seed_context=json.dumps(context),
-                        input_sha256=hashlib.sha256(data.tobytes()).hexdigest(),
+                        input_sha256=input_hash,
                     )
 
                     # Counts independently check the active comparison schedule.

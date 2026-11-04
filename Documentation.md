@@ -179,6 +179,10 @@ noiseless diagonal contributes one, so subtracting one converts source ranks
 to Python positions. No noisy diagonal is restored, and no reverse vote is
 inferred from another cell.
 
+The code uses the equivalent comparison `measured >= ΔU` directly. This keeps
+the same bias and inclusive boundary while avoiding an additional floating-point
+matrix for every trial in the batch.
+
 For noiseless keys `[3,1,3,0]`, all 16 threshold entries are:
 
 | Competitor row | ID 0: first 3 | ID 1: 1 | ID 2: second 3 | ID 3: 0 |
@@ -201,8 +205,10 @@ in the same units as the explicit `bias_step=Δ`.
 
 ### 2.4 Score complete outputs against a digital reference
 
-[`evaluation.py`](qant_sorting/evaluation.py) uses stable NumPy argsort after
-the algorithm finishes. The reference never guides a noisy decision.
+[`evaluation.py`](qant_sorting/evaluation.py) checks record preservation, adjacent
+key order and original ID order within ties in `reference_flags`. Separately,
+`prepare_keys` caches a stable NumPy argsort for the saved-output quality scorer.
+These equivalent checks evaluate completed outputs and never guide a noisy decision.
 
 | Metric | Required condition |
 |---|---|
@@ -577,3 +583,41 @@ Retained metadata keeps its original generation environment, source hashes and
 recorded filenames and paths, which can differ from the current layout. The
 main-run duration records simulation execution time, not a hardware latency
 benchmark.
+
+### 4.4 Code audit and full reproduction — 2026-11-04
+
+The optimized implementation was evaluated using Python 3.12, NumPy 2.3.5 and
+the pinned official Q.ANT 2.3.1 CPU backend. The noise model, random streams,
+comparison schedules, invalid-output policy and metric definitions are unchanged.
+
+| Verification | Outcome |
+|---|---|
+| Built-in self-tests | All 34 passed, including the SDK checks |
+| Full noise experiment | 288 configurations and 288,000 sorting trials completed |
+| Noiseless simulation | All 48,000 outputs valid, correct and stable |
+| Saved-output quality | All 288,000 outputs rescored; every saved flag and count reproduced; 984 recall rows and 49,058 key-gap rows |
+| Official CPU SDK | All 65,792 ordered key pairs and 48,000 complete sorting trials passed |
+| Resource evaluation | Both tables reproduced: 16 count rows and 36 capacity rows; actual sorter submissions independently checked for 60 size/capacity combinations |
+
+**All seven numerical result tables and both NPZ archives were byte-identical
+to the retained files.** All 672 archive arrays were also compared element by
+element, and the recorded failure examples matched. The existing result files
+and their original provenance remain unchanged; new-run metadata naturally has
+current source hashes, paths and execution times.
+
+The changes remove repeated work: redundant input-grid rounding, a batch-sized
+biased rank matrix, repeated reference sorting, repeated valid-input copies and
+per-condition input hashing. The SDK fills its BF16 buffer directly and reuses
+one counter-accumulating adapter per dataset and mapping. At the largest rank
+batch, the threshold change avoids a 7.5 MiB floating-point temporary; a local
+SDK packing check reduced peak traced allocation from 33.75 to 11.31 MiB. These
+are software allocation improvements, not measurements of optical performance.
+
+Two validation gaps were also closed. Bitonic now rejects incorrectly shaped
+or nonfinite comparison scores. Quality evaluation rejects unregistered noise
+levels and ambiguous mapping names instead of silently attaching them to an
+existing saved case. Neither issue affected the correctly labelled retained run.
+
+No additional repository modules or result files were introduced. The complete
+rerun confirms reproducibility under the declared synthetic model and CPU SDK;
+physical noise calibration and hardware performance remain outside this evidence.

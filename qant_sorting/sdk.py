@@ -62,8 +62,10 @@ class SdkDifference:
         """Normalize and pack pairs, call the SDK, then restore the pair shape."""
         if a.shape != b.shape:
             raise ValueError("The two pair arrays must have the same shape")
-        features = np.stack((a, b), axis=-1).reshape(-1, 2)
-        features = np.ascontiguousarray(features / self.denominator, dtype=self._bfloat16)
+        # Fill the BF16 buffer directly to avoid a stacked integer temporary.
+        features = np.empty((a.size, 2), dtype=self._bfloat16)
+        features[:, 0] = a.ravel() / self.denominator
+        features[:, 1] = b.ravel() / self.denominator
         result = self._qant.native.linear_fprop(features, self.weights, self.device_id)
         if result.shape != (a.size, 1) or result.dtype != np.dtype(self._bfloat16):
             raise AssertionError("Unexpected SDK output contract")
@@ -107,22 +109,17 @@ def run(output_directory):
             data = validate_keys(corpus[dataset], bits)
             for name in ("bitonic", "rank"):
                 flags, indices = [], []
-                pair_count = api_calls = payload = 0
+                difference = SdkDifference(bits)
                 # Bound the full-matrix temporary without changing trial order.
                 batch_size = min(64, max(1, 1_000_000 // (n*n)))
                 for start in range(0, len(data), batch_size):
                     batch = data[start:start+batch_size]
-                    difference = SdkDifference(bits)
                     if name == "rank":
                         result = rank_sort(batch, difference, bias_step=2.**(-bits))
                     else:
                         result = bitonic_sort(batch, difference)
                     flags.append(reference_flags(batch, result))
                     indices.append(result[1])
-                    c = difference.counts
-                    pair_count += c.pair_differences
-                    api_calls += c.api_calls
-                    payload += c.feature_bytes + c.weight_bytes + c.output_bytes
                 flags = np.concatenate(flags)
                 indices = np.concatenate(indices).astype(np.int16)
                 key = f"{dataset}_sdk_cpu_{name}"
@@ -131,13 +128,15 @@ def run(output_directory):
                     raise AssertionError("Noiseless SDK sort disagrees with stable argsort")
                 m = n.bit_length() - 1
                 expected = n*m*(m+1)//4 if name == "bitonic" else n*n
-                if pair_count != len(data) * expected:
+                c = difference.counts
+                if c.pair_differences != len(data) * expected:
                     raise AssertionError("The SDK did not evaluate the required number of cells")
                 rows.append(dict(
                     mapping=name, key_bits=bits, n=n, family=family, trials=len(data),
                     correct_sorts=int(flags[:, 1].sum()), stable_sorts=int(flags[:, 2].sum()),
-                    pair_differences=pair_count, api_calls_batched_trials=api_calls,
-                    logical_payload_bytes=payload, trial_batch_size=batch_size,
+                    pair_differences=c.pair_differences, api_calls_batched_trials=c.api_calls,
+                    logical_payload_bytes=c.feature_bytes + c.weight_bytes + c.output_bytes,
+                    trial_batch_size=batch_size,
                 ))
             print(f"{dataset}: SDK CPU verified", flush=True)
 
@@ -212,6 +211,23 @@ class SdkTests(unittest.TestCase):
                 self.assertEqual(model.counts.pair_differences, pairs)
                 self.assertEqual(model.counts.api_calls, calls)
                 np.testing.assert_array_equal(keys, original)
+
+    def test_strided_inputs_and_accumulated_counts(self):
+        """Pack read-only views and keep accounting across different shapes."""
+        for bits in (4, 8):
+            keys = np.arange(24).reshape(4, 6) % 2**bits
+            original = keys.copy()
+            keys.flags.writeable = False
+            model = SdkDifference(bits)
+            for a, b in ((keys[::2, ::2], keys[1::2, 1::2]), (keys.T, keys[::-1].T)):
+                result = model(a, b)
+                self.assertEqual(result.shape, a.shape)
+                np.testing.assert_array_equal(result, (a-b)/2**bits)
+            np.testing.assert_array_equal(keys, original)
+            self.assertEqual(model.counts, CallCounts(
+                api_calls=2, pair_differences=30, feature_bytes=120,
+                weight_bytes=8, output_bytes=60, largest_pair_batch=24,
+            ))
 
     def test_full_rank_matrix_submits_both_directions_and_diagonal(self):
         keys = np.array([[3, 1, 3, 0]])

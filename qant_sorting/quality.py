@@ -16,7 +16,7 @@ import numpy as np
 
 from qant_sorting.evaluation import prepare_keys, score_saved_order
 from qant_sorting.run import (
-    INPUT_SHA256, ROOT, file_hash, prepare_output_directory, source_hashes, write_csv,
+    ETA_VALUES, INPUT_SHA256, ROOT, file_hash, prepare_output_directory, source_hashes, write_csv,
 )
 
 
@@ -54,13 +54,19 @@ def run(results_dir, output_dir):
         prepared = {}
         for row in rows:
             bits, n, eta = int(row["key_bits"]), int(row["n"]), float(row["eta"])
+            if eta not in ETA_VALUES:
+                raise ValueError(f"Unknown noise level: {row['eta']}")
             dataset = f"b{bits}_n{n}_{row['family']}"
             if dataset not in prepared:
                 prepared[dataset] = prepare_keys(corpus[dataset], bits)
-            label = row["mapping"].lower()
-            if "bitonic" not in label and "rank" not in label:
+            label = row["mapping"].strip().lower()
+            # Accept short names and the exact labels in the retained experiment.
+            if label in ("bitonic", "pipelined bitonic adaptation"):
+                mapping = "bitonic"
+            elif label in ("rank", "louri full-matrix rank"):
+                mapping = "rank"
+            else:
                 raise ValueError(f"Unknown sorting mapping: {row['mapping']}")
-            mapping = "bitonic" if "bitonic" in label else "rank"
             tag = "zero" if eta == 0 else f"noise{round(100 * eta):03d}"
             case = f"{dataset}_{tag}_{mapping}"
             members = {case + "_indices", case + "_flags"}
@@ -207,6 +213,28 @@ class QualityRunnerTests(unittest.TestCase):
                  patch(__name__ + ".INPUT_SHA256", checksum):
                 with self.assertRaisesRegex(ValueError, "cases do not match"):
                     run(results, directory / "quality")
+
+    def test_ambiguous_case_labels_are_rejected(self):
+        # Rounding eta must not silently attach a different condition's archive;
+        # a mapping name containing "rank" is not necessarily the rank sorter.
+        for field, value, message in (
+            ("eta", "0.249", "Unknown noise level"),
+            ("eta", "nan", "Unknown noise level"),
+            ("mapping", "not-a-rank-algorithm", "Unknown sorting mapping"),
+            ("mapping", "rank and bitonic", "Unknown sorting mapping"),
+        ):
+            with self.subTest(field=field, value=value), tempfile.TemporaryDirectory() as temporary:
+                directory = Path(temporary)
+                project, results, checksum = self.write_fixture(directory)
+                csv_path = results / "simulation_accuracy.csv"
+                with csv_path.open(newline="") as handle:
+                    rows = list(csv.DictReader(handle))
+                rows[0][field] = value
+                write_csv(csv_path, rows)
+                with patch(__name__ + ".ROOT", project), \
+                     patch(__name__ + ".INPUT_SHA256", checksum):
+                    with self.assertRaisesRegex(ValueError, message):
+                        run(results, directory / "quality")
 
 if __name__ == "__main__":
     main()
