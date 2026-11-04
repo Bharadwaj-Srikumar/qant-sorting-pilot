@@ -208,7 +208,7 @@ def main(argv=None):
 
 
 class RunTests(unittest.TestCase):
-    def test_main_commands_explain_their_options(self):
+    def test_command_help(self):
         commands = (
             ("qant_sorting.run", "--batch-size"),
             ("qant_sorting.quality", "--results-dir"),
@@ -225,7 +225,7 @@ class RunTests(unittest.TestCase):
                 self.assertIn("--output-dir", result.stdout)
                 self.assertIn(option, result.stdout)
 
-    def test_existing_results_are_not_overwritten(self):
+    def test_output_protection(self):
         reference_hash = file_hash(REFERENCE / "simulation_trial_outcomes.npz")
         with self.assertRaises(ValueError):
             run(REFERENCE, batch_size=1)
