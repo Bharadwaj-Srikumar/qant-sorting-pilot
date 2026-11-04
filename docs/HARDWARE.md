@@ -86,8 +86,8 @@ q_R=\left\lceil\frac{N^2}{c}\right\rceil.
 
 The cap is an application setting, not a demonstrated physical matrix size.
 For one sort, BF16 features cost four logical bytes per pair and results cost
-two. Reloading both weights adds four bytes per call: U_A=4C_A+4q_A uploaded
-and V_A=2C_A downloaded. At N=256 with enough rows per call:
+two. Reloading both weights adds four bytes per call: $U_A=4C_A+4q_A$ uploaded
+and $V_A=2C_A$ downloaded. At N=256 with enough rows per call:
 
 | Mapping | Pair differences | Calls | Total logical bytes, weights reloaded |
 |---|---:|---:|---:|
@@ -111,14 +111,21 @@ exclude protocol, software, arithmetic and host costs.
 A model with serialized transfers and execution is
 
 ```math
-t_A=q_A\ell+C_A t_{arith}+U_A/B_{up}+V_A/B_{down}+h_A.
+t_A=q_A\ell+C_A t_{\mathrm{arith}}+\frac{U_A}{B_{\mathrm{up}}}
++\frac{V_A}{B_{\mathrm{down}}}+h_A.
 ```
 
 The terms are call overhead, effective pair arithmetic time, upload/download
 time and electronic control work. Shared per-pair time is a conditional
 assumption: actual shapes can have different utilization. With weights reloaded,
-set a=ℓ+4/B_up and τ=t_arith+4/B_up+2/B_down. Rank is faster within this model
-only if
+define
+
+```math
+a=\ell+\frac{4}{B_{\mathrm{up}}},\qquad
+\tau=t_{\mathrm{arith}}+\frac{4}{B_{\mathrm{up}}}+\frac{2}{B_{\mathrm{down}}}.
+```
+
+Rank is faster within this model only if
 
 ```math
 (q_B-q_R)a>(C_R-C_B)\tau+h_R-h_B.
@@ -132,6 +139,11 @@ establish a speedup.
 Physical noise calibration would require the supported ranges, effective
 precision, repeated-readout distribution, bias, drift and correlations. Energy
 requires power integrated over a defined end-to-end interval,
-E_A=∫P_A(t)dt, including the electronic work needed to meet the same output
-quality. The retained evidence supplies no physical latency, throughput or
+
+```math
+E_A=\int P_A(t)\,dt,
+```
+
+including the electronic work needed to meet the same output quality.
+The retained evidence supplies no physical latency, throughput or
 energy-efficiency verdict, and no established regeneration interval.
