@@ -10,6 +10,9 @@ and express unknown hardware costs parametrically. Q.ANT is the reference
 platform. The official CPU SDK establishes software integration; there are no
 physical NPU measurements or claims of a hardware speed or energy advantage.
 
+Read [DOCUMENTATION.md](DOCUMENTATION.md) for the code guide, mathematical model,
+hardware mapping and recorded results.
+
 ## Run the evaluation
 
 Use Python 3.12. From the repository root:
@@ -34,7 +37,8 @@ The quality command scores the saved record orders. It retains **validity,
 correctness, stability, Kendall's tau, inversions and Recall@k / Top-k**, including
 both stable-record and tie-neutral recall. Conditional quality is undefined for
 invalid outputs; a separately named recall measure assigns those failures zero
-utility. The definitions and denominators are in [METHOD.md](docs/METHOD.md).
+utility. See the [method and noise model](DOCUMENTATION.md#2-method-and-noise-model)
+for definitions and denominators.
 
 New results go to `results/reproduced/`, `results/ranking_quality_reproduced/`
 and `results/resources_reproduced/`. Each command accepts `--output-dir` and
@@ -58,7 +62,7 @@ The setup helper [install_sdk.py](qant_sorting/install_sdk.py) is in the same
 folder. It installs the bundled Q.ANT SDK and is separate from the seven
 evaluation modules above.
 
-Start with the four-key example in [CODE_GUIDE.md](docs/CODE_GUIDE.md).
+Start with the four-key example in the [code guide](DOCUMENTATION.md#1-code-guide).
 The main flow is **inputs → noisy comparisons → sorting → quality metrics → results**.
 There is one retained simulation noise model, in `comparison.py`.
 
@@ -78,8 +82,9 @@ This checks every 4-/8-bit key pair and both sorters on the saved inputs, writin
 to `results/sdk_reproduced/`. The differences are calculated by `linear_fprop`;
 decisions, bias, sums and record routing remain on the host. The SDK run has no
 added Gaussian noise or extra fixed-point quantizer. See
-[HARDWARE.md](docs/HARDWARE.md) for the source-audited nonlinearity boundary,
-resource formulas and unresolved physical parameters.
+[hardware mapping and resource costs](DOCUMENTATION.md#3-hardware-mapping-and-resource-costs)
+for the source-audited nonlinearity boundary, resource formulas and unresolved
+physical parameters.
 
 ## Evidence included for review
 
@@ -92,8 +97,8 @@ resource formulas and unresolved physical parameters.
 | `results/resources/` | Logical operation, submission and transfer counts |
 | `vendor/` | Pinned SDK distribution and required license notices |
 
-[RESULTS.md](docs/RESULTS.md) summarizes the retained findings. Saved results
-retain their original metadata and hashes; historical source paths describe the
+The [results section](DOCUMENTATION.md#4-results) summarizes the retained findings.
+Saved results retain their original metadata and hashes; historical source paths describe the
 code at the time those runs were produced. The cleanup does not relabel them as
 new measurements. Earlier exploratory code and drafts remain in Git history.
 
