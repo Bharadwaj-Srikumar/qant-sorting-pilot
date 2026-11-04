@@ -9,7 +9,7 @@ import argparse
 import json
 from pathlib import Path
 
-from qant_sorting.run import ROOT, write_csv
+from qant_sorting.run import ROOT, prepare_output_directory, write_csv
 
 
 # PCIe Gen4 x8 directional ceiling, after line coding but before other overhead.
@@ -38,10 +38,9 @@ def counts(n, cap):
 
 def run(output=None):
     """Write resource rows and call-cap sensitivity without requiring the SDK."""
-    output = (output or ROOT / "results/resources_reproduced").resolve()
-    output.mkdir(parents=True, exist_ok=True)
-    if any(output.iterdir()):
-        raise ValueError("Use an empty resource output directory")
+    output = prepare_output_directory(output or ROOT / "results/reproduced", (
+        "resources_counts.csv", "resources_batch_sensitivity.csv", "resources_validation.json",
+    ))
     resources, sensitivity = [], []
     for n in (2, 4, 8, 16, 32, 64, 128, 256):
         _, cb, cr, qb, qr = counts(n, n * n)
@@ -65,8 +64,8 @@ def run(output=None):
                 overhead_to_pair_time_threshold=(cr - cb) / saved_calls if saved_calls > 0 else "",
                 scope="Same effective time per pair; equal/omitted host time only for this threshold.",
             ))
-    write_csv(output / "resources.csv", resources)
-    write_csv(output / "batch_sensitivity.csv", sensitivity)
+    write_csv(output / "resources_counts.csv", resources)
+    write_csv(output / "resources_batch_sensitivity.csv", sensitivity)
     metadata = dict(
         hardware_executed=False, peak_link_bytes_per_second=B_PEAK,
         cap_domain="Predeclared caps {1, min(8,N*N), N/2, min(128,N*N), min(1024,N*N), N*N}; application submissions, not device tiles.",
@@ -76,13 +75,13 @@ def run(output=None):
         limitations="Logical payload only; no measured latency, throughput or energy verdict.",
         checks=[],
     )
-    (output / "validation.json").write_text(json.dumps(metadata, indent=2))
+    (output / "resources_validation.json").write_text(json.dumps(metadata, indent=2))
     print(f"Saved {len(resources)} resource rows and {len(sensitivity):,} conditional sensitivity rows.")
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/resources_reproduced")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)
 

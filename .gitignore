@@ -5,9 +5,8 @@ __pycache__/
 Thumbs.db
 *.py[cod]
 .pytest_cache/
-results/reproduced/
-results/sdk_reproduced/
 
 # New runs and local checks are separate from committed research evidence.
-tmp/
+results/reproduced/
 results/*_reproduced/
+tmp/

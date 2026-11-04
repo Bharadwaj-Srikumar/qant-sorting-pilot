@@ -40,11 +40,13 @@ invalid outputs; a separately named recall measure assigns those failures zero
 utility. See the [method and noise model](Documentation.md#2-method-and-noise-model)
 for definitions and denominators.
 
-New results go to `results/reproduced/`, `results/ranking_quality_reproduced/`
-and `results/resources_reproduced/`. Each command accepts `--output-dir` and
-refuses to overwrite a nonempty directory. The main command's `--batch-size`
-changes memory use without changing a trial's noise stream. To score the
-committed results directly, run `python -m qant_sorting.quality`.
+All commands write new files to `results/reproduced/` by default, using the
+prefixes `simulation_`, `quality_`, `sdk_` and `resources_`. Each command accepts
+`--output-dir` and stops if any file in its output group already exists; other
+groups can share the directory. Choose another output directory to repeat a
+group. The main command's `--batch-size` changes memory use without changing a
+trial's noise stream. To score the committed results in `results/` directly,
+run `python -m qant_sorting.quality`.
 
 ## Code structure and reading order
 
@@ -79,7 +81,7 @@ python -m qant_sorting.sdk
 ```
 
 This checks every 4-/8-bit key pair and both sorters on the saved inputs, writing
-to `results/sdk_reproduced/`. The differences are calculated by `linear_fprop`;
+`sdk_` files to `results/reproduced/`. The differences are calculated by `linear_fprop`;
 decisions, bias, sums and record routing remain on the host. The SDK run has no
 added Gaussian noise or extra fixed-point quantizer. See
 [hardware mapping and resource costs](Documentation.md#3-hardware-mapping-and-resource-costs)
@@ -88,19 +90,23 @@ physical parameters.
 
 ## Evidence included for review
 
-| Folder | Contents |
+All retained result files are directly in `results/`; their prefixes identify
+the evaluation that produced them.
+
+| Location or filename prefix | Contents |
 |---|---|
 | `data/` | Fixed input arrays |
-| `results/reference/` | Main accuracy, complete output orders, failures and run metadata |
-| `results/ranking_quality/` | Kendall metrics, inversion distances, Recall@k and their denominators |
-| `results/sdk/` | Official CPU SDK integration results |
-| `results/resources/` | Logical operation, submission and transfer counts |
+| `results/simulation_*` | Main accuracy, complete output orders, failures and run metadata |
+| `results/quality_*` | Kendall metrics, inversion distances, Recall@k and their denominators |
+| `results/sdk_*` | Official CPU SDK integration results |
+| `results/resources_*` | Logical operation, submission and transfer counts |
 | `vendor/` | Pinned SDK distribution and required license notices |
 
 The [results section](Documentation.md#4-results) summarizes the retained findings.
-Saved results retain their original metadata and hashes; historical source paths describe the
-code at the time those runs were produced. The cleanup does not relabel them as
-new measurements. Earlier exploratory code and drafts remain in Git history.
+Saved results retain their original metadata and hashes; recorded filenames and
+source paths describe the layout when those runs were produced. The cleanup does
+not relabel them as new measurements. Earlier exploratory code and drafts remain
+in Git history.
 
 Each of the seven core files ends with a clearly marked **Self-tests** section.
 These checks run only when requested. Run them all with:
