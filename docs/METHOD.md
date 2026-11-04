@@ -29,17 +29,17 @@ its original ID, 0 through N−1, so equal keys remain distinguishable.
 For a pair of keys a and b, the arithmetic is a normalized subtraction:
 
 ```math
-d=\widehat a-\widehat b
+d=\widehat{a}-\widehat{b}
 =\begin{bmatrix}1&-1\end{bmatrix}
- \begin{bmatrix}\widehat a\\\widehat b\end{bmatrix},\qquad
-\epsilon\sim\mathcal N(0,(\eta\Delta)^2).
+ \begin{bmatrix}\widehat{a}\\\widehat{b}\end{bmatrix},\qquad
+\epsilon\sim\mathcal{N}(0,(\eta\Delta)^2).
 ```
 
 Noise is added **before** nearest-even rounding and signed saturation:
 
 ```math
-c=\operatorname{round}_{even}((d+\epsilon)/\Delta),\qquad
-\widetilde d=Q(d+\epsilon)
+c=\mathrm{round}_{\mathrm{even}}((d+\epsilon)/\Delta),\qquad
+\widetilde{d}=Q(d+\epsilon)
 =\Delta\min(L/2-1,\max(-L/2,c)).
 ```
 
@@ -80,12 +80,12 @@ The rank mapping follows equations (1)–(7) and the worked matrices in
 Row i is a competitor; column j is the record being ranked. Define
 
 ```math
-D_{ij}=\Delta(x_j-x_i),\qquad U_{ij}=\mathbf 1[i>j],\qquad
-\widehat D_{ij}=Q(D_{ij}+E_{ij}),
+D_{ij}=\Delta(x_j-x_i),\qquad U_{ij}=\mathbf{1}[i>j],\qquad
+\widehat{D}_{ij}=Q(D_{ij}+E_{ij}),
 ```
 
 ```math
-R_{ij}=\mathbf 1[\widehat D_{ij}-\Delta U_{ij}\geq0],\qquad
+R_{ij}=\mathbf{1}[\widehat{D}_{ij}-\Delta U_{ij}\geq0],\qquad
 r_j=\sum_i R_{ij}-1.
 ```
 
