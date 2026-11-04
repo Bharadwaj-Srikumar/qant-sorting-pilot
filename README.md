@@ -85,7 +85,6 @@ resource formulas and unresolved physical parameters.
 | `results/ranking_quality/` | Kendall metrics, inversion distances, Recall@k and their denominators |
 | `results/sdk/` | Official CPU SDK integration results |
 | `results/resources/` | Logical operation, submission and transfer counts |
-| `tests/` | Focused model, source-equation, metric and SDK checks |
 | `tools/`, `vendor/` | Pinned SDK installer, distribution and required license notices |
 
 [RESULTS.md](docs/RESULTS.md) summarizes the retained findings. Saved results
@@ -93,11 +92,18 @@ retain their original metadata and hashes; historical source paths describe the
 code at the time those runs were produced. The cleanup does not relabel them as
 new measurements. Earlier exploratory code and drafts remain in Git history.
 
-Run the focused checks with:
+Each of the seven core files ends with a clearly marked **Self-tests** section.
+These checks run only when requested. Run them all with:
 
 ```bash
-python -m unittest discover -s tests -v
+python -m qant_sorting.run --self-test
 ```
 
-The main simulation and quality evaluation require NumPy only. SDK tests clearly
-skip when the toolkit is not installed. No report-generation code is included.
+To check just one module, for example the evaluation metrics:
+
+```bash
+python -m unittest qant_sorting.evaluation -v
+```
+
+The main simulation and quality evaluation require NumPy only. SDK self-tests
+clearly skip when the toolkit is not installed. No report-generation code is included.

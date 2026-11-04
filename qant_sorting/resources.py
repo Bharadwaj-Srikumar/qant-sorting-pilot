@@ -87,5 +87,17 @@ def main(argv=None):
     run(args.output_dir)
 
 
+# Self-tests
+
+import unittest
+
+
+class ResourceTests(unittest.TestCase):
+    def test_resource_counts(self):
+        self.assertEqual(counts(4, 16), (3, 6, 16, 3, 1))
+        self.assertEqual(counts(16, 256), (10, 80, 256, 10, 1))
+        self.assertEqual(counts(256, 65536), (36, 4608, 65536, 36, 1))
+
+
 if __name__ == "__main__":
     main()
