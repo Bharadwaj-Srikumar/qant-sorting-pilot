@@ -1,4 +1,4 @@
-# Thesis documentation
+# Documentation
 
 Read this document for the code walkthrough, mathematical model, Q.ANT mapping
 and recorded results. Installation and main commands are in [README.md](README.md).
