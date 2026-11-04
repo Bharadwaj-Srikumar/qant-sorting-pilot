@@ -30,7 +30,7 @@ of effective optical precision. The SDK control does not implement the noise
 model from [METHOD.md](METHOD.md).
 
 ```bash
-python -m pip install -r requirements/sdk.txt
+python -m pip install -r requirements.txt
 python -m tools.install_sdk --no-deps
 python -m qant_sorting.sdk
 ```

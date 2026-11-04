@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--no-deps", action="store_true",
-                        help="Keep the environment already installed from requirements/sdk.txt")
+                        help="Keep the environment already installed from requirements.txt")
     args = parser.parse_args()
     if sys.version_info[:2] != (3, 12):
         raise SystemExit("Use Python 3.12 for the supplied official wheels")
@@ -49,7 +49,7 @@ def main():
             wheel = Path(directory) / Path(name).name
             wheel.write_bytes(bundle.read(name))
         dependencies = (["--no-deps"] if args.no_deps else
-                        ["-r", str(ROOT / "requirements/sdk.txt")])
+                        ["-r", str(ROOT / "requirements.txt")])
         subprocess.run([sys.executable, "-m", "pip", "install", str(wheel),
                         *dependencies], check=True)
     print("Installed the official CPU backend. Run python -m qant_sorting.sdk")

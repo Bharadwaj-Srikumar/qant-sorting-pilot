@@ -61,10 +61,11 @@ There is one retained simulation noise model, in `comparison.py`.
 ## Q.ANT mapping
 
 The pinned SDK and its licenses are included so that the linear mapping can be
-reproduced. In the same Python 3.12 virtual environment:
+reproduced. The setup above installs all shared Python dependencies from the
+single `requirements.txt`. Add the bundled SDK wheel in the same Python 3.12
+virtual environment:
 
 ```bash
-python -m pip install -r requirements/sdk.txt
 python -m tools.install_sdk --no-deps
 python -m qant_sorting.sdk
 ```
@@ -105,5 +106,7 @@ To check just one module, for example the evaluation metrics:
 python -m unittest qant_sorting.evaluation -v
 ```
 
-The main simulation and quality evaluation require NumPy only. SDK self-tests
-clearly skip when the toolkit is not installed. No report-generation code is included.
+The numerical simulation and quality evaluation use NumPy. The shared requirements
+also include the SDK support packages; the official toolkit wheel is installed
+separately as shown above. SDK self-tests skip until that toolkit is installed.
+No report-generation code is included.

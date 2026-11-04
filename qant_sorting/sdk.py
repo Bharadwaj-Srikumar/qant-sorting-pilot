@@ -20,7 +20,7 @@ from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
 def _load_sdk():
-    """Load the separate SDK environment only when an SDK operation is needed."""
+    """Load the optional toolkit only when an SDK operation is needed."""
     from ml_dtypes import bfloat16
     import qant_native_computing_toolkit as qant
 
