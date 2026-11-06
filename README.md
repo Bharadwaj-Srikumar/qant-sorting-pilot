@@ -110,9 +110,8 @@ Recorded metadata values and hashes are preserved; historical filenames and
 source paths describe the original runs. The cleanup does not relabel them as
 new measurements. Earlier exploratory code and drafts remain in Git history.
 
-The [2026-11-04 audit](Documentation.md#44-code-audit-and-full-reproduction--2026-11-04)
-passed all 34 self-tests and repeated the full simulation, quality, SDK and
-resource evaluations. All seven numerical tables and both output archives
+The [2026-11-04 reproduction check](Documentation.md#43-evidence-and-reproduction)
+confirmed that all seven numerical result tables and both output archives
 matched the retained files exactly after the optimizations.
 
 Each of the seven core files contains `unittest` classes near the end.
