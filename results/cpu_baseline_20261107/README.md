@@ -26,7 +26,7 @@ test-run successfully against the exact canonical input archive.
 
 ## Retained files
 
-- `summary/b*_n*.csv`: all 192 configuration summaries, split by bit-width and N.
+- `summary.csv`: all 192 benchmark configurations in one table.
 - `metadata.json`: environment, benchmark settings, timing boundary and limitations.
 - `validation.json`: complete correctness/stability checks and per-dataset hashes.
 
