@@ -19,6 +19,8 @@ The benchmark code is integrated into the main package at
 [`qant_sorting/cpu_baseline.py`](../../qant_sorting/cpu_baseline.py). It remains a
 separate digital-performance theme and does not call the photonic noise/SDK path.
 
+The retained timing metadata keeps the exact source hash from the measurement run. The code was subsequently relocated into `qant_sorting/cpu_baseline.py`; the timed NumPy operation and benchmark protocol are unchanged, while the integrated module adds convenient repository-default paths and an explicit canonical NPZ hash guard.
+
 ## Retained files
 
 - `summary/b*_n*.csv`: all 192 configuration summaries, split by bit-width and N.
