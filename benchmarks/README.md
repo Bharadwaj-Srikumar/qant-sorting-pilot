@@ -48,8 +48,8 @@ overwritten.
 `results/cpu_baseline_20261107/` is a fresh run performed on 7 November 2026.
 It contains:
 
-- `summary.csv` — 192 configurations with median/IQR and throughput;
-- `samples.csv` — all 1,728 raw timing samples;
+- `summary/b*_n*.csv` — all 192 configurations, split by bit-width and N;
+- `samples/b*_n*.csv` — all 1,728 raw timing samples, split the same way;
 - `validation.json` — correctness, stability and dataset-hash checks;
 - `metadata.json` — machine/software environment and timing boundary.
 
@@ -65,10 +65,10 @@ For 8-bit distinct keys at `N=256`:
 
 | Storage dtype | Lists per call | Median time per call | Amortized time per list | Relative IQR |
 |---|---:|---:|---:|---:|
-| int64 | 1 | 12.23 µs | 12.23 µs | 3.4% |
-| int64 | 1,000 | 7.832 ms | 7.83 µs | 2.0% |
-| uint8 | 1 | 5.29 µs | 5.29 µs | 6.7% |
-| uint8 | 1,000 | 1.359 ms | 1.36 µs | 2.8% |
+| int64 | 1 | 11.74 µs | 11.74 µs | 2.6% |
+| int64 | 1,000 | 7.894 ms | 7.89 µs | 4.6% |
+| uint8 | 1 | 5.44 µs | 5.44 µs | 8.6% |
+| uint8 | 1,000 | 1.380 ms | 1.38 µs | 2.0% |
 
 These values are platform-specific measurements, not a universal CPU lower
 bound. Four of the 192 configurations have relative IQR above 20%; the raw
