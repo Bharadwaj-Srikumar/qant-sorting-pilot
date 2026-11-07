@@ -48,10 +48,11 @@ overwritten.
 `results/cpu_baseline_20261107/` is a fresh run performed on 7 November 2026.
 It contains:
 
-- `summary/b*_n*.csv` — all 192 configurations, split by bit-width and N;
-- `samples/b*_n*.csv` — all 1,728 raw timing samples, split the same way;
+- `summary/b*_n*.csv` — all 192 retained configuration summaries, split by bit-width and N;
 - `validation.json` — correctness, stability and dataset-hash checks;
-- `metadata.json` — machine/software environment and timing boundary.
+- `metadata.json` — machine/software environment, run settings and timing boundary.
+
+The benchmark script also writes all raw repeated samples under `samples/` when reproduced. The committed fresh-run evidence intentionally retains the full configuration summaries plus validation/provenance, rather than mixing a large raw timing trace into the thesis result set.
 
 Environment of the retained run:
 
@@ -71,6 +72,5 @@ For 8-bit distinct keys at `N=256`:
 | uint8 | 1,000 | 1.380 ms | 1.38 µs | 2.0% |
 
 These values are platform-specific measurements, not a universal CPU lower
-bound. Four of the 192 configurations have relative IQR above 20%; the raw
-samples are retained rather than filtered. No GPU, Q.ANT NPU, photonic latency
+bound. One of the 192 configurations has relative IQR above 20%. No configuration was removed or replaced because of timing variation. No GPU, Q.ANT NPU, photonic latency
 or energy measurement is implied.
