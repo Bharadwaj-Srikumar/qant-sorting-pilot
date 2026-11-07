@@ -1,0 +1,48 @@
+{
+  "run_id": "cpu_baseline_20261107",
+  "created_at_utc": "2026-11-07T09:18:00.603444+00:00",
+  "environment": {
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "numpy": "2.3.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "logical_cpus_visible": 5,
+    "affinity_cpus": [0,1,2,3,4],
+    "cgroup_cpu_max": "400000 100000",
+    "thread_environment": {
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    },
+    "timer": "time.perf_counter_ns",
+    "timer_resolution_s": 1e-09,
+    "gpu_executed": false,
+    "photonic_hardware_executed": false
+  },
+  "input_archive": "/mnt/data/cpu_baseline_rerun/inputs_regenerated.npz",
+  "input_archive_sha256": "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da",
+  "dataset_hashes_match_declared_corpus": true,
+  "benchmark_source_sha256": "cc5928497831c29f52cd4744ca3710ade2cef639b1bff299d9aaafe1356350ea",
+  "baseline": "NumPy stable argsort + take_along_axis",
+  "input_storage_dtypes": ["uint8","int64"],
+  "index_dtype": "int64",
+  "batch_sizes": [1,10,100,1000],
+  "repeats": 9,
+  "target_ms": 15.0,
+  "warmup_passes": 2,
+  "case_order_seed": 20261107,
+  "measured_cases": 192,
+  "raw_samples": 1728,
+  "benchmark_elapsed_s": 28.00770634,
+  "scope": "CPU application calls returning sorted keys and original indices; allocation and gather included",
+  "excluded": "File loading, dtype conversion, input preparation, validation and result-file writing",
+  "protocol": "Warm-cache repeated full-corpus passes; immutable inputs; GC disabled only during timing",
+  "statistic": "Median across repeated mean batch times; IQR is repeat variation, not tail latency or a confidence interval",
+  "limits": [
+    "Platform-specific benchmark; not a universal CPU lower bound",
+    "No GPU, NPU, photonic latency, device energy or photonic speedup measured",
+    "NumPy library baseline, not a hand-optimized sorting kernel",
+    "Amortized batch time per array is not isolated single-request latency"
+  ],
+  "units": "Physical seconds and throughput; separate from algorithmic complexity T/W/S/H/D"
+}
