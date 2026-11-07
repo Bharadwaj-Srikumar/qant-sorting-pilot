@@ -34,24 +34,47 @@ One row is one sorting trial. The sorters move the original keys and IDs using
 measured comparison scores. The digital reference is used afterwards to score
 the output; it never supplies sorting decisions.
 
-### Read in this order
+### Thematic code organization
+
+All executable code remains in `qant_sorting/`, but two different questions
+are kept conceptually separate.
+
+#### A. Photonic sorting evaluation
 
 | File | Functions to follow | Question answered |
 |---|---|---|
 | `qant_sorting/comparison.py` | `validate_keys`, `Precision`, `NoisyDifference.__call__` | How does a pair of keys become a noisy comparison? |
 | `qant_sorting/sorters.py` | `compact_bitonic_layers`, `bitonic_sort`, `rank_sort`, `place_ranks` | How do comparison results determine the output order? |
 | `qant_sorting/evaluation.py` | `reference_flags`, `wilson_interval`, `prepare_keys`, `score_saved_order` | How are validity, accuracy, stability, tau and Recall@k calculated? |
-| `qant_sorting/run.py` | Settings, `evaluate_case`, `run`, `main` | How are the datasets, noise levels and sorters evaluated? |
-| `qant_sorting/quality.py` | `statistics`, `run`, `main` | How are detailed metrics generated from saved orders? |
+| `qant_sorting/run.py` | Settings, `evaluate_case`, `run`, `main` | How are datasets, noise levels and sorters evaluated? |
+| `qant_sorting/quality.py` | `statistics`, `run`, `main` | How are detailed metrics generated from saved sorting outputs? |
 | `qant_sorting/sdk.py` | `SdkDifference`, `backend_identity`, `main` | How is subtraction submitted through the Q.ANT CPU SDK? |
 | `qant_sorting/resources.py` | `counts`, `main` | What work and logical data movement does each mapping require? |
 
-The first four files explain the main experiment. The final three produce its
-detailed quality analysis, software mapping evidence and resource comparison.
+The first four files explain the main sorting experiment. The final three add
+quality analysis, Q.ANT software-integration evidence and resource accounting.
+`qant_sorting/install_sdk.py` is only a setup helper for the official SDK.
 
-`qant_sorting/install_sdk.py` is a setup helper in the same folder. Run it as
-`python -m qant_sorting.install_sdk --no-deps` after installing `requirements.txt`
-when you want to use the official CPU SDK. It is not part of the sorting flow.
+#### B. Digital CPU baseline
+
+`qant_sorting/cpu_baseline.py` answers a different question: how quickly does
+a conventional stable CPU library sort the **same input corpus** while returning
+the same complete record contract (sorted keys plus original indices)?
+
+It intentionally does not call the photonic noise model, Q.ANT SDK or hybrid
+mapping. The timed operation is stable NumPy `argsort` plus
+`take_along_axis`. This keeps the digital performance baseline thematically
+separate without placing it in a separate repository folder.
+
+Run it with:
+
+```bash
+python -m qant_sorting.cpu_baseline
+```
+
+The default input is `data/inputs.npz`; the default fresh output directory is
+`results/cpu_baseline_reproduced/`. The benchmark verifies the canonical NPZ
+hash and every dataset-content hash before timing.
 
 ### Checks in the same files
 
@@ -535,10 +558,11 @@ Recall@N checks record preservation only. The formulas and denominators are in
 
 ### 4.3 Fresh CPU baseline (7 November 2026)
 
-The digital baseline has now been rerun as a standalone benchmark, separate from
-the photonic/noise/SDK modules. Its code lives in
-[`benchmarks/cpu_baseline.py`](benchmarks/cpu_baseline.py), and the retained
-evidence is isolated under
+The digital baseline has now been rerun as a separate measurement path inside the
+same `qant_sorting/` package. Its code lives in
+[`qant_sorting/cpu_baseline.py`](qant_sorting/cpu_baseline.py). It is thematically
+separate from the photonic/noise/SDK evaluation, while the retained evidence is
+kept under
 [`results/cpu_baseline_20261107/`](results/cpu_baseline_20261107/).
 
 The fresh run used the same 24 thesis datasets (24,000 unique arrays). Before
@@ -571,6 +595,14 @@ bound. Amortized batch time is a throughput quantity rather than isolated
 single-request latency. No GPU or Q.ANT NPU timing and no energy measurement is
 included; the GPU baseline remains open. The complete configuration summaries,
 validation and run metadata are retained in the dated result directory.
+
+Reproduce the CPU baseline independently with:
+
+```bash
+python -m qant_sorting.cpu_baseline
+```
+
+The command does not execute the photonic sorting sweep.
 
 ### 4.4 Evidence and reproduction
 

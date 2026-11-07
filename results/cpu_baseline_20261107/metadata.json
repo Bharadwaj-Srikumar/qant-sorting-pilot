@@ -75,5 +75,8 @@
   ],
   "raw_samples_generated": 1728,
   "raw_samples_retained": false,
-  "raw_sample_policy": "Fresh run generated 1,728 repeated timing samples; committed evidence retains all 192 configuration summaries plus validation/provenance. Reproduction regenerates the samples/ files."
+  "raw_sample_policy": "Fresh run generated 1,728 repeated timing samples; committed evidence retains all 192 configuration summaries plus validation/provenance. Reproduction regenerates the samples/ files.",
+  "source_location_at_run": "benchmarks/cpu_baseline.py",
+  "current_source_location": "qant_sorting/cpu_baseline.py",
+  "source_relocation_note": "The 7 Nov timing run predates the code relocation. The current module keeps the same timed NumPy operation and protocol, while adding package-level default paths and an explicit canonical NPZ hash guard. benchmark_source_sha256 remains the exact source hash recorded at measurement time."
 }

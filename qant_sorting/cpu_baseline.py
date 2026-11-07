@@ -1,8 +1,9 @@
-"""Standalone stable CPU sorting baseline for the thesis input corpus.
+"""Stable digital CPU baseline for the thesis input corpus.
 
-This benchmark is intentionally separate from qant_sorting/. It measures a
-NumPy stable argsort followed by value gathering and returns both sorted values
-and original record indices. It does not import the photonic/noise/SDK code.
+This module lives beside the photonic evaluation code but remains a separate
+measurement path: it uses NumPy only and does not call the noise model, Q.ANT
+SDK, or photonic mapping. It measures stable argsort plus value gathering and
+returns both sorted values and original record indices.
 """
 
 from __future__ import annotations
@@ -22,6 +23,9 @@ import sys
 import time
 
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_INPUT_ARCHIVE_SHA256 = "79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da"
 
 EXPECTED_DATASET_HASHES = {
     "b4_n2_distinct": "9d124934ecb8c2ac90f48c4adc50f8d1687436a24be230a31c67948068a7c690",
@@ -146,6 +150,8 @@ def run(args: argparse.Namespace) -> None:
         raise ValueError("output directory must be empty")
 
     input_archive_sha256 = sha256_bytes(args.input.read_bytes())
+    if input_archive_sha256 != EXPECTED_INPUT_ARCHIVE_SHA256:
+        raise ValueError("input archive differs from the declared thesis corpus")
     dataset_hashes = {}
     validation = []
     cases = []
@@ -276,7 +282,7 @@ def run(args: argparse.Namespace) -> None:
 
     source_sha256 = sha256_bytes(Path(__file__).read_bytes())
     metadata = {
-        "run_id": "cpu_baseline_20261107",
+        "run_id": output.name,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "environment": environment(),
         "input_archive": str(args.input),
@@ -313,8 +319,8 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--input", type=Path, default=ROOT / "data/inputs.npz")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "results/cpu_baseline_reproduced")
     parser.add_argument("--batch-sizes", nargs="+", type=int, default=[1, 10, 100, 1000])
     parser.add_argument("--dtypes", nargs="+", choices=["uint8", "int64"], default=["uint8", "int64"])
     parser.add_argument("--repeats", type=int, default=9)
