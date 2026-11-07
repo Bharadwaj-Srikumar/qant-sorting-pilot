@@ -88,7 +88,8 @@ def selected_k(n):
 def score_saved_order(prepared, indices, ks=None):
     """Score saved record indices with order flags, inversions, tau, and recall.
 
-    indices has shape (trials, N); recall selects the largest k records.
+    indices has shape (trials, N); recall scores the last k output positions
+    against the true largest-k reference.
     Invalid orders get -1 inversions and NaN tau/recall. Tau also needs
     unequal-key pairs. The result includes pair and inversion counts by gap.
     """
@@ -169,7 +170,7 @@ def score_saved_order(prepared, indices, ks=None):
         if k == n and (np.any(strict != 1) or np.any(tie_neutral != 1)):
             raise AssertionError("Full-set recall must be one for a valid permutation")
         recall[k] = dict(stable=strict_all, tie_neutral=neutral_all)
-    return dict(flags=flags, inversions=inversions, comparable_pairs=comparable,
+    return dict(flags=flags, inversions=inversions,
                 tau_b=tau_b, tau_b_ceiling=ceiling, tau_key_normalized=normalized,
                 distance_pairs=available_by_gap, distance_inversions=inverted_by_gap,
                 recall=recall)

@@ -80,8 +80,9 @@ expected number of comparisons, and requires every noiseless sort to be valid,
 correct and stable. It records these three flags and the original record IDs
 for every trial, including noisy failures.
 
-`quality.py` independently rescores the saved orders, checks agreement with the
-recorded flags and summary counts, and rejects incomplete or unexpected cases.
+`quality.py` independently rescores the saved orders and checks the recorded
+flags plus the trial, validity, correctness and stability totals. It checks all
+cases listed in the selected CSV and rejects missing or unexpected archive members.
 Input checks, output-file protection and this result validation are part of the
 experiment implementation.
 
@@ -254,7 +255,8 @@ not 288,000 independently drawn inputs.
 ### 2.5 Measure partial ordering quality
 
 [`quality.py`](qant_sorting/quality.py) reads saved record IDs, reconstructs
-keys from the input corpus and independently checks every saved flag and count.
+keys from the input corpus and independently checks every saved flag plus the
+trial, validity, correctness and stability totals.
 It does not execute a sorter. Invalid permutations have undefined conditional
 quality. The following metrics concern final outputs, not internal comparisons.
 
@@ -596,7 +598,8 @@ the exact canonical input archive.
 
 ### 4.4 Evidence and reproduction
 
-All retained files are directly in [`results/`](results/), grouped by prefix:
+The retained photonic evaluation files are directly in [`results/`](results/),
+grouped by prefix:
 
 | Filename prefix | What it supports | Command |
 |---|---|---|
@@ -627,8 +630,9 @@ The tables use different row units: summaries describe one setting, recall adds
 k, and key-gap statistics add the distance. Separate tables avoid repeating
 summary values for every cutoff or key gap.
 
-Quality evaluation performs no new sorts. Its validation checks complete
-coverage and agreement with every saved flag and accuracy count. By default,
+Quality evaluation performs no new sorts. It verifies the saved flags and
+trial, validity, correctness and stability totals for every case in the selected
+accuracy CSV, rejecting missing or unexpected archive members. By default,
 it reads the retained `simulation_` files in `results/`. To score a fresh main
 run, use `--results-dir results/reproduced`; its `quality_` output files can
 share that directory with the simulation files.
@@ -641,7 +645,9 @@ Capacity, data movement and electronic work therefore matter to any physical
 comparison. These logical counts and the SDK CPU check establish no measured
 photonic speed or energy advantage.
 
-New runs default to `results/reproduced/` and use the same filename prefixes.
+New simulation, quality, SDK and resource runs default to `results/reproduced/`
+and use the same filename prefixes. The CPU baseline defaults to
+`results/cpu_baseline_reproduced/`.
 Retained metadata keeps its original generation environment, source hashes and
 recorded filenames and paths, which can differ from the current layout. The
 main-run duration records simulation execution time, not a hardware latency

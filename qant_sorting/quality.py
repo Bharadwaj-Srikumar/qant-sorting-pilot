@@ -17,7 +17,7 @@ from qant_sorting.run import (
 
 
 def statistics(values, prefix):
-    """Summarize finite metric values; return None when none are defined."""
+    """Summarize finite values, using None for each undefined statistic."""
     values = values[np.isfinite(values)]
     if not len(values):
         return {prefix + suffix: None for suffix in ("_mean", "_median", "_min", "_p05")}
@@ -106,6 +106,9 @@ def run(results_dir, output_dir):
         if set(outputs.files) != expected_members or len(outputs.files) != len(expected_members):
             raise ValueError("Saved output cases do not match the accuracy CSV")
 
+    if any(file_hash(path) != hashes[path.name] for path in sources):
+        raise ValueError("Inputs or saved outputs changed during quality evaluation")
+
     write_csv(output_dir / "quality_summary.csv", summaries)
     write_csv(output_dir / "quality_recall.csv", recalls)
     distance_fields = ["dataset", "key_bits", "n", "family", "eta", "mapping", "key_distance",
@@ -116,10 +119,8 @@ def run(results_dir, output_dir):
                 writer = csv.DictWriter(handle, fieldnames=distance_fields)
                 writer.writeheader()
                 writer.writerows(distances)
-    if any(file_hash(path) != hashes[path.name] for path in sources):
-        raise ValueError("Inputs or saved outputs changed during quality evaluation")
     validation = dict(evaluated_cases=len(rows), evaluated_outputs=sum(row["trials"] for row in summaries),
-        complete_coverage=True, missing_cases=[], saved_flags_and_counts_reproduced=True,
+        complete_coverage=True, saved_flags_and_counts_reproduced=True,
         distance_rows=len(distances), new_sorter_executions=0)
     metadata = dict(python=platform.python_version(), numpy=np.__version__, source_sha256=hashes,
         results_directory=str(results_dir), evaluation_code_sha256=source_hashes(),

@@ -40,9 +40,10 @@ invalid outputs; a separately named recall measure assigns those failures zero
 utility. See the [method and noise model](Documentation.md#2-method-and-noise-model)
 for definitions and denominators.
 
-All commands write new files to `results/reproduced/` by default, using the
-prefixes `simulation_`, `quality_`, `sdk_` and `resources_`. Each command accepts
-`--output-dir` and stops if any file in its output group already exists; other
+The simulation, quality, SDK and resource commands write new files to
+`results/reproduced/` by default, using the prefixes `simulation_`, `quality_`,
+`sdk_` and `resources_`. Each command accepts `--output-dir` and stops if any
+file in its output group already exists; other
 groups can share the directory. Choose another output directory to repeat a
 group. The main command's `--batch-size` changes memory use without changing a
 trial's noise stream. To score the committed results in `results/` directly,
@@ -130,8 +131,9 @@ physical parameters.
 
 ## Evidence included for review
 
-All retained result files are directly in `results/`; their prefixes identify
-the evaluation that produced them.
+The retained simulation, quality, SDK and resource files are directly in
+`results/`; their prefixes identify the evaluation that produced them. The CPU
+baseline has its own dated subdirectory.
 
 | Location or filename prefix | Contents |
 |---|---|
@@ -144,8 +146,9 @@ the evaluation that produced them.
 | `results/cpu_baseline_20261107/` | Fresh 7 Nov 2026 CPU baseline summary, validation and provenance |
 | `vendor/` | Pinned SDK distribution and required license notices |
 
-Each command has one `*_metadata.json` file for its run details, including
-checks and failure examples where applicable.
+The four photonic evaluation commands each write one `*_metadata.json` file
+for run details, checks and failure examples where applicable. The CPU baseline
+writes `metadata.json` in its separate output directory.
 
 The [results section](Documentation.md#4-results) summarizes the retained findings, including the [fresh CPU baseline](Documentation.md#43-fresh-cpu-baseline-7-november-2026).
 Recorded metadata values and hashes are preserved; historical filenames and
@@ -159,7 +162,8 @@ matched the retained files exactly after the optimizations.
 The main experiment validates the fixed input archive, checks the expected
 comparison counts and requires every noiseless output to be valid, correct and
 stable. It records these three flags for every sorting execution. The quality
-analysis independently rescores the saved orders and checks the recorded counts.
+analysis independently rescores the saved orders and checks the recorded trial,
+validity, correctness and stability totals.
 
 The numerical simulation and quality evaluation use NumPy. The shared requirements
 also include the SDK support packages; the official toolkit wheel is installed
