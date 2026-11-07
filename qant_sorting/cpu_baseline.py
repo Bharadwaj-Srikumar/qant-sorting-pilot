@@ -64,6 +64,15 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+def cpu_model():
+    info = Path("/proc/cpuinfo")
+    if info.exists():
+        for line in info.read_text().splitlines():
+            if line.startswith("model name"):
+                return line.split(":", 1)[1].strip()
+    return platform.processor() or "unknown"
+
+
 def run(output):
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -149,7 +158,7 @@ def run(output):
     (output / "metadata.json").write_text(json.dumps({
         "run_id": output.name,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
-        "cpu_model": platform.processor(),
+        "cpu_model": cpu_model(),
         "python": platform.python_version(),
         "numpy": np.__version__,
         "logical_cpus_visible": os.cpu_count(),
