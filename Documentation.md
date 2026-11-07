@@ -533,7 +533,35 @@ recall coincide because every output is valid. Recall selects the largest keys;
 Recall@N checks record preservation only. The formulas and denominators are in
 [method and noise model](#2-method-and-noise-model).
 
-### 4.3 Evidence and reproduction
+### 4.3 CPU baseline (historical measurement, 7 October 2026)
+
+A reproducible digital CPU baseline was measured on the same 24,000 saved input
+arrays using NumPy `argsort(kind="stable")` followed by `take_along_axis`.
+All checked outputs preserved the records, were correctly sorted, and were stable.
+The measurement was performed on an AMD EPYC 9V74 system with Python 3.12.14
+and NumPy 2.3.5. It is a platform-specific library baseline, not a claim of the
+fastest CPU sorter and not a photonic comparison.
+
+For 8-bit distinct keys at N=256:
+
+| Storage dtype | Lists per call | Median time per call | Amortized time per list | Relative IQR |
+|---|---:|---:|---:|---:|
+| int64 | 1 | 11.90 µs | 11.90 µs | 5.4% |
+| int64 | 1,000 | 8.852 ms | 8.85 µs | 12.2% |
+| uint8 | 1 | 5.26 µs | 5.26 µs | 10.6% |
+| uint8 | 1,000 | 1.408 ms | 1.41 µs | 3.7% |
+
+The complete historical evidence is restored as
+[`cpu_baseline_20261007_summary.csv`](results/cpu_baseline_20261007_summary.csv),
+[`cpu_baseline_20261007_metadata.json`](results/cpu_baseline_20261007_metadata.json)
+and [`cpu_baseline_20261007_validation.json`](results/cpu_baseline_20261007_validation.json).
+These are the original 7 October measurements recovered from Git history; they
+were **not rerun during this restoration**. File I/O, dtype conversion, input
+preparation, validation and result-file writing were outside the timed region.
+The benchmark includes allocations, stable argsort, gathering sorted keys, and
+normal result release. A GPU baseline remains open.
+
+### 4.4 Evidence and reproduction
 
 All retained files are directly in [`results/`](results/), grouped by prefix:
 
