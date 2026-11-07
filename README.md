@@ -100,12 +100,13 @@ the evaluation that produced them.
 | `results/quality_*` | Kendall metrics, inversion distances, Recall@k and their denominators |
 | `results/sdk_*` | Official CPU SDK integration results |
 | `results/resources_*` | Logical operation, submission and transfer counts |
+| `results/cpu_baseline_20261007_*` | Historical 7 Oct 2026 CPU timing baseline, metadata and validation |
 | `vendor/` | Pinned SDK distribution and required license notices |
 
 Each command has one `*_metadata.json` file for its run details, including
 checks and failure examples where applicable.
 
-The [results section](Documentation.md#4-results) summarizes the retained findings.
+The [results section](Documentation.md#4-results) summarizes the retained findings, including the restored [historical CPU baseline](Documentation.md#43-cpu-baseline-historical-measurement-7-october-2026).
 Recorded metadata values and hashes are preserved; historical filenames and
 source paths describe the original runs. The cleanup does not relabel them as
 new measurements. Earlier exploratory code and drafts remain in Git history.
