@@ -100,12 +100,14 @@ the evaluation that produced them.
 | `results/quality_*` | Kendall metrics, inversion distances, Recall@k and their denominators |
 | `results/sdk_*` | Official CPU SDK integration results |
 | `results/resources_*` | Logical operation, submission and transfer counts |
+| `benchmarks/` | Standalone CPU baseline code, isolated from the photonic/noise evaluation |
+| `results/cpu_baseline_20261107/` | Fresh 7 Nov 2026 CPU baseline summaries, validation and provenance |
 | `vendor/` | Pinned SDK distribution and required license notices |
 
 Each command has one `*_metadata.json` file for its run details, including
 checks and failure examples where applicable.
 
-The [results section](Documentation.md#4-results) summarizes the retained findings.
+The [results section](Documentation.md#4-results) summarizes the retained findings, including the [fresh CPU baseline](Documentation.md#43-fresh-cpu-baseline-7-november-2026).
 Recorded metadata values and hashes are preserved; historical filenames and
 source paths describe the original runs. The cleanup does not relabel them as
 new measurements. Earlier exploratory code and drafts remain in Git history.
