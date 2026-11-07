@@ -37,7 +37,6 @@ class CallCounts:
     feature_bytes: int = 0
     weight_bytes: int = 0
     output_bytes: int = 0
-    largest_pair_batch: int = 0
 
 
 class SdkDifference:
@@ -47,7 +46,6 @@ class SdkDifference:
         """Set the key normalization, SDK device, weights, and counters."""
         if key_bits not in (4, 8):
             raise ValueError("This registered pilot accepts 4-bit or 8-bit key domains")
-        self.key_bits = key_bits
         self.device_id = device_id
         self.denominator = 2 ** key_bits
         self._qant, self._bfloat16 = _load_sdk()
@@ -70,7 +68,6 @@ class SdkDifference:
         c.feature_bytes += features.nbytes
         c.weight_bytes += self.weights.nbytes
         c.output_bytes += result.nbytes
-        c.largest_pair_batch = max(c.largest_pair_batch, a.size)
         return result.astype(np.float32).reshape(a.shape)
 
 

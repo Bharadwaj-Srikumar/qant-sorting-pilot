@@ -13,7 +13,7 @@ standalone CPU sorting baseline. It is intentionally separate from the main
 - 2 storage dtypes × 4 batch sizes = 192 configurations
 - 9 repeated timing samples per configuration = 1,728 measured samples
 - All correctness, record-preservation and stability checks passed
-- The content hash of every dataset matched the declared thesis corpus
+- The input archive checksum matched the declared thesis corpus
 
 The benchmark code is integrated into the main package at
 [`qant_sorting/cpu_baseline.py`](../../qant_sorting/cpu_baseline.py). It remains a
@@ -28,7 +28,7 @@ test-run successfully against the exact canonical input archive.
 
 - `summary.csv`: all 192 benchmark configurations in one table.
 - `metadata.json`: environment, benchmark settings, timing boundary and limitations.
-- `validation.json`: complete correctness/stability checks and per-dataset hashes.
+- `validation.json`: correctness/stability status, corpus counts and input archive checksum.
 
 A fresh reproduction writes `summary.csv`, `samples.csv`, `validation.json` and
 `metadata.json` into a new output directory. The committed 7 November evidence

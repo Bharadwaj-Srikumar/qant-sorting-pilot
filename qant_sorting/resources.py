@@ -60,7 +60,6 @@ def run(output=None):
         model="t_A = q_A*ell + C_A*t_arithmetic + U_A/B_up + V_A/B_down + h_A",
         threshold="a=ell+4/B_up; tau=t_arithmetic+4/B_up+2/B_down. Rank wins if (q_B-q_R)*a > (C_R-C_B)*tau + h_R-h_B.",
         limitations="Logical payload only; no measured latency, throughput or energy verdict.",
-        checks=[],
     )
     (output / "resources_metadata.json").write_text(json.dumps(metadata, indent=2))
     print(f"Saved {len(resources)} resource rows and {len(sensitivity):,} conditional sensitivity rows.")
