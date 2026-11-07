@@ -74,71 +74,38 @@ the sorting algorithm itself.
 
 ### B. Digital CPU reference baseline
 
-[cpu_baseline.py](qant_sorting/cpu_baseline.py) is a separate measurement path
-inside the same package. It does **not** use the photonic noise model, the Q.ANT
-SDK, or the hybrid mappings. Its purpose is only to provide a reproducible
-digital reference for complete stable sorting.
+[cpu_baseline.py](qant_sorting/cpu_baseline.py) provides a conventional digital
+reference for the same complete stable-sorting task. It uses NumPy only and does
+not call the photonic noise model, Q.ANT SDK or hybrid mappings.
 
-The timed application call is:
+The timed operation is simply:
 
 ```python
 indices = np.argsort(data, axis=-1, kind="stable")
 values = np.take_along_axis(data, indices, axis=-1)
 ```
 
-It therefore returns the same complete record contract used by the thesis:
-sorted values plus original record indices. Allocation and gathering are inside
-the timing boundary; file loading, dtype conversion, validation and result-file
-writing are outside it.
+The benchmark verifies the fixed thesis input archive, checks correctness and
+stable ties once, then measures the same 24 datasets for `uint8` and `int64`
+with batch sizes 1, 10, 100 and 1,000. Each configuration uses two warm-ups,
+automatic timing calibration to about 15 ms, and nine measured repetitions.
+Results are reported as median runtime, relative IQR and throughput.
 
-The benchmark uses the same 24 thesis datasets and checks their SHA-256 content
-before measuring. Its default protocol is:
-
-- storage dtypes: `uint8` and `int64`;
-- batch sizes: 1, 10, 100 and 1,000 lists per call;
-- 9 timing repetitions per configuration;
-- 2 warm-up passes;
-- 15 ms target timing interval per repeated sample;
-- randomized case order with seed `20261107`.
-
-Run it from the repository root:
+Run it with:
 
 ```bash
 python -m qant_sorting.cpu_baseline
 ```
 
-By default it reads `data/inputs.npz` and writes a new run to
-`results/cpu_baseline_reproduced/`. The output directory must be empty.
+A new run writes four files to `results/cpu_baseline_reproduced/`:
+`summary.csv`, `samples.csv`, `validation.json` and `metadata.json`.
+The retained 7 November reference run remains in
+[`results/cpu_baseline_20261107/`](results/cpu_baseline_20261107/).
 
-The retained fresh run is
-[`results/cpu_baseline_20261107/`](results/cpu_baseline_20261107/). It covers
-**192 configurations** and generated **1,728 timing samples**. All outputs passed
-record-preservation, sortedness and stability checks.
-
-Environment of that retained run:
-
-- AMD EPYC 9V74 80-Core Processor;
-- Python 3.13.5;
-- NumPy 2.3.5;
-- 5 visible logical CPUs, affinity CPUs 0–4;
-- cgroup quota `400000 100000` (four CPU-time units).
-
-For 8-bit distinct keys at (N=256):
-
-| Storage dtype | Lists per call | Median time per call | Amortized time per list | Relative IQR |
-|---|---:|---:|---:|---:|
-| int64 | 1 | 11.74 µs | 11.74 µs | 2.6% |
-| int64 | 1,000 | 7.894 ms | 7.89 µs | 4.6% |
-| uint8 | 1 | 5.44 µs | 5.44 µs | 8.6% |
-| uint8 | 1,000 | 1.380 ms | 1.38 µs | 2.0% |
-
-These are platform-specific CPU measurements, not a universal CPU lower bound.
-They do not imply GPU/NPU performance, energy efficiency, or photonic speedup.
-The GPU baseline remains open.
-
-Start with the four-key example in the [code guide](Documentation.md#1-code-guide)
-for the photonic evaluation. The CPU baseline is intentionally documented as a
-different experimental question even though its code lives in the same package.
+For 8-bit distinct keys at (N=256), that retained run measured 11.74 µs per
+single `int64` list and 5.44 µs per single `uint8` list. These are
+platform-specific CPU measurements, not a universal CPU bound or evidence of
+photonic speedup. The GPU baseline remains open.
 
 ## Q.ANT mapping
 
@@ -173,7 +140,7 @@ the evaluation that produced them.
 | `results/sdk_*` | Official CPU SDK integration results |
 | `results/resources_*` | Logical operation, submission and transfer counts |
 | `qant_sorting/cpu_baseline.py` | Digital CPU reference baseline code; same package, separate evaluation theme |
-| `results/cpu_baseline_20261107/` | Fresh 7 Nov 2026 CPU baseline summaries, validation and provenance |
+| `results/cpu_baseline_20261107/` | Fresh 7 Nov 2026 CPU baseline summary, validation and provenance |
 | `vendor/` | Pinned SDK distribution and required license notices |
 
 Each command has one `*_metadata.json` file for its run details, including
