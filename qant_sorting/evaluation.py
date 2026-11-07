@@ -168,7 +168,7 @@ class RankingQualityTests(unittest.TestCase):
         self.assertEqual(reversed_result["inversions"][0], 6)
         self.assertEqual(reversed_result["tau_b"][0], -1)
 
-    def test_boundary_ties_do_not_count_as_key_errors(self):
+    def test_boundary_tie_metrics(self):
         p = prepare_keys(np.array([[2, 2, 1, 3]]), 4)
         result = score_saved_order(p, np.array([[2, 1, 0, 3]]), [2])
         np.testing.assert_array_equal(result["flags"], [[True, True, False]])
@@ -177,7 +177,7 @@ class RankingQualityTests(unittest.TestCase):
         self.assertEqual(result["recall"][2]["stable"][0], .5)
         self.assertEqual(result["recall"][2]["tie_neutral"][0], 1)
 
-    def test_all_equal_and_singleton_tau_are_undefined(self):
+    def test_tau_without_unequal_keys(self):
         for data, indices in (([[5, 5, 5]], [[2, 1, 0]]), ([[7]], [[0]])):
             p = prepare_keys(np.array(data), 4)
             result = score_saved_order(p, np.array(indices), [1])
@@ -186,7 +186,7 @@ class RankingQualityTests(unittest.TestCase):
             self.assertEqual(result["recall"][1]["tie_neutral"][0], 1)
             self.assertTrue(result["flags"][0, 1])
 
-    def test_invalid_outputs_never_get_rank_quality(self):
+    def test_invalid_output_metrics(self):
         p = prepare_keys(np.tile([0, 1, 2, 3], (3, 1)), 4)
         result = score_saved_order(p, np.array([[0, 0, 2, 3], [-1, 0, 1, 2], [0, 1, 2, 8]]))
         self.assertFalse(result["flags"].any())
@@ -194,13 +194,13 @@ class RankingQualityTests(unittest.TestCase):
         self.assertEqual(result["distance_pairs"].sum(), 0)
         self.assertTrue(np.isnan(result["recall"][1]["stable"]).all())
 
-    def test_uint8_key_distances_do_not_wrap(self):
+    def test_uint8_distance_overflow(self):
         p = prepare_keys(np.array([[0, 255]], dtype=np.uint8), 8)
         result = score_saved_order(p, np.array([[1, 0]]))
         self.assertEqual(result["distance_pairs"][255], 1)
         self.assertEqual(result["distance_inversions"][255], 1)
 
-    def test_exhaustive_small_orders_against_pair_enumeration(self):
+    def test_exhaustive_small_orders(self):
         for keys in ([0, 1, 2, 3, 4], [0, 0, 1, 2, 2]):
             permutations = np.array(list(itertools.permutations(range(5))))
             p = prepare_keys(np.tile(keys, (len(permutations), 1)), 4)
@@ -231,7 +231,7 @@ class RankingQualityTests(unittest.TestCase):
                     self.assertEqual(result["recall"][k]["tie_neutral"][row], neutral)
             np.testing.assert_array_equal(result["distance_inversions"], expected_hist)
 
-    def test_record_checks_detect_lost_or_changed_keys(self):
+    def test_record_integrity(self):
         data = np.array([[1, 2]])
         cases = (
             ([1, 1], [0, 0], True),
