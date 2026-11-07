@@ -19,18 +19,21 @@ The benchmark code is integrated into the main package at
 [`qant_sorting/cpu_baseline.py`](../../qant_sorting/cpu_baseline.py). It remains a
 separate digital-performance theme and does not call the photonic noise/SDK path.
 
-The retained timing metadata keeps the exact source hash from the measurement run. The code was subsequently relocated into `qant_sorting/cpu_baseline.py`; the timed NumPy operation and benchmark protocol are unchanged, while the integrated module adds convenient repository-default paths and an explicit canonical NPZ hash guard.
+The retained timing metadata keeps the exact source hash from the measurement
+run. The current benchmark was subsequently simplified without changing the
+measured operation or benchmark settings; the simplified code has also been
+test-run successfully against the exact canonical input archive.
 
 ## Retained files
 
-- `summary/b*_n*.csv`: all 192 configuration summaries, split by bit-width and N.
+- `summary.csv`: all 192 benchmark configurations in one table.
 - `metadata.json`: environment, benchmark settings, timing boundary and limitations.
 - `validation.json`: complete correctness/stability checks and per-dataset hashes.
 
-The benchmark also generates the repeated raw `samples/` files on reproduction via `python -m qant_sorting.cpu_baseline`.
-The committed thesis evidence retains the complete 192-row summary together with
-validation and provenance rather than adding the larger raw timing trace to the
-main result history.
+A fresh reproduction writes `summary.csv`, `samples.csv`, `validation.json` and
+`metadata.json` into a new output directory. The committed 7 November evidence
+keeps the complete 192-row summary plus concise validation/provenance; the 1,728
+raw timing samples are regenerated when the benchmark is rerun.
 
 ## Example: 8-bit, N=256, distinct keys
 
