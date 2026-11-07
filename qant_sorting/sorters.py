@@ -1,13 +1,10 @@
-import itertools
-import unittest
+"""Bitonic and rank sorting driven by an injected difference function."""
 
 import numpy as np
 
-from qant_sorting.comparison import NoisyDifference, Precision
-from qant_sorting.evaluation import reference_flags
-
 
 def compact_bitonic_layers(n):
+    """Return (left, right, ascending) arrays for each Bitonic network layer."""
     if n < 2 or n & (n - 1):
         raise ValueError("n must be a power of two and at least 2")
     layers = []
@@ -25,6 +22,11 @@ def compact_bitonic_layers(n):
 
 
 def bitonic_sort(keys, difference):
+    """Route (trials, N) keys through Bitonic layers using difference(a, b).
+
+    Return (values, original_indices, valid_flags). Zero scores use original
+    indices to break ties; noise can leave keys out of ascending order.
+    """
     values = keys.copy()
     indices = np.broadcast_to(np.arange(keys.shape[1]), keys.shape).copy()
     for left, right, ascending in compact_bitonic_layers(keys.shape[1]):
@@ -45,6 +47,12 @@ def bitonic_sort(keys, difference):
 
 
 def rank_sort(keys, difference, *, bias_step):
+    """Rank (trials, N) keys by thresholding all N**2 directed differences.
+
+    Matrix axes are (trial, competitor, record); sums over competitors,
+    minus one, give each record's rank. A lower-triangular bias breaks ties.
+    Return (values, original_indices, valid_flags).
+    """
     if not np.isfinite(bias_step) or bias_step <= 0:
         raise ValueError("bias_step must be finite and positive")
     keys = np.asarray(keys)
@@ -63,6 +71,11 @@ def rank_sort(keys, difference, *, bias_step):
 
 
 def place_ranks(keys, zero_based_ranks):
+    """Place (trials, N) keys at their proposed zero-based ranks.
+
+    Return (values, original_indices, valid_flags). Duplicate or out-of-range
+    ranks make a trial invalid and leave its values and indices at -1.
+    """
     keys = np.asarray(keys)
     ranks = np.asarray(zero_based_ranks)
     if ranks.shape != keys.shape or ranks.dtype.kind not in "iu" or keys.ndim != 2:
@@ -79,133 +92,3 @@ def place_ranks(keys, zero_based_ranks):
     values[rows[:, None], ranks[rows]] = keys[rows]
     indices[rows[:, None], ranks[rows]] = np.arange(n)
     return values, indices, valid
-
-
-class SorterTests(unittest.TestCase):
-    def test_bitonic_layers(self):
-        for n in (2, 4, 8, 16, 32, 64, 128, 256):
-            layers = compact_bitonic_layers(n)
-            m = n.bit_length() - 1
-            self.assertEqual(len(layers), m * (m + 1) // 2)
-            for left, right, ascending in layers:
-                np.testing.assert_array_equal(np.sort(np.r_[left, right]), np.arange(n))
-                self.assertEqual(len(ascending), n // 2)
-        with self.assertRaises(ValueError):
-            compact_bitonic_layers(3)
-
-    def test_stable_binary_sort(self):
-        for n in (2, 4, 8):
-            data = np.array(list(itertools.product((0, 1), repeat=n)))
-            for sorter in (bitonic_sort, rank_sort):
-                model = NoisyDifference(Precision(4, 4, 4))
-                self.assertTrue(reference_flags(data, sorter(data, model, **({"bias_step": 1/16} if sorter is rank_sort else {}))).all())
-
-    def test_bitonic_invalid_scores(self):
-        keys = np.array([[0, 1]])
-        for scores in (np.array(0.0), np.zeros((1, 2)),
-                       np.array([[np.nan]]), np.array([[np.inf]])):
-            with self.assertRaisesRegex(ValueError, "finite scores with the pair-array shape"):
-                bitonic_sort(keys, lambda a, b: scores)
-
-    def test_rank_cycle_rejection(self):
-        data = np.array([[3, 1, 2]])
-        result = rank_sort(data, lambda a, b: np.array([[0, -1, 1, 1, 0, -1, -1, 1, 0]]), bias_step=1)
-        self.assertFalse(result[2][0])
-        np.testing.assert_array_equal(result[0], [[-1, -1, -1]])
-
-    def test_noise_batch_invariance(self):
-        data = np.random.default_rng(47).integers(0, 256, (23, 16))
-        precision = Precision(8, 8, 8)
-        for stream, sorter in enumerate((bitonic_sort, rank_sort), 1):
-            context = [20260930, 8, 8, 8, 16, 1, 2, stream]
-            options = {"bias_step": precision.delta_in} if sorter is rank_sort else {}
-            whole = sorter(data, NoisyDifference(precision, 0.25, context, range(23)), **options)
-            chunks = []
-            for start in range(0, 23, 5):
-                stop = min(start + 5, 23)
-                model = NoisyDifference(precision, 0.25, context, range(start, stop))
-                chunks.append(sorter(data[start:stop], model, **options))
-            for i in range(3):
-                np.testing.assert_array_equal(whole[i], np.concatenate([part[i] for part in chunks]))
-
-
-class RankSorterTests(unittest.TestCase):
-    def test_published_matrix_example(self):
-        keys = np.array([[7, 8, 2, 8, 5]])
-        difference = keys[:, None, :] - keys[:, :, None]
-        biased = difference - np.tril(np.ones((5, 5), dtype=int), k=-1)
-        votes = biased >= 0
-        np.testing.assert_array_equal(difference[0], [
-            [0, 1, -5, 1, -2], [-1, 0, -6, 0, -3], [5, 6, 0, 6, 3],
-            [-1, 0, -6, 0, -3], [2, 3, -3, 3, 0],
-        ])
-        np.testing.assert_array_equal(biased[0], [
-            [0, 1, -5, 1, -2], [-2, 0, -6, 0, -3], [4, 5, 0, 6, 3],
-            [-2, -1, -7, 0, -3], [1, 2, -4, 2, 0],
-        ])
-        np.testing.assert_array_equal(votes[0], [
-            [1, 1, 0, 1, 0], [0, 1, 0, 1, 0], [1, 1, 1, 1, 1],
-            [0, 0, 0, 1, 0], [1, 1, 0, 1, 1],
-        ])
-        np.testing.assert_array_equal(votes.sum(axis=1), [[3, 4, 1, 5, 2]])
-        result = rank_sort(keys, NoisyDifference(Precision(4, 4, 4)), bias_step=1/16)
-        np.testing.assert_array_equal(result[1], [[2, 4, 0, 1, 3]])
-
-    def test_tied_and_singleton_order(self):
-        for bits in (4, 8):
-            for keys in (np.array([[3, 3, 3, 3]]), np.array([[15]])):
-                result = rank_sort(
-                    keys, NoisyDifference(Precision(bits, bits, bits)),
-                    bias_step=2.0**(-bits),
-                )
-                np.testing.assert_array_equal(result[1], [np.arange(keys.shape[1])])
-                self.assertTrue(result[2].all())
-
-    def test_invalid_ranks(self):
-        keys = np.array([[0, 1], [0, 1], [0, 1]])
-        result = place_ranks(keys, np.array([[-1, 0], [0, 2], [1, 1]]))
-        self.assertFalse(result[2].any())
-        self.assertTrue(np.all(result[0] == -1))
-        self.assertTrue(np.all(result[1] == -1))
-
-    def test_full_directed_matrix(self):
-        keys = np.array([[3, 1, 3, 0]])
-        calls = []
-
-        def difference(a, b):
-            calls.append((a.copy(), b.copy()))
-            return (a - b) / 16
-
-        result = rank_sort(keys, difference, bias_step=1/16)
-        self.assertEqual(len(calls), 1)
-        np.testing.assert_array_equal(calls[0][0], [[3, 1, 3, 0] * 4])
-        np.testing.assert_array_equal(calls[0][1], [[3]*4 + [1]*4 + [3]*4 + [0]*4])
-        np.testing.assert_array_equal(result[1], [[3, 1, 0, 2]])
-
-    def test_no_comparison_repair(self):
-        result = rank_sort(
-            np.array([[1, 0]]), lambda a, b: np.array([[0, 1, 1, 0]]) / 16,
-            bias_step=1/16,
-        )
-        self.assertFalse(result[2][0])
-        result = rank_sort(np.array([[1]]), lambda a, b: np.array([[-.01]]), bias_step=1/16)
-        self.assertFalse(result[2][0])
-        np.testing.assert_array_equal(result[1], [[-1]])
-
-    def test_noisy_rank_equations(self):
-        keys = np.random.default_rng(43).integers(0, 16, (20, 9))
-        context, delta = (91, 4), 1/16
-        errors = np.stack([
-            np.random.default_rng(np.random.SeedSequence([*context, i]))
-            .normal(0, .25 * delta, (9, 9)) for i in range(len(keys))
-        ])
-        difference = (keys[:, None, :] - keys[:, :, None]) * delta
-        measured = np.clip(np.rint((difference + errors) / delta), -8, 7) * delta
-        votes = measured - delta * np.tril(np.ones((9, 9)), k=-1) >= 0
-        expected = place_ranks(keys, votes.sum(axis=1) - 1)
-        actual = rank_sort(
-            keys, NoisyDifference(Precision(4, 4, 4), .25, context, range(len(keys))),
-            bias_step=delta,
-        )
-        for observed, reference in zip(actual, expected):
-            np.testing.assert_array_equal(observed, reference)

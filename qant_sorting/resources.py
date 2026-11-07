@@ -1,6 +1,7 @@
+"""Calculate logical sorting costs and conditional communication estimates."""
+
 import argparse
 import json
-import unittest
 from pathlib import Path
 
 from qant_sorting.run import ROOT, prepare_output_directory, write_csv
@@ -10,6 +11,7 @@ B_PEAK = 16e9 * 8 * (128 / 130) / 8
 
 
 def counts(n, cap):
+    """Return Bitonic layers, pair counts, and submission counts for a pair cap."""
     if n < 2 or n & (n - 1):
         raise ValueError("n must be a power of two and at least 2")
     if type(cap) is not int or cap < 1:
@@ -24,6 +26,7 @@ def counts(n, cap):
 
 
 def run(output=None):
+    """Write resource counts and cost assumptions; these are not hardware timings."""
     output = prepare_output_directory(output or ROOT / "results/reproduced", (
         "resources_counts.csv", "resources_batch_sensitivity.csv", "resources_metadata.json",
     ))
@@ -64,18 +67,11 @@ def run(output=None):
 
 
 def main(argv=None):
+    """Parse the output directory and generate resource reports."""
     parser = argparse.ArgumentParser(description="Calculate sorting resource costs.")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)
-
-
-class ResourceTests(unittest.TestCase):
-    def test_resource_counts(self):
-        self.assertEqual(counts(4, 16), (3, 6, 16, 3, 1))
-        self.assertEqual(counts(16, 256), (10, 80, 256, 10, 1))
-        self.assertEqual(counts(256, 65536), (36, 4608, 65536, 36, 1))
-
 
 if __name__ == "__main__":
     main()

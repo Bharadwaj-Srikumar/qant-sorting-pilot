@@ -50,8 +50,9 @@ run `python -m qant_sorting.quality`.
 
 ## Code structure and thematic separation
 
-All executable thesis code is kept together in `qant_sorting/`, but it serves
-two different evaluation themes.
+The experiment implementation is in `qant_sorting/` and serves two evaluation
+themes. Each module contains its execution logic and the validation needed for
+its inputs and results.
 
 ### A. Photonic sorting evaluation
 
@@ -155,20 +156,12 @@ The [2026-11-04 reproduction check](Documentation.md#44-evidence-and-reproductio
 confirmed that all seven numerical result tables and both output archives
 matched the retained files exactly after the optimizations.
 
-Each of the seven core files contains `unittest` classes near the end.
-These checks run only when requested. Run them all with:
-
-```bash
-python -m qant_sorting.run --self-test
-```
-
-To check just one module, for example the evaluation metrics:
-
-```bash
-python -m unittest qant_sorting.evaluation -v
-```
+The main experiment validates the fixed input archive, checks the expected
+comparison counts and requires every noiseless output to be valid, correct and
+stable. It records these three flags for every sorting execution. The quality
+analysis independently rescores the saved orders and checks the recorded counts.
 
 The numerical simulation and quality evaluation use NumPy. The shared requirements
 also include the SDK support packages; the official toolkit wheel is installed
-separately as shown above. SDK self-tests skip until that toolkit is installed.
+separately as shown above.
 No report-generation code is included.

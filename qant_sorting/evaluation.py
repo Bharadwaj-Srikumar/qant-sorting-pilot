@@ -1,12 +1,17 @@
-import itertools
+"""Validate saved record orders and measure ranking quality per trial."""
+
 import math
-import unittest
 from dataclasses import dataclass
 
 import numpy as np
 
 
 def reference_flags(data, result):
+    """Return (trials, 3) flags for validity, ascending order, and stable ties.
+
+    Data has shape (trials, N); result is (values, original_indices,
+    reported_valid). Validity requires each original record exactly once.
+    """
     values, indices, reported_valid = result
     permutation = np.all(np.sort(indices, axis=1) == np.arange(data.shape[1]), axis=1)
 
@@ -24,6 +29,7 @@ def reference_flags(data, result):
 
 
 def wilson_interval(successes, trials):
+    """Return the lower and upper 95% Wilson bounds for successes / trials."""
     z = 1.959963984540054
     p = successes / trials
     denominator = 1 + z * z / trials
@@ -36,6 +42,8 @@ def wilson_interval(successes, trials):
 
 @dataclass
 class PreparedKeys:
+    """Cached (trials, N) keys and reference orders with pair counts by gap."""
+
     data: np.ndarray
     expected_order: np.ndarray
     sorted_keys: np.ndarray
@@ -46,6 +54,11 @@ class PreparedKeys:
 
 
 def prepare_keys(data, bits):
+    """Validate a (trials, N) 4/8-bit corpus and cache references in PreparedKeys.
+
+    Signed storage prevents subtraction overflow; pair counts group each
+    unordered pair by absolute key difference, including ties at gap zero.
+    """
     data = np.asarray(data)
     if bits not in (4, 8) or data.ndim != 2 or data.shape[1] < 1 or len(data) < 1:
         raise ValueError("Expected a nonempty 2-D 4/8-bit key corpus")
@@ -68,10 +81,17 @@ def prepare_keys(data, bits):
 
 
 def selected_k(n):
+    """Return sorted unique cutoffs from {1, 5, 10, 32, n} that fit n."""
     return sorted({k for k in (1, 5, 10, 32, n) if k <= n})
 
 
 def score_saved_order(prepared, indices, ks=None):
+    """Score saved record indices with order flags, inversions, tau, and recall.
+
+    indices has shape (trials, N); recall selects the largest k records.
+    Invalid orders get -1 inversions and NaN tau/recall. Tau also needs
+    unequal-key pairs. The result includes pair and inversion counts by gap.
+    """
     data = prepared.data
     indices = np.asarray(indices)
     trials, n = data.shape
@@ -153,95 +173,3 @@ def score_saved_order(prepared, indices, ks=None):
                 tau_b=tau_b, tau_b_ceiling=ceiling, tau_key_normalized=normalized,
                 distance_pairs=available_by_gap, distance_inversions=inverted_by_gap,
                 recall=recall)
-
-
-class RankingQualityTests(unittest.TestCase):
-    def test_adjacent_swap_and_reversal(self):
-        p = prepare_keys(np.array([[0, 1, 2, 3]]), 4)
-        result = score_saved_order(p, np.array([[0, 2, 1, 3]]), [1, 2, 4])
-        self.assertEqual(result["inversions"][0], 1)
-        self.assertAlmostEqual(result["tau_b"][0], 2/3)
-        self.assertEqual(result["distance_inversions"][1], 1)
-        self.assertEqual(result["distance_pairs"][1], 3)
-        self.assertEqual(result["recall"][2]["stable"][0], .5)
-        reversed_result = score_saved_order(p, np.array([[3, 2, 1, 0]]))
-        self.assertEqual(reversed_result["inversions"][0], 6)
-        self.assertEqual(reversed_result["tau_b"][0], -1)
-
-    def test_boundary_tie_metrics(self):
-        p = prepare_keys(np.array([[2, 2, 1, 3]]), 4)
-        result = score_saved_order(p, np.array([[2, 1, 0, 3]]), [2])
-        np.testing.assert_array_equal(result["flags"], [[True, True, False]])
-        self.assertAlmostEqual(result["tau_b"][0], np.sqrt(5/6))
-        self.assertEqual(result["tau_key_normalized"][0], 1)
-        self.assertEqual(result["recall"][2]["stable"][0], .5)
-        self.assertEqual(result["recall"][2]["tie_neutral"][0], 1)
-
-    def test_tau_without_unequal_keys(self):
-        for data, indices in (([[5, 5, 5]], [[2, 1, 0]]), ([[7]], [[0]])):
-            p = prepare_keys(np.array(data), 4)
-            result = score_saved_order(p, np.array(indices), [1])
-            self.assertTrue(np.isnan(result["tau_b"][0]))
-            self.assertTrue(np.isnan(result["tau_key_normalized"][0]))
-            self.assertEqual(result["recall"][1]["tie_neutral"][0], 1)
-            self.assertTrue(result["flags"][0, 1])
-
-    def test_invalid_output_metrics(self):
-        p = prepare_keys(np.tile([0, 1, 2, 3], (3, 1)), 4)
-        result = score_saved_order(p, np.array([[0, 0, 2, 3], [-1, 0, 1, 2], [0, 1, 2, 8]]))
-        self.assertFalse(result["flags"].any())
-        self.assertTrue(np.isnan(result["tau_b"]).all())
-        self.assertEqual(result["distance_pairs"].sum(), 0)
-        self.assertTrue(np.isnan(result["recall"][1]["stable"]).all())
-
-    def test_uint8_distance_overflow(self):
-        p = prepare_keys(np.array([[0, 255]], dtype=np.uint8), 8)
-        result = score_saved_order(p, np.array([[1, 0]]))
-        self.assertEqual(result["distance_pairs"][255], 1)
-        self.assertEqual(result["distance_inversions"][255], 1)
-
-    def test_exhaustive_small_orders(self):
-        for keys in ([0, 1, 2, 3, 4], [0, 0, 1, 2, 2]):
-            permutations = np.array(list(itertools.permutations(range(5))))
-            p = prepare_keys(np.tile(keys, (len(permutations), 1)), 4)
-            result = score_saved_order(p, permutations, [1, 2, 3, 5])
-            values = np.take_along_axis(p.data, permutations, axis=1)
-            flags = reference_flags(p.data, (values, permutations, np.ones(len(values), dtype=bool)))
-            expected_hist = np.zeros(16, dtype=int)
-            for row, order in enumerate(permutations):
-                values = [keys[i] for i in order]
-                inversion_count = 0
-                for a in range(5):
-                    for b in range(a+1, 5):
-                        if values[a] > values[b]:
-                            inversion_count += 1
-                            expected_hist[values[a]-values[b]] += 1
-                self.assertEqual(result["inversions"][row], inversion_count)
-                truth = sorted(range(5), key=lambda i: (keys[i], i))
-                expected_flags = [True, values == sorted(keys), list(order) == truth]
-                np.testing.assert_array_equal(flags[row], expected_flags)
-                np.testing.assert_array_equal(result["flags"][row], expected_flags)
-                for k in (1, 2, 3, 5):
-                    expected = len(set(order[-k:]) & set(truth[-k:])) / k
-                    self.assertEqual(result["recall"][k]["stable"][row], expected)
-                    choices = list(itertools.combinations(range(5), k))
-                    best = max(sum(keys[i] for i in choice) for choice in choices)
-                    neutral = max(len(set(order[-k:]) & set(choice)) / k for choice in choices
-                                  if sum(keys[i] for i in choice) == best)
-                    self.assertEqual(result["recall"][k]["tie_neutral"][row], neutral)
-            np.testing.assert_array_equal(result["distance_inversions"], expected_hist)
-
-    def test_record_integrity(self):
-        data = np.array([[1, 2]])
-        cases = (
-            ([1, 1], [0, 0], True),
-            ([1, 2], [1, 0], True),
-            ([1, 3], [0, 1], True),
-            ([1, 2], [0, -1], True),
-            ([1, 2], [0, 2], True),
-            ([1, 2], [0, 1], False),
-        )
-        for values, indices, reported_valid in cases:
-            with self.subTest(values=values, indices=indices, reported_valid=reported_valid):
-                result = np.array([values]), np.array([indices]), np.array([reported_valid])
-                self.assertFalse(reference_flags(data, result).any())

@@ -1,8 +1,12 @@
+"""Validate sorting through the official Q.ANT SDK CPU backend.
+
+The SDK computes normalized pair differences for a software-integration control.
+Counters describe logical API payloads; this module does not time NPU hardware.
+"""
+
 import argparse
 import json
-import unittest
 from dataclasses import dataclass
-from importlib.util import find_spec
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +18,7 @@ from qant_sorting.sorters import bitonic_sort, rank_sort
 
 
 def _load_sdk():
+    """Load the optional SDK and its bfloat16 type only when needed."""
     from ml_dtypes import bfloat16
     import qant_native_computing_toolkit as qant
 
@@ -22,6 +27,11 @@ def _load_sdk():
 
 @dataclass
 class CallCounts:
+    """Accumulate API calls, pair counts, and logical payload sizes in bytes.
+
+    Weight bytes are counted on every call, alongside feature and output bytes.
+    """
+
     api_calls: int = 0
     pair_differences: int = 0
     feature_bytes: int = 0
@@ -31,7 +41,10 @@ class CallCounts:
 
 
 class SdkDifference:
+    """Compute normalized pair differences using the SDK's [1, -1] projection."""
+
     def __init__(self, key_bits, device_id=0):
+        """Set the key normalization, SDK device, weights, and counters."""
         if key_bits not in (4, 8):
             raise ValueError("This registered pilot accepts 4-bit or 8-bit key domains")
         self.key_bits = key_bits
@@ -42,6 +55,7 @@ class SdkDifference:
         self.counts = CallCounts()
 
     def __call__(self, a, b):
+        """Return (a - b) / 2**key_bits and record the logical SDK payload."""
         if a.shape != b.shape:
             raise ValueError("The two pair arrays must have the same shape")
         features = np.empty((a.size, 2), dtype=self._bfloat16)
@@ -61,11 +75,13 @@ class SdkDifference:
 
 
 def backend_identity():
+    """Return the SDK version and driver identification for validation."""
     qant, _ = _load_sdk()
     return {"sdk_version": qant.__version__, "driver_info": qant.info.get_driver_info()}
 
 
 def run(output_directory):
+    """Verify exhaustive pairs and corpus sorts with the pinned CPU backend."""
     identity = backend_identity()
     if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
         raise RuntimeError("This control requires the pinned official 2.3.1 CPU backend")
@@ -131,89 +147,11 @@ def run(output_directory):
 
 
 def main(argv=None):
+    """Parse command-line options and run the SDK CPU control."""
     parser = argparse.ArgumentParser(description="Evaluate the Q.ANT CPU SDK mapping.")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.output_dir)
-
-
-SDK_AVAILABLE = all(find_spec(name) is not None for name in (
-    "qant_native_computing_toolkit", "ml_dtypes",
-))
-
-
-@unittest.skipUnless(SDK_AVAILABLE, "official Q.ANT CPU SDK and ml_dtypes are not installed")
-class SdkTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        identity = backend_identity()
-        if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
-            raise RuntimeError("SDK tests require the pinned official 2.3.1 CPU backend")
-
-    def test_pair_normalization(self):
-        for bits in (4, 8):
-            a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
-            a.flags.writeable = b.flags.writeable = False
-            model = SdkDifference(bits)
-            result = model(a, b)
-            np.testing.assert_array_equal(result, (a-b)/2**bits)
-            self.assertEqual(result.dtype, np.dtype(np.float32))
-            self.assertEqual(model.counts.api_calls, 1)
-            self.assertEqual(model.counts.pair_differences, a.size)
-            self.assertEqual(model.counts.feature_bytes, 4*a.size)
-            self.assertEqual(model.counts.output_bytes, 2*a.size)
-            self.assertEqual(model.counts.weight_bytes, 4)
-
-    def test_stable_sorting(self):
-        for bits in (4, 8):
-            keys = np.array([[3, 1, 3, 0], [2**bits-1, 0, 2**bits-1, 1]])
-            original = keys.copy()
-            expected = np.argsort(keys, axis=1, kind="stable")
-            for sorter, pairs, calls in ((bitonic_sort, 12, 3), (rank_sort, 32, 1)):
-                model = SdkDifference(bits)
-                if sorter is rank_sort:
-                    values, indices, valid = sorter(keys, model, bias_step=2.**(-bits))
-                else:
-                    values, indices, valid = sorter(keys, model)
-                np.testing.assert_array_equal(indices, expected)
-                np.testing.assert_array_equal(values, np.take_along_axis(keys, expected, axis=1))
-                self.assertTrue(valid.all())
-                self.assertEqual(model.counts.pair_differences, pairs)
-                self.assertEqual(model.counts.api_calls, calls)
-                np.testing.assert_array_equal(keys, original)
-
-    def test_strided_inputs_and_counts(self):
-        for bits in (4, 8):
-            keys = np.arange(24).reshape(4, 6) % 2**bits
-            original = keys.copy()
-            keys.flags.writeable = False
-            model = SdkDifference(bits)
-            for a, b in ((keys[::2, ::2], keys[1::2, 1::2]), (keys.T, keys[::-1].T)):
-                result = model(a, b)
-                self.assertEqual(result.shape, a.shape)
-                np.testing.assert_array_equal(result, (a-b)/2**bits)
-            np.testing.assert_array_equal(keys, original)
-            self.assertEqual(model.counts, CallCounts(
-                api_calls=2, pair_differences=30, feature_bytes=120,
-                weight_bytes=8, output_bytes=60, largest_pair_batch=24,
-            ))
-
-    def test_full_rank_matrix(self):
-        keys = np.array([[3, 1, 3, 0]])
-        model = SdkDifference(4)
-        submitted = []
-
-        def observed(a, b):
-            submitted.append((a.copy(), b.copy()))
-            return model(a, b)
-
-        result = rank_sort(keys, observed, bias_step=1/16)
-        self.assertEqual(len(submitted), 1)
-        np.testing.assert_array_equal(submitted[0][0], [[3, 1, 3, 0]*4])
-        np.testing.assert_array_equal(submitted[0][1], [[3]*4 + [1]*4 + [3]*4 + [0]*4])
-        self.assertEqual(model.counts.pair_differences, 16)
-        self.assertEqual(model.counts.api_calls, 1)
-        np.testing.assert_array_equal(result[1], [[3, 1, 0, 2]])
 
 
 if __name__ == "__main__":

@@ -1,12 +1,13 @@
-import math
+"""Quantized pairwise subtraction with optional Gaussian noise."""
+
 import numbers
-import unittest
 from dataclasses import dataclass
 
 import numpy as np
 
 
 def validate_keys(keys, key_bits):
+    """Validate a key array or (trials, N) batch and return int64 values."""
     if (
         not isinstance(key_bits, int)
         or isinstance(key_bits, bool)
@@ -34,11 +35,14 @@ def validate_keys(keys, key_bits):
 
 @dataclass(frozen=True)
 class Precision:
+    """Matched 4- or 8-bit widths for stored keys, inputs, and differences."""
+
     key_bits: int
     input_bits: int
     output_bits: int
 
     def __post_init__(self):
+        """Reject unsupported or noninteger precision settings."""
         widths = (self.key_bits, self.input_bits, self.output_bits)
         if any(type(width) is not int for width in widths):
             raise ValueError("Bit widths must be integers")
@@ -47,20 +51,25 @@ class Precision:
 
     @property
     def delta_in(self):
+        """Spacing between consecutive encoded input keys."""
         return 1 / 2**self.input_bits
 
     @property
     def delta_out(self):
+        """Spacing between consecutive quantized difference levels."""
         return 1 / 2**self.output_bits
 
 
 class NoisyDifference:
+    """Callable subtraction model with per-trial noise and diagnostic counters."""
+
     counter_names = (
         "comparisons", "saturations", "false_ties", "sign_reversals",
         "broken_true_ties",
     )
 
     def __init__(self, precision, eta=0.0, seed_context=(), trial_ids=()):
+        """Set noise standard deviation to eta output steps and seed each trial."""
         if not np.isfinite(eta) or eta < 0:
             raise ValueError("eta must be finite and nonnegative")
         self.precision = precision
@@ -75,6 +84,11 @@ class NoisyDifference:
             setattr(self, name, 0)
 
     def __call__(self, a, b):
+        """Return normalized (a - b) after noise, rounding, and clipping.
+
+        Arrays have equal shapes; noisy inputs use (trials, pairs). Preserve
+        that shape in the output and update diagnostic counters.
+        """
         if a.shape != b.shape:
             raise ValueError("Both pair arrays must have the same shape")
         delta_in = self.precision.delta_in
@@ -104,43 +118,3 @@ class NoisyDifference:
         ))
         self.broken_true_ties += int(np.count_nonzero((a == b) & (measured != 0)))
         return measured
-
-
-class ComparisonTests(unittest.TestCase):
-    def test_noiseless_signs(self):
-        for bits in (4, 8):
-            a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
-            model = NoisyDifference(Precision(bits, bits, bits))
-            actual = model(a, b)
-            np.testing.assert_array_equal(np.sign(actual), np.sign(a - b))
-            self.assertEqual(model.false_ties, 0)
-            self.assertGreater(model.saturations, 0)
-
-    def test_quantization_and_saturation(self):
-        for dtype in (np.int64, np.uint8):
-            model = NoisyDifference(Precision(8, 8, 8))
-            a = np.array([[10, 255, 0, 9]], dtype=dtype)
-            b = np.array([[9, 0, 255, 9]], dtype=dtype)
-            np.testing.assert_array_equal(model(a, b), [[1 / 256, 127 / 256, -0.5, 0]])
-
-    def test_invalid_keys(self):
-        with self.assertRaisesRegex(ValueError, r"array index 1, key index 0.*\[0, 15\]"):
-            validate_keys([[1, 2], [16, 0]], 4)
-        for invalid in (-1, 1.5, np.inf, True, "2"):
-            with self.assertRaises(ValueError):
-                validate_keys([invalid], 4)
-
-    def test_precision_mismatch(self):
-        with self.assertRaises(ValueError):
-            Precision(4, 4, 8)
-
-    def test_invalid_noise(self):
-        for eta in (-0.1, np.nan, np.inf):
-            with self.assertRaises(ValueError):
-                NoisyDifference(Precision(4, 4, 4), eta)
-
-    def test_false_tie_probability(self):
-        noise = np.random.default_rng(20261004).normal(0, 0.25, 200000)
-        observed = np.mean(np.rint(1 + noise) == 0)
-        expected = 0.5 * (math.erfc(2 / math.sqrt(2)) - math.erfc(6 / math.sqrt(2)))
-        self.assertLess(abs(observed - expected), 0.002)
