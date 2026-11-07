@@ -7,11 +7,21 @@
     "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
     "cpu_model": "AMD EPYC 9V74 80-Core Processor",
     "logical_cpus_visible": 5,
-    "affinity_cpus": [0, 1, 2, 3, 4],
+    "affinity_cpus": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
     "cgroup_cpu_max": "400000 100000",
-    "thread_environment": {"OMP_NUM_THREADS": null, "OPENBLAS_NUM_THREADS": null, "MKL_NUM_THREADS": null},
+    "thread_environment": {
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    },
     "timer": "time.perf_counter_ns",
-    "timer_resolution_s": 1e-09,
+    "timer_resolution_s": 1e-9,
     "gpu_executed": false,
     "photonic_hardware_executed": false
   },
@@ -20,29 +30,23 @@
   "dataset_hashes_match_declared_corpus": true,
   "benchmark_source_sha256": "a93e426583930a881fd7625ebad27c18271a77ea2ba4d97521b4e67d25e80b13",
   "baseline": "NumPy stable argsort + take_along_axis",
-  "input_storage_dtypes": ["uint8", "int64"],
+  "input_storage_dtypes": [
+    "uint8",
+    "int64"
+  ],
   "index_dtype": "int64",
-  "batch_sizes": [1, 10, 100, 1000],
+  "batch_sizes": [
+    1,
+    10,
+    100,
+    1000
+  ],
   "repeats": 9,
-  "target_ms": 15.0,
+  "target_ms": 15,
   "warmup_passes": 2,
   "case_order_seed": 20261107,
   "measured_cases": 192,
   "raw_samples": 1728,
-  "result_files": [
-    "summary/b4_n2.csv", "samples/b4_n2.csv",
-    "summary/b4_n4.csv", "samples/b4_n4.csv",
-    "summary/b4_n8.csv", "samples/b4_n8.csv",
-    "summary/b4_n16.csv", "samples/b4_n16.csv",
-    "summary/b8_n2.csv", "samples/b8_n2.csv",
-    "summary/b8_n4.csv", "samples/b8_n4.csv",
-    "summary/b8_n8.csv", "samples/b8_n8.csv",
-    "summary/b8_n16.csv", "samples/b8_n16.csv",
-    "summary/b8_n32.csv", "samples/b8_n32.csv",
-    "summary/b8_n64.csv", "samples/b8_n64.csv",
-    "summary/b8_n128.csv", "samples/b8_n128.csv",
-    "summary/b8_n256.csv", "samples/b8_n256.csv"
-  ],
   "benchmark_elapsed_s": 27.83643655999998,
   "scope": "CPU application calls returning sorted keys and original indices; allocation and gather included",
   "excluded": "File loading, dtype conversion, input preparation, validation and result-file writing",
@@ -54,5 +58,22 @@
     "NumPy library baseline, not a hand-optimized sorting kernel",
     "Amortized batch time per array is not isolated single-request latency"
   ],
-  "units": "Physical seconds and throughput; separate from algorithmic complexity T/W/S/H/D"
+  "units": "Physical seconds and throughput; separate from algorithmic complexity T/W/S/H/D",
+  "retained_result_files": [
+    "summary/b4_n2.csv",
+    "summary/b4_n4.csv",
+    "summary/b4_n8.csv",
+    "summary/b4_n16.csv",
+    "summary/b8_n2.csv",
+    "summary/b8_n4.csv",
+    "summary/b8_n8.csv",
+    "summary/b8_n16.csv",
+    "summary/b8_n32.csv",
+    "summary/b8_n64.csv",
+    "summary/b8_n128.csv",
+    "summary/b8_n256.csv"
+  ],
+  "raw_samples_generated": 1728,
+  "raw_samples_retained": false,
+  "raw_sample_policy": "Fresh run generated 1,728 repeated timing samples; committed evidence retains all 192 configuration summaries plus validation/provenance. Reproduction regenerates the samples/ files."
 }
