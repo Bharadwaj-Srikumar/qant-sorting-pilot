@@ -12,32 +12,30 @@ and recorded results. Installation and main commands are in [README.md](README.m
 
 ## 1. Code guide
 
-### Start with one four-key example
+### Follow the experiment from input to output
 
-```python
-from qant_sorting.comparison import Precision, NoisyDifference, validate_keys
-from qant_sorting.sorters import bitonic_sort, rank_sort
-from qant_sorting.evaluation import reference_flags
+The main sweep uses `data/inputs.npz`: 24 datasets containing 1,000 arrays each.
+Six noise levels and two algorithms produce 288 configurations and 288,000
+sorting executions, reusing the same 24,000 input arrays.
 
-keys = validate_keys([[3, 1, 3, 0]], key_bits=4)
-precision = Precision(4, 4, 4)
-for sorter in (bitonic_sort, rank_sort):
-    difference = NoisyDifference(precision, eta=0)
-    options = {"bias_step": precision.delta_in} if sorter is rank_sort else {}
-    result = sorter(keys, difference, **options)
-    print(result[0])                 # [[0, 1, 3, 3]]
-    print(result[1])                 # [[3, 1, 0, 2]]: original record IDs
-    print(reference_flags(keys, result))  # [[True, True, True]]
-```
-
-One row is one sorting trial. The sorters move the original keys and IDs using
-measured comparison scores. The digital reference is used afterwards to score
-the output; it never supplies sorting decisions.
+1. `run.py` loads and validates each dataset, then selects the noise level and
+   sorting algorithm.
+2. `comparison.py` normalizes each compared pair, subtracts, adds Gaussian
+   noise, rounds and clips the result.
+3. `sorters.py` uses those measured differences to order the original keys and
+   record IDs with Bitonic or full-matrix rank sorting.
+4. `evaluation.py` checks each output for record validity, sorted keys and
+   stable ties. The digital reference scores the output after sorting; it does
+   not supply sorting decisions.
+5. `run.py` saves per-trial orders, accuracy, comparison diagnostics and run
+   metadata in the `simulation_` files.
+6. `quality.py` reads those saved orders and writes Kendall, inversion and
+   recall metrics in the `quality_` files.
 
 ### Thematic code organization
 
-All executable code remains in `qant_sorting/`, but two different questions
-are kept conceptually separate.
+The experiment implementation and its runtime validation are in `qant_sorting/`.
+Two evaluation questions are kept conceptually separate.
 
 #### A. Photonic sorting evaluation
 
@@ -75,16 +73,17 @@ A fresh run writes one `summary.csv`, one `samples.csv`,
 `validation.json` and `metadata.json`. It does not execute the photonic
 sorting sweep or the Q.ANT SDK path.
 
-### Checks in the same files
+### Validation of the experimental results
 
-Each core module contains `unittest` classes near the end for its mathematical
-examples and implementation checks. Read the main functions first, then use the
-test names and assertions to see which behaviours are checked. Normal experiment
-commands do not execute these tests.
+`run.py` verifies the fixed input archive and permitted key ranges, checks the
+expected number of comparisons, and requires every noiseless sort to be valid,
+correct and stable. It records these three flags and the original record IDs
+for every trial, including noisy failures.
 
-Run all checks with `python -m qant_sorting.run --self-test`. To check only one
-module, use e.g. `python -m unittest qant_sorting.comparison -v`. The SDK checks
-skip when the official toolkit is not installed.
+`quality.py` independently rescores the saved orders, checks agreement with the
+recorded flags and summary counts, and rejects incomplete or unexpected cases.
+Input checks, output-file protection and this result validation are part of the
+experiment implementation.
 
 ### Keep these conventions in mind
 

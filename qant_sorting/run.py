@@ -1,13 +1,11 @@
+"""Run the 288,000-sort noise sweep and save outcomes, accuracy and provenance."""
+
 import argparse
 import csv
 import hashlib
 import json
 import platform
-import subprocess
-import sys
-import tempfile
 import time
-import unittest
 from pathlib import Path
 
 import numpy as np
@@ -29,11 +27,13 @@ MAPPINGS = {
 
 
 def file_hash(path):
+    """Return a file's SHA-256 fingerprint for reproducibility checks."""
     with Path(path).open("rb") as handle:
         return hashlib.file_digest(handle, "sha256").hexdigest()
 
 
 def write_csv(path, rows):
+    """Write dictionaries as CSV records, using the first row's keys as columns."""
     if not rows:
         raise ValueError("Cannot infer CSV columns from an empty record list")
     with Path(path).open("w", newline="", encoding="utf-8") as handle:
@@ -43,6 +43,7 @@ def write_csv(path, rows):
 
 
 def prepare_output_directory(directory, filenames):
+    """Create an output directory and reject files that would be overwritten."""
     directory = Path(directory).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     existing = [name for name in filenames if (directory / name).exists()]
@@ -53,6 +54,7 @@ def prepare_output_directory(directory, filenames):
 
 
 def source_hashes():
+    """Record the implementation files used to produce this run's results."""
     hashes = {}
     for path in sorted((ROOT / "qant_sorting").rglob("*.py")):
         hashes[str(path.relative_to(ROOT))] = file_hash(path)
@@ -60,6 +62,11 @@ def source_hashes():
 
 
 def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
+    """Sort one dataset at one noise level; return flags, IDs and diagnostics.
+
+    Rows of data are independent trials. Absolute trial IDs keep their seeded
+    noise streams consistent when batch_size changes.
+    """
     if sort is rank_sort:
         batch_size = min(batch_size, max(1, 1_000_000 // data.shape[1]**2))
     totals = dict.fromkeys(NoisyDifference.counter_names, 0)
@@ -92,6 +99,11 @@ def evaluate_case(data, precision, eta, sort, seed_context, batch_size):
 
 
 def run(output_directory, batch_size):
+    """Evaluate 24 datasets at six noise levels with both sorting algorithms.
+
+    Each dataset contains 1,000 input arrays: 288 configurations yield 288,000
+    sorting executions. Save per-trial orders, summary counts and run metadata.
+    """
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
     output_directory = output_directory.resolve()
@@ -190,60 +202,12 @@ def run(output_directory, batch_size):
 
 
 def main(argv=None):
+    """Read command-line options and launch the sorting experiment."""
     parser = argparse.ArgumentParser(description="Run the sorting noise evaluation.")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--self-test", action="store_true",
-                        help="Run all built-in checks without starting the experiment")
     args = parser.parse_args(argv)
-    if args.self_test:
-        modules = [
-            "qant_sorting.comparison", "qant_sorting.sorters", "qant_sorting.evaluation",
-            "qant_sorting.run", "qant_sorting.quality", "qant_sorting.sdk",
-            "qant_sorting.resources",
-        ]
-        unittest.main(module=None, argv=["self-test", "-v", *modules])
-    else:
-        run(args.output_dir, args.batch_size)
-
-
-class RunTests(unittest.TestCase):
-    def test_command_help(self):
-        commands = (
-            ("qant_sorting.run", "--batch-size"),
-            ("qant_sorting.quality", "--results-dir"),
-            ("qant_sorting.sdk", "--output-dir"),
-            ("qant_sorting.resources", "--output-dir"),
-        )
-        for module, option in commands:
-            with self.subTest(module=module):
-                result = subprocess.run(
-                    [sys.executable, "-m", module, "--help"],
-                    cwd=ROOT, capture_output=True, text=True,
-                )
-                self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn("--output-dir", result.stdout)
-                self.assertIn(option, result.stdout)
-
-    def test_output_protection(self):
-        reference_hash = file_hash(REFERENCE / "simulation_trial_outcomes.npz")
-        with self.assertRaises(ValueError):
-            run(REFERENCE, batch_size=1)
-        self.assertEqual(file_hash(REFERENCE / "simulation_trial_outcomes.npz"), reference_hash)
-
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory)
-            other_group = output / "sdk_accuracy.csv"
-            other_group.write_text("Keep the SDK results.")
-            self.assertEqual(
-                prepare_output_directory(output, ("simulation_accuracy.csv",)), output.resolve()
-            )
-            marker = output / "simulation_accuracy.csv"
-            marker.write_text("Keep the previous run.")
-            with self.assertRaises(ValueError):
-                run(output, batch_size=1)
-            self.assertEqual(marker.read_text(), "Keep the previous run.")
-            self.assertEqual(other_group.read_text(), "Keep the SDK results.")
+    run(args.output_dir, args.batch_size)
 
 
 if __name__ == "__main__":

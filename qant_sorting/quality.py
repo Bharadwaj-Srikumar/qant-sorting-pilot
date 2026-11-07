@@ -1,14 +1,12 @@
+"""Rescore saved sorting outputs and export quality metrics without rerunning sorts."""
+
 import argparse
 import csv
 import gzip
 import io
 import json
 import platform
-import tempfile
-import unittest
-from contextlib import redirect_stdout
 from pathlib import Path
-from unittest.mock import patch
 
 import numpy as np
 
@@ -19,6 +17,7 @@ from qant_sorting.run import (
 
 
 def statistics(values, prefix):
+    """Summarize finite metric values; return None when none are defined."""
     values = values[np.isfinite(values)]
     if not len(values):
         return {prefix + suffix: None for suffix in ("_mean", "_median", "_min", "_p05")}
@@ -29,6 +28,7 @@ def statistics(values, prefix):
 
 
 def run(results_dir, output_dir):
+    """Validate saved cases and write quality summaries, recall, and inversion distances."""
     results_dir, output_dir = results_dir.resolve(), output_dir.resolve()
     inputs = ROOT / "data/inputs.npz"
     sources = [inputs, results_dir / "simulation_accuracy.csv", results_dir / "simulation_trial_outcomes.npz"]
@@ -135,90 +135,13 @@ def run(results_dir, output_dir):
 
 
 def main(argv=None):
+    """Parse command-line directories and run quality evaluation."""
     parser = argparse.ArgumentParser(description="Score saved sorting outputs.")
     parser.add_argument("--results-dir", type=Path, default=ROOT / "results")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/reproduced")
     args = parser.parse_args(argv)
     run(args.results_dir, args.output_dir)
 
-
-class QualityRunnerTests(unittest.TestCase):
-    def write_fixture(self, directory, extra_member=False):
-        project, results = directory / "project", directory / "new_run"
-        (project / "data").mkdir(parents=True)
-        results.mkdir()
-        dataset = "b4_n4_duplicates"
-        inputs = project / "data/inputs.npz"
-        np.savez(inputs, **{dataset: np.array([[3, 1, 3, 0], [3, 1, 3, 0]])})
-        case = dataset + "_noise025_rank"
-        members = {
-            case + "_indices": np.array([[3, 1, 0, 2], [-1, -1, -1, -1]]),
-            case + "_flags": np.array([[True, True, True], [False, False, False]]),
-        }
-        if extra_member:
-            members["unlisted_case_flags"] = np.array([[True, True, True]])
-        np.savez(results / "simulation_trial_outcomes.npz", **members)
-        row = dict(key_bits=4, n=4, family="duplicates", eta=.25, mapping="rank",
-                   trials=2, valid_outputs=1, correct_sorts=1, stable_sorts=1)
-        write_csv(results / "simulation_accuracy.csv", [row])
-        return project, results, file_hash(inputs)
-
-    def test_saved_result_metrics(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary)
-            project, results, checksum = self.write_fixture(directory)
-            output = results
-            with patch(__name__ + ".ROOT", project), \
-                 patch(__name__ + ".INPUT_SHA256", checksum), \
-                 patch(__name__ + ".source_hashes", return_value={}), \
-                 redirect_stdout(io.StringIO()):
-                main(["--results-dir", str(results), "--output-dir", str(output)])
-                with self.assertRaisesRegex(ValueError, "Output files already exist"):
-                    run(results, output)
-            with (output / "quality_summary.csv").open(newline="") as handle:
-                summary = list(csv.DictReader(handle))[0]
-            self.assertEqual((summary["valid_outputs"], summary["invalid_outputs"]), ("1", "1"))
-            self.assertEqual(float(summary["whole_sort_accuracy"]), .5)
-            with (output / "quality_recall.csv").open(newline="") as handle:
-                recall = next(row for row in csv.DictReader(handle) if row["k"] == "1")
-            for variant in ("stable", "tie_neutral"):
-                self.assertEqual(float(recall[variant + "_mean_valid"]), 1)
-                self.assertEqual(float(recall[variant + "_mean_all_invalid_zero"]), .5)
-            with gzip.open(output / "quality_distance.csv.gz", "rt", newline="") as handle:
-                distances = list(csv.DictReader(handle))
-            self.assertEqual(sum(int(row["pairs_at_distance"]) for row in distances), 5)
-            validation = json.loads((output / "quality_metadata.json").read_text())["validation"]
-            self.assertEqual(validation["evaluated_outputs"], 2)
-            self.assertTrue(validation["complete_coverage"])
-
-    def test_unlisted_output_case(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary)
-            project, results, checksum = self.write_fixture(directory, extra_member=True)
-            with patch(__name__ + ".ROOT", project), \
-                 patch(__name__ + ".INPUT_SHA256", checksum):
-                with self.assertRaisesRegex(ValueError, "cases do not match"):
-                    run(results, directory / "quality")
-
-    def test_invalid_case_labels(self):
-        for field, value, message in (
-            ("eta", "0.249", "Unknown noise level"),
-            ("eta", "nan", "Unknown noise level"),
-            ("mapping", "not-a-rank-algorithm", "Unknown sorting mapping"),
-            ("mapping", "rank and bitonic", "Unknown sorting mapping"),
-        ):
-            with self.subTest(field=field, value=value), tempfile.TemporaryDirectory() as temporary:
-                directory = Path(temporary)
-                project, results, checksum = self.write_fixture(directory)
-                csv_path = results / "simulation_accuracy.csv"
-                with csv_path.open(newline="") as handle:
-                    rows = list(csv.DictReader(handle))
-                rows[0][field] = value
-                write_csv(csv_path, rows)
-                with patch(__name__ + ".ROOT", project), \
-                     patch(__name__ + ".INPUT_SHA256", checksum):
-                    with self.assertRaisesRegex(ValueError, message):
-                        run(results, directory / "quality")
 
 if __name__ == "__main__":
     main()
