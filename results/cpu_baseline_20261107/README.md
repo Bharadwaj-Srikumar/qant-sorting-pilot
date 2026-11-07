@@ -15,8 +15,9 @@ standalone CPU sorting baseline. It is intentionally separate from the main
 - All correctness, record-preservation and stability checks passed
 - The content hash of every dataset matched the declared thesis corpus
 
-The benchmark code is kept separately at
-[`benchmarks/cpu_baseline.py`](../../benchmarks/cpu_baseline.py).
+The benchmark code is integrated into the main package at
+[`qant_sorting/cpu_baseline.py`](../../qant_sorting/cpu_baseline.py). It remains a
+separate digital-performance theme and does not call the photonic noise/SDK path.
 
 ## Retained files
 
@@ -24,7 +25,7 @@ The benchmark code is kept separately at
 - `metadata.json`: environment, benchmark settings, timing boundary and limitations.
 - `validation.json`: complete correctness/stability checks and per-dataset hashes.
 
-The benchmark also generates the repeated raw `samples/` files on reproduction.
+The benchmark also generates the repeated raw `samples/` files on reproduction via `python -m qant_sorting.cpu_baseline`.
 The committed thesis evidence retains the complete 192-row summary together with
 validation and provenance rather than adding the larger raw timing trace to the
 main result history.
