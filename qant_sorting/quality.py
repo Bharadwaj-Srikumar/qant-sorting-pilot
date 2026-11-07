@@ -163,7 +163,7 @@ class QualityRunnerTests(unittest.TestCase):
         write_csv(results / "simulation_accuracy.csv", [row])
         return project, results, file_hash(inputs)
 
-    def test_results_directory_and_invalid_zero_recall(self):
+    def test_saved_result_metrics(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             project, results, checksum = self.write_fixture(directory)
@@ -191,7 +191,7 @@ class QualityRunnerTests(unittest.TestCase):
             self.assertEqual(validation["evaluated_outputs"], 2)
             self.assertTrue(validation["complete_coverage"])
 
-    def test_unlisted_output_case_is_rejected(self):
+    def test_unlisted_output_case(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             project, results, checksum = self.write_fixture(directory, extra_member=True)
@@ -200,7 +200,7 @@ class QualityRunnerTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "cases do not match"):
                     run(results, directory / "quality")
 
-    def test_ambiguous_case_labels_are_rejected(self):
+    def test_invalid_case_labels(self):
         for field, value, message in (
             ("eta", "0.249", "Unknown noise level"),
             ("eta", "nan", "Unknown noise level"),

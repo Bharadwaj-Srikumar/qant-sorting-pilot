@@ -150,7 +150,7 @@ class SdkTests(unittest.TestCase):
         if identity["sdk_version"] != "2.3.1" or not identity["driver_info"].startswith("cpu-backend;"):
             raise RuntimeError("SDK tests require the pinned official 2.3.1 CPU backend")
 
-    def test_all_pairs_match_the_declared_normalization(self):
+    def test_pair_normalization(self):
         for bits in (4, 8):
             a, b = np.meshgrid(np.arange(2**bits), np.arange(2**bits), indexing="ij")
             a.flags.writeable = b.flags.writeable = False
@@ -164,7 +164,7 @@ class SdkTests(unittest.TestCase):
             self.assertEqual(model.counts.output_bytes, 2*a.size)
             self.assertEqual(model.counts.weight_bytes, 4)
 
-    def test_both_sorters_keep_original_records_and_stable_ties(self):
+    def test_stable_sorting(self):
         for bits in (4, 8):
             keys = np.array([[3, 1, 3, 0], [2**bits-1, 0, 2**bits-1, 1]])
             original = keys.copy()
@@ -182,7 +182,7 @@ class SdkTests(unittest.TestCase):
                 self.assertEqual(model.counts.api_calls, calls)
                 np.testing.assert_array_equal(keys, original)
 
-    def test_strided_inputs_and_accumulated_counts(self):
+    def test_strided_inputs_and_counts(self):
         for bits in (4, 8):
             keys = np.arange(24).reshape(4, 6) % 2**bits
             original = keys.copy()
@@ -198,7 +198,7 @@ class SdkTests(unittest.TestCase):
                 weight_bytes=8, output_bytes=60, largest_pair_batch=24,
             ))
 
-    def test_full_rank_matrix_submits_both_directions_and_diagonal(self):
+    def test_full_rank_matrix(self):
         keys = np.array([[3, 1, 3, 0]])
         model = SdkDifference(4)
         submitted = []
