@@ -250,8 +250,19 @@ def run(args: argparse.Namespace) -> None:
     summaries.sort(key=lambda row: (
         row["key_bits"], row["n"], row["family"], row["storage_dtype"], row["batch_size"]
     ))
-    write_csv(output / "summary.csv", summaries)
-    write_csv(output / "samples.csv", raw)
+
+    summary_dir = output / "summary"
+    samples_dir = output / "samples"
+    summary_dir.mkdir()
+    samples_dir.mkdir()
+    groups = sorted({(row["key_bits"], row["n"]) for row in summaries})
+    result_files = []
+    for bits, n in groups:
+        summary_path = summary_dir / f"b{bits}_n{n}.csv"
+        sample_path = samples_dir / f"b{bits}_n{n}.csv"
+        write_csv(summary_path, [row for row in summaries if row["key_bits"] == bits and row["n"] == n])
+        write_csv(sample_path, [row for row in raw if row["key_bits"] == bits and row["n"] == n])
+        result_files.extend([str(summary_path.relative_to(output)), str(sample_path.relative_to(output))])
 
     validation_doc = {
         "all_passed": True,
@@ -282,6 +293,7 @@ def run(args: argparse.Namespace) -> None:
         "case_order_seed": args.seed,
         "measured_cases": len(cases),
         "raw_samples": len(raw),
+        "result_files": result_files,
         "benchmark_elapsed_s": time.perf_counter() - started,
         "scope": "CPU application calls returning sorted keys and original indices; allocation and gather included",
         "excluded": "File loading, dtype conversion, input preparation, validation and result-file writing",
