@@ -57,24 +57,23 @@ quality analysis, Q.ANT software-integration evidence and resource accounting.
 
 #### B. Digital CPU baseline
 
-`qant_sorting/cpu_baseline.py` answers a different question: how quickly does
-a conventional stable CPU library sort the **same input corpus** while returning
-the same complete record contract (sorted keys plus original indices)?
+`qant_sorting/cpu_baseline.py` is a separate measurement path inside the same
+package. It answers only one question: how fast does a conventional stable CPU
+library sort the same input corpus while returning sorted keys and original
+record indices?
 
-It intentionally does not call the photonic noise model, Q.ANT SDK or hybrid
-mapping. The timed operation is stable NumPy `argsort` plus
-`take_along_axis`. This keeps the digital performance baseline thematically
-separate without placing it in a separate repository folder.
-
-Run it with:
+The benchmark verifies the canonical `data/inputs.npz` archive, checks stable
+sorting correctness, then measures `uint8` and `int64` inputs at batch sizes
+1, 10, 100 and 1,000. Each configuration uses two warm-ups, automatic timing
+calibration to about 15 ms, and nine measured repetitions.
 
 ```bash
 python -m qant_sorting.cpu_baseline
 ```
 
-The default input is `data/inputs.npz`; the default fresh output directory is
-`results/cpu_baseline_reproduced/`. The benchmark verifies the canonical NPZ
-hash and every dataset-content hash before timing.
+A fresh run writes one `summary.csv`, one `samples.csv`,
+`validation.json` and `metadata.json`. It does not execute the photonic
+sorting sweep or the Q.ANT SDK path.
 
 ### Checks in the same files
 
@@ -558,29 +557,20 @@ Recall@N checks record preservation only. The formulas and denominators are in
 
 ### 4.3 Fresh CPU baseline (7 November 2026)
 
-The digital baseline has now been rerun as a separate measurement path inside the
-same `qant_sorting/` package. Its code lives in
-[`qant_sorting/cpu_baseline.py`](qant_sorting/cpu_baseline.py). It is thematically
-separate from the photonic/noise/SDK evaluation, while the retained evidence is
-kept under
-[`results/cpu_baseline_20261107/`](results/cpu_baseline_20261107/).
-
-The fresh run used the same 24 thesis datasets (24,000 unique arrays). Before
-timing, the benchmark verified the SHA-256 content hash of every dataset and the
-complete input archive; the archive hash exactly matched the canonical
-`data/inputs.npz` hash
+The digital CPU baseline was measured on the same 24 thesis datasets
+(24,000 unique arrays) using stable NumPy `argsort` followed by
+`take_along_axis`. The retained run passed the stable-sorting checks and used
+the exact canonical input archive SHA-256
 `79efbd1ee270242cc122d8f9e1848fe07a85077bcf310324b27dd60f8faf11da`.
-Every output preserved the original records, was correctly sorted and retained
-stable tie order.
 
-The timed CPU application call is stable NumPy `argsort` followed by
-`take_along_axis`, so both sorted values and original record indices are
-returned. Allocation and gathering are inside the timed boundary; file loading,
-dtype conversion, input preparation, validation and result-file writing are
-outside it. The benchmark covers 2 storage dtypes × 4 batch sizes across the 24
-datasets, giving **192 configurations** with **1,728 repeated timing samples**.
+The timed region contains stable sorting, index allocation and value gathering.
+File loading, dtype conversion, correctness validation and result writing are
+outside the timed region. The run covers 192 configurations and generated 1,728
+timing samples.
 
-The retained run environment is AMD EPYC 9V74, Python 3.13.5 and NumPy 2.3.5.
+Environment: AMD EPYC 9V74, Python 3.13.5, NumPy 2.3.5, five visible logical
+CPUs with a cgroup quota equivalent to four CPU-time units.
+
 For 8-bit distinct keys at N=256:
 
 | Storage dtype | Lists per call | Median time per call | Amortized time per list | Relative IQR |
@@ -590,19 +580,20 @@ For 8-bit distinct keys at N=256:
 | uint8 | 1 | 5.44 µs | 5.44 µs | 8.6% |
 | uint8 | 1,000 | 1.380 ms | 1.38 µs | 2.0% |
 
-These values are a platform-specific library baseline, not a universal CPU lower
-bound. Amortized batch time is a throughput quantity rather than isolated
-single-request latency. No GPU or Q.ANT NPU timing and no energy measurement is
-included; the GPU baseline remains open. The complete configuration summaries,
-validation and run metadata are retained in the dated result directory.
+These are platform-specific CPU measurements, not a universal CPU lower bound.
+The GPU baseline remains open. The retained evidence is in
+[`results/cpu_baseline_20261107/`](results/cpu_baseline_20261107/) as one
+`summary.csv`, concise validation and metadata.
 
-Reproduce the CPU baseline independently with:
+Reproduce independently with:
 
 ```bash
 python -m qant_sorting.cpu_baseline
 ```
 
-The command does not execute the photonic sorting sweep.
+The current simplified benchmark keeps the same sorting operation and benchmark
+settings as the retained run; it was separately test-run successfully against
+the exact canonical input archive.
 
 ### 4.4 Evidence and reproduction
 
